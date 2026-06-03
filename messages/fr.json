@@ -1,0 +1,198 @@
+{
+  "metadata": {
+    "title": "Recensement — Église",
+    "description": "Inscription des foyers et membres pour le recensement de l'église"
+  },
+  "home": {
+    "title": "Recensement",
+    "intro": "Commencez par saisir votre courriel : si votre foyer est déjà enregistré, vos informations seront préremplies. Sinon, complétez l'inscription en trois étapes (membres adultes et enfants du foyer)."
+  },
+  "language": {
+    "label": "Langue",
+    "mg": "Malagasy",
+    "fr": "Français"
+  },
+  "wizard": {
+    "progress": "Progression",
+    "steps": {
+      "email": "Courriel",
+      "household": "Foyer",
+      "persons": "Personnes"
+    },
+    "notices": {
+      "householdFound": "Nous avons retrouvé votre foyer. Vérifiez et mettez à jour si nécessaire.",
+      "personsReview": "Vérifiez les membres adultes et les enfants rattachés à votre foyer.",
+      "householdCreate": "Aucun dossier trouvé pour ce courriel. Complétez les informations de votre foyer.",
+      "registrationCreate": "Aucun dossier trouvé pour ce courriel. Complétez votre inscription."
+    },
+    "errors": {
+      "lookupFailed": "Impossible de rechercher ce courriel.",
+      "householdUpdateFailed": "Erreur lors de la mise à jour du foyer.",
+      "householdCreateFailed": "Erreur lors de la création du foyer.",
+      "householdIdMissing": "Identifiant de foyer manquant. Recommencez à l'étape 1.",
+      "membersUpdateFailed": "Erreur lors de la mise à jour des membres.",
+      "membersSaveFailed": "Erreur lors de l'enregistrement des membres.",
+      "unregisterMissing": "Impossible de désinscrire : foyer ou courriel manquant."
+    },
+    "success": {
+      "updated": "Vos informations ont été mises à jour ({summary}).",
+      "registered": "Inscription réussie ! {summary} enregistré(s).",
+      "unregistered": "Votre foyer a été désinscrit du recensement. Vous pouvez vous réinscrire à tout moment avec le même courriel.",
+      "summaryWithChildren": "{adults} membre(s) adulte(s) et {children} enfant(s)",
+      "summaryAdultsOnly": "{adults} membre(s) adulte(s)"
+    },
+    "buttons": {
+      "back": "Retour",
+      "continue": "Continuer",
+      "saving": "Enregistrement…",
+      "finishRegistration": "Terminer l'inscription",
+      "saveChanges": "Enregistrer les modifications"
+    },
+    "shortcuts": {
+      "applyBranches": "Appliquer les branches du 1er membre à tous",
+      "sameLastName": "Même nom de famille que le 1er membre"
+    },
+    "unregister": {
+      "title": "Désinscrire le foyer",
+      "description": "Retire votre foyer du recensement actif sans supprimer l'historique en base. Vous ne pourrez plus le modifier tant qu'il n'est pas réactivé par l'administration.",
+      "confirm": "Cette action retire votre foyer du recensement actif. Vos données restent archivées en base. Vous pourrez vous réinscrire plus tard avec le même courriel.\n\nContinuer ?",
+      "button": "Désinscrire ce foyer",
+      "buttonLoading": "Désinscription…",
+      "error": "Impossible de désinscrire ce foyer."
+    },
+    "householdSize": {
+      "title": "Combien de personnes dans votre foyer ?",
+      "description": "Indiquez le nombre d'adultes et d'enfants pour préparer le formulaire en une fois.",
+      "adultsLabel": "Adultes (16 ans et +)",
+      "childrenLabel": "Enfants (15 ans et −)",
+      "prepare": "Préparer le formulaire"
+    },
+    "sections": {
+      "adultsTitle": "Membres adultes",
+      "adultsDescription": "Personnes de plus de 15 ans ({minAge} ans minimum). Une carte à la fois pour faciliter la saisie.",
+      "childrenTitle": "Enfants du foyer",
+      "childrenDescription": "Enfants de 15 ans et moins rattachés au foyer (facultatif).",
+      "noChildren": "Aucun enfant ajouté.",
+      "addAdult": "+ Ajouter un membre adulte",
+      "addChild": "+ Ajouter un enfant",
+      "removeAdult": "Retirer ce membre",
+      "removeChild": "Retirer cet enfant"
+    },
+    "nav": {
+      "quickNav": "Navigation rapide entre les personnes",
+      "adult": "Adulte {n}",
+      "child": "Enfant {n}"
+    }
+  },
+  "form": {
+    "email": {
+      "intro": "Saisissez votre courriel pour retrouver les informations de votre foyer si elles existent déjà.",
+      "label": "Courriel",
+      "placeholder": "votre.nom@exemple.com",
+      "submit": "Continuer",
+      "submitting": "Recherche…"
+    },
+    "household": {
+      "nameLabel": "Nom du foyer",
+      "namePlaceholder": "Ex. Famille Rakoto",
+      "addressLabel": "Adresse principale",
+      "addressPlaceholder": "Ex. 12 rue de l'Église, Antananarivo"
+    },
+    "person": {
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "emailOptional": "E-mail (optionnel)",
+      "phoneOptional": "Téléphone (optionnel)",
+      "preferredLanguage": "Langue préférée",
+      "age": "Âge",
+      "visibleInDirectory": "Visible dans l'annuaire",
+      "notProvided": "Non renseigné",
+      "ageSummary": "{age} ans",
+      "adultTitle": "Membre adulte {n}",
+      "childTitle": "Enfant {n}"
+    },
+    "church": {
+      "title": "Parcours ecclésial",
+      "toFixCount": "({count} à corriger)",
+      "baptized": "Baptisé(e)",
+      "baptizedSince": "Baptisé(e) depuis",
+      "mpiandry": "Mpiandry",
+      "mpiandrySince": "Mpiandry depuis",
+      "mpandray": "Mpandray",
+      "mpandraySince": "Mpandray depuis",
+      "assignments": "Affectations dans l'église",
+      "assignmentsPlaceholder": "Ex. Chorale, accueil, enseignement…"
+    },
+    "branches": {
+      "title": "Branches",
+      "hint": "Facultatif. Ajoutez une ou plusieurs branches et votre rôle dans chacune.",
+      "none": "Aucune branche sélectionnée.",
+      "branchLabel": "Branche",
+      "roleOptional": "Rôle dans cette branche (optionnel)",
+      "rolePlaceholder": "Ex. responsable chorale",
+      "remove": "Retirer",
+      "add": "+ Ajouter une branche"
+    },
+    "status": {
+      "complete": "Complet",
+      "toFix": "À corriger",
+      "toComplete": "À compléter",
+      "fieldsToFix": "Champs à corriger"
+    }
+  },
+  "validation": {
+    "emailRequired": "Le courriel est requis.",
+    "emailInvalid": "Adresse e-mail invalide.",
+    "householdNameRequired": "Le nom du foyer est requis.",
+    "householdAddressRequired": "L'adresse principale est requise.",
+    "firstNameRequired": "Le prénom est requis.",
+    "lastNameRequired": "Le nom est requis.",
+    "ageRequired": "L'âge est requis.",
+    "languageRequired": "La langue est requise.",
+    "branchInvalid": "Branche invalide.",
+    "branchDuplicate": "Cette branche est déjà sélectionnée.",
+    "personIdInvalid": "Identifiant de personne invalide.",
+    "householdIdInvalid": "Identifiant de foyer invalide.",
+    "minOneAdult": "Ajoutez au moins un membre adulte au foyer.",
+    "adultAgeRequired": "L'âge est requis pour un membre adulte.",
+    "adultMinAge": "Un membre doit avoir plus de 15 ans (minimum {min} ans).",
+    "baptismDateRequired": "Indiquez la date de baptême.",
+    "mpiandryDateRequired": "Indiquez depuis quand cette personne est mpiandry.",
+    "mpandrayDateRequired": "Indiquez depuis quand cette personne est mpandray.",
+    "childAgeRequired": "L'âge de l'enfant est requis.",
+    "childAgeRange": "L'âge d'un enfant doit être entre 0 et {max} ans.",
+    "invalidData": "Données invalides.",
+    "invalidInputEmailRequired": "Le courriel est requis.",
+    "invalidInputEmailInvalid": "Adresse e-mail invalide.",
+    "invalidInputPersonId": "Identifiant de personne invalide.",
+    "invalidInputRequired": "Ce champ est requis.",
+    "invalidInputGeneric": "Valeur invalide. Vérifiez ce champ."
+  },
+  "errors": {
+    "householdNotFound": "Foyer introuvable.",
+    "householdUnregistered": "Ce foyer est désinscrit et ne peut plus être modifié.",
+    "householdAlreadyUnregistered": "Ce foyer est déjà désinscrit.",
+    "emailNotInHousehold": "Ce courriel ne correspond pas à un membre de ce foyer.",
+    "unregisterFailed": "Impossible de désinscrire ce foyer.",
+    "lookupFailed": "Impossible de rechercher ce courriel.",
+    "invalidData": "Données invalides.",
+    "householdIdMissing": "Identifiant de foyer manquant.",
+    "createHouseholdFailed": "Impossible de créer le foyer.",
+    "getHouseholdFailed": "Impossible de récupérer le foyer.",
+    "updateHouseholdFailed": "Impossible de mettre à jour le foyer.",
+    "deleteHouseholdFailed": "Impossible de supprimer le foyer.",
+    "addMemberFailed": "Impossible d'ajouter le membre.",
+    "addChildFailed": "Impossible d'ajouter l'enfant.",
+    "savePersonsFailed": "Impossible d'enregistrer les personnes du foyer.",
+    "updateMemberFailed": "Impossible de mettre à jour un membre.",
+    "addMemberGenericFailed": "Impossible d'ajouter un membre.",
+    "updateChildFailed": "Impossible de mettre à jour un enfant.",
+    "addChildGenericFailed": "Impossible d'ajouter un enfant.",
+    "verifyHouseholdFailed": "Impossible de vérifier le foyer.",
+    "deletePersonFailed": "Impossible de supprimer la personne.",
+    "invalidMembers": "Ajoutez au moins un membre valide.",
+    "fkInvalid": "Référence invalide : le foyer associé n'existe pas.",
+    "duplicate": "Cet enregistrement existe déjà.",
+    "unexpected": "Une erreur inattendue s'est produite."
+  }
+}

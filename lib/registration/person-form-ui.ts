@@ -6,22 +6,33 @@ import type {
   MemberFormValues,
 } from "@/lib/validations/registration";
 
-export function getMemberSummary(member: MemberFormValues | undefined): string {
-  if (!member) return "Non renseigné";
+export type PersonSummaryLabels = {
+  notProvided: string;
+  ageSummary: (age: string) => string;
+};
+
+export function getMemberSummary(
+  member: MemberFormValues | undefined,
+  labels: PersonSummaryLabels,
+): string {
+  if (!member) return labels.notProvided;
   const name = [member.first_name, member.last_name].filter(Boolean).join(" ");
   const age = member.age?.trim();
-  if (name && age) return `${name} · ${age} ans`;
+  if (name && age) return `${name} · ${labels.ageSummary(age)}`;
   if (name) return name;
-  return "Non renseigné";
+  return labels.notProvided;
 }
 
-export function getChildSummary(child: ChildFormValues | undefined): string {
-  if (!child) return "Non renseigné";
+export function getChildSummary(
+  child: ChildFormValues | undefined,
+  labels: PersonSummaryLabels,
+): string {
+  if (!child) return labels.notProvided;
   const name = [child.first_name, child.last_name].filter(Boolean).join(" ");
   const age = child.age?.trim();
-  if (name && age) return `${name} · ${age} ans`;
+  if (name && age) return `${name} · ${labels.ageSummary(age)}`;
   if (name) return name;
-  return "Non renseigné";
+  return labels.notProvided;
 }
 
 export function isMemberComplete(member: MemberFormValues | undefined): boolean {

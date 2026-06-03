@@ -9,13 +9,13 @@ import {
   success,
   type ActionResult,
 } from "@/lib/actions/types";
+import { getServerI18n } from "@/lib/i18n/server";
+import { localeSchema } from "@/lib/i18n/locale";
 import {
   normalizeEmailForLookup,
   splitPersonsForForm,
 } from "@/lib/registration/mappers";
 import { createAdminClient } from "@/lib/supabase/supabase";
-import { formatZodError } from "@/lib/validations/format-zod-error";
-import { emailLookupSchema } from "@/lib/validations/registration";
 import type {
   ChildFormValues,
   MemberFormValues,
@@ -49,10 +49,23 @@ function findPersonByNormalizedEmail(
   return persons.find((p) => personEmailMatches(p.email, normalizedEmail));
 }
 
+const lookupByEmailInputSchema = z.object({
+  locale: localeSchema,
+  email: z.string(),
+});
+
 export async function lookupByEmail(
   input: unknown,
 ): Promise<LookupByEmailResult> {
-  const parsed = emailLookupSchema.safeParse(input);
+  const payload = lookupByEmailInputSchema.safeParse(input);
+  if (!payload.success) {
+    return failure("Invalid request");
+  }
+
+  const { locale, email } = payload.data;
+  const { schemas, formatZodError, tErrors } = await getServerI18n(locale);
+
+  const parsed = schemas.emailLookupSchema.safeParse({ email });
   if (!parsed.success) {
     return failure(formatZodError(parsed.error));
   }
@@ -69,7 +82,7 @@ export async function lookupByEmail(
       .limit(20);
 
     if (lookupError) {
-      return failure(mapSupabaseError(lookupError));
+      return failure(mapSupabaseError(lookupError, tErrors));
     }
 
     const matchedPerson = findPersonByNormalizedEmail(
@@ -88,7 +101,7 @@ export async function lookupByEmail(
       .single();
 
     if (householdError) {
-      return failure(mapSupabaseError(householdError));
+      return failure(mapSupabaseError(householdError, tErrors));
     }
 
     if (household.unregistered_at) {
@@ -102,7 +115,7 @@ export async function lookupByEmail(
       .order("last_name");
 
     if (membersError) {
-      return failure(mapSupabaseError(membersError));
+      return failure(mapSupabaseError(membersError, tErrors));
     }
 
     const { members: adultMembers, children } = splitPersonsForForm(
@@ -117,28 +130,41 @@ export async function lookupByEmail(
     });
   } catch (err) {
     const message =
-      err instanceof Error
-        ? err.message
-        : "Impossible de rechercher ce courriel.";
+      err instanceof Error ? err.message : tErrors("lookupFailed");
     return failure(message);
   }
 }
 
 const unregisterHouseholdInputSchema = z.object({
-  householdId: z.string().uuid("Identifiant de foyer invalide."),
-  email: emailLookupSchema.shape.email,
+  locale: localeSchema,
+  householdId: z.string().uuid(),
+  email: z.string(),
 });
 
 export async function unregisterHousehold(
   input: unknown,
 ): Promise<ActionResult<null>> {
-  const parsed = unregisterHouseholdInputSchema.safeParse(input);
+  const payload = unregisterHouseholdInputSchema.safeParse(input);
+  if (!payload.success) {
+    return failure("Invalid request");
+  }
+
+  const { locale, householdId, email } = payload.data;
+  const { schemas, formatZodError, tValidation, tErrors } =
+    await getServerI18n(locale);
+
+  const parsed = z
+    .object({
+      householdId: z.string().uuid(tValidation("householdIdInvalid")),
+      email: schemas.emailLookupSchema.shape.email,
+    })
+    .safeParse({ householdId, email });
+
   if (!parsed.success) {
     return failure(formatZodError(parsed.error));
   }
 
-  const { householdId, email } = parsed.data;
-  const normalizedEmail = normalizeEmailForLookup(email);
+  const normalizedEmail = normalizeEmailForLookup(parsed.data.email);
 
   try {
     const supabase = createAdminClient();
@@ -150,11 +176,11 @@ export async function unregisterHousehold(
       .single();
 
     if (householdError || !household) {
-      return failure("Foyer introuvable.");
+      return failure(tErrors("householdNotFound"));
     }
 
     if (household.unregistered_at) {
-      return failure("Ce foyer est déjà désinscrit.");
+      return failure(tErrors("householdAlreadyUnregistered"));
     }
 
     const { data: persons, error: personsError } = await supabase
@@ -163,7 +189,7 @@ export async function unregisterHousehold(
       .eq("household_id", householdId);
 
     if (personsError) {
-      return failure(mapSupabaseError(personsError));
+      return failure(mapSupabaseError(personsError, tErrors));
     }
 
     const emailMatchesHousehold = (persons ?? []).some((p) =>
@@ -171,9 +197,7 @@ export async function unregisterHousehold(
     );
 
     if (!emailMatchesHousehold) {
-      return failure(
-        "Ce courriel ne correspond pas à un membre de ce foyer.",
-      );
+      return failure(tErrors("emailNotInHousehold"));
     }
 
     const { error: updateError } = await supabase
@@ -182,16 +206,14 @@ export async function unregisterHousehold(
       .eq("id", householdId);
 
     if (updateError) {
-      return failure(mapSupabaseError(updateError));
+      return failure(mapSupabaseError(updateError, tErrors));
     }
 
     revalidatePath("/");
     return success(null);
   } catch (err) {
     const message =
-      err instanceof Error
-        ? err.message
-        : "Impossible de désinscrire ce foyer.";
+      err instanceof Error ? err.message : tErrors("unregisterFailed");
     return failure(message);
   }
 }

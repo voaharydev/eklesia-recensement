@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useFieldArray, useForm, type FieldErrors } from "react-hook-form";
 
@@ -14,6 +15,7 @@ import {
   PersonQuickNav,
   type PersonNavItem,
 } from "@/components/registration/person-quick-nav";
+import { useRegistrationSchemas } from "@/lib/i18n/client";
 import { MIN_ADULT_AGE } from "@/lib/constants/ages";
 import {
   childHasErrors,
@@ -31,7 +33,6 @@ import {
 import {
   defaultChild,
   defaultMember,
-  householdPersonsSchema,
   type HouseholdPersonsFormValues,
 } from "@/lib/validations/registration";
 
@@ -48,12 +49,31 @@ type MembersStepProps = {
 export function MembersStep({
   defaultValues,
   isEditMode = false,
-  submitLabel = "Terminer l'inscription",
+  submitLabel,
   onSubmit,
   onBack,
   isSubmitting,
   afterForm,
 }: MembersStepProps) {
+  const tWizard = useTranslations("wizard");
+  const tForm = useTranslations("form.person");
+  const { schemas } = useRegistrationSchemas();
+  const resolver = useMemo(
+    () => zodResolver(schemas.householdPersonsSchema),
+    [schemas],
+  );
+
+  const resolvedSubmitLabel =
+    submitLabel ?? tWizard("buttons.finishRegistration");
+
+  const summaryLabels = useMemo(
+    () => ({
+      notProvided: tForm("notProvided"),
+      ageSummary: (age: string) => tForm("ageSummary", { age }),
+    }),
+    [tForm],
+  );
+
   const [openAdultIndex, setOpenAdultIndex] = useState<number | null>(0);
   const [openChildIndex, setOpenChildIndex] = useState<number | null>(null);
   const [churchExpanded, setChurchExpanded] = useState<Record<string, boolean>>(
@@ -72,7 +92,7 @@ export function MembersStep({
     setValue,
     formState: { errors, submitCount },
   } = useForm<HouseholdPersonsFormValues>({
-    resolver: zodResolver(householdPersonsSchema),
+    resolver,
     defaultValues,
   });
 
@@ -167,7 +187,7 @@ export function MembersStep({
   const navItems: PersonNavItem[] = useMemo(() => {
     const adults: PersonNavItem[] = memberFields.map((field, index) => ({
       id: field.id,
-      label: `Adulte ${index + 1}`,
+      label: tWizard("nav.adult", { n: index + 1 }),
       kind: "adult" as const,
       index,
       hasError: memberHasErrors(errors.members, index),
@@ -175,7 +195,7 @@ export function MembersStep({
     }));
     const children: PersonNavItem[] = childFields.map((field, index) => ({
       id: field.id,
-      label: `Enfant ${index + 1}`,
+      label: tWizard("nav.child", { n: index + 1 }),
       kind: "child" as const,
       index,
       hasError: childHasErrors(errors.children, index),
@@ -189,6 +209,7 @@ export function MembersStep({
     errors.children,
     openAdultIndex,
     openChildIndex,
+    tWizard,
   ]);
 
   function handleNavSelect(item: PersonNavItem) {
@@ -279,11 +300,10 @@ export function MembersStep({
           <section className="flex flex-col gap-4">
             <div>
               <h3 className="text-base font-semibold text-gray-900">
-                Membres adultes
+                {tWizard("sections.adultsTitle")}
               </h3>
               <p className="mt-1 text-sm text-gray-600">
-                Personnes de plus de 15 ans ({MIN_ADULT_AGE} ans minimum). Une
-                carte à la fois pour faciliter la saisie.
+                {tWizard("sections.adultsDescription", { minAge: MIN_ADULT_AGE })}
               </p>
             </div>
 
@@ -294,14 +314,14 @@ export function MembersStep({
                   onClick={applyBranchToAll}
                   className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
                 >
-                  Appliquer les branches du 1er membre à tous
+                  {tWizard("shortcuts.applyBranches")}
                 </button>
                 <button
                   type="button"
                   onClick={applyLastNameToAll}
                   className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
                 >
-                  Même nom de famille que le 1er membre
+                  {tWizard("shortcuts.sameLastName")}
                 </button>
               </div>
             ) : null}
@@ -321,8 +341,8 @@ export function MembersStep({
                   <PersonAccordionCard
                     key={field.id}
                     cardId={`adult-card-${index}`}
-                    title={`Membre adulte ${index + 1}`}
-                    summary={getMemberSummary(member)}
+                    title={tForm("adultTitle", { n: index + 1 })}
+                    summary={getMemberSummary(member, summaryLabels)}
                     isOpen={openAdultIndex === index}
                     onToggle={() =>
                       openAdultIndex === index
@@ -350,35 +370,35 @@ export function MembersStep({
                       ) : null}
                       <div className="grid gap-4 sm:grid-cols-2">
                         <FormField
-                          label="Prénom"
+                          label={tForm("firstName")}
                           error={errors.members?.[index]?.first_name?.message}
                           {...register(`members.${index}.first_name`)}
                         />
                         <FormField
-                          label="Nom"
+                          label={tForm("lastName")}
                           error={errors.members?.[index]?.last_name?.message}
                           {...register(`members.${index}.last_name`)}
                         />
                       </div>
                       <FormField
-                        label="E-mail (optionnel)"
+                        label={tForm("emailOptional")}
                         type="email"
                         error={errors.members?.[index]?.email?.message}
                         {...register(`members.${index}.email`)}
                       />
                       <FormField
-                        label="Téléphone (optionnel)"
+                        label={tForm("phoneOptional")}
                         type="tel"
                         error={errors.members?.[index]?.phone?.message}
                         {...register(`members.${index}.phone`)}
                       />
                       <FormField
-                        label="Langue préférée"
+                        label={tForm("preferredLanguage")}
                         error={errors.members?.[index]?.preferred_language?.message}
                         {...register(`members.${index}.preferred_language`)}
                       />
                       <FormField
-                        label="Âge"
+                        label={tForm("age")}
                         type="number"
                         min={MIN_ADULT_AGE}
                         max={120}
@@ -392,7 +412,7 @@ export function MembersStep({
                           className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                           {...register(`members.${index}.is_visible_in_directory`)}
                         />
-                        Visible dans l&apos;annuaire
+                        {tForm("visibleInDirectory")}
                       </label>
 
                       <MemberChurchFields
@@ -416,7 +436,7 @@ export function MembersStep({
                           }}
                           className="self-start text-sm text-red-600 hover:text-red-700"
                         >
-                          Retirer ce membre
+                          {tWizard("sections.removeAdult")}
                         </button>
                       ) : null}
                     </div>
@@ -433,22 +453,24 @@ export function MembersStep({
               }}
               className="self-start text-sm font-medium text-indigo-600 hover:text-indigo-700"
             >
-              + Ajouter un membre adulte
+              {tWizard("sections.addAdult")}
             </button>
           </section>
 
           <section className="flex flex-col gap-4 border-t border-gray-200 pt-6">
             <div>
               <h3 className="text-base font-semibold text-gray-900">
-                Enfants du foyer
+                {tWizard("sections.childrenTitle")}
               </h3>
               <p className="mt-1 text-sm text-gray-600">
-                Enfants de 15 ans et moins rattachés au foyer (facultatif).
+                {tWizard("sections.childrenDescription")}
               </p>
             </div>
 
             {childFields.length === 0 ? (
-              <p className="text-sm text-gray-500">Aucun enfant ajouté.</p>
+              <p className="text-sm text-gray-500">
+                {tWizard("sections.noChildren")}
+              </p>
             ) : (
               <div className="flex flex-col gap-3">
                 {childFields.map((field, index) => {
@@ -458,8 +480,8 @@ export function MembersStep({
                     <PersonAccordionCard
                       key={field.id}
                       cardId={`child-card-${index}`}
-                      title={`Enfant ${index + 1}`}
-                      summary={getChildSummary(child)}
+                      title={tForm("childTitle", { n: index + 1 })}
+                      summary={getChildSummary(child, summaryLabels)}
                       isOpen={openChildIndex === index}
                       onToggle={() =>
                         openChildIndex === index
@@ -501,7 +523,7 @@ export function MembersStep({
                           }}
                           className="self-start text-sm text-red-600 hover:text-red-700"
                         >
-                          Retirer cet enfant
+                          {tWizard("sections.removeChild")}
                         </button>
                       </div>
                     </PersonAccordionCard>
@@ -518,7 +540,7 @@ export function MembersStep({
               }}
               className="self-start text-sm font-medium text-indigo-600 hover:text-indigo-700"
             >
-              + Ajouter un enfant
+              {tWizard("sections.addChild")}
             </button>
           </section>
         </>
@@ -533,7 +555,7 @@ export function MembersStep({
           disabled={isSubmitting}
           className="rounded-md border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
         >
-          Retour
+          {tWizard("buttons.back")}
         </button>
         {!showSizePrompt ? (
           <button
@@ -541,7 +563,7 @@ export function MembersStep({
             disabled={isSubmitting}
             className="rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? "Enregistrement…" : submitLabel}
+            {isSubmitting ? tWizard("buttons.saving") : resolvedSubmitLabel}
           </button>
         ) : null}
       </div>

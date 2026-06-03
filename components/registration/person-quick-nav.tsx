@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 export type PersonNavItem = {
   id: string;
   label: string;
@@ -15,13 +17,15 @@ type PersonQuickNavProps = {
 };
 
 export function PersonQuickNav({ items, onSelect }: PersonQuickNavProps) {
+  const t = useTranslations("wizard.nav");
+
   if (items.length < 3) {
     return null;
   }
 
   return (
     <nav
-      aria-label="Navigation rapide entre les personnes"
+      aria-label={t("quickNav")}
       className="-mx-1 overflow-x-auto px-1 pb-1"
     >
       <ul className="flex gap-2">

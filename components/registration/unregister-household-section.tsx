@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 type UnregisterHouseholdSectionProps = {
@@ -11,15 +12,14 @@ export function UnregisterHouseholdSection({
   onUnregister,
   disabled = false,
 }: UnregisterHouseholdSectionProps) {
+  const t = useTranslations("wizard.unregister");
   const [isUnregistering, setIsUnregistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleClick() {
     setError(null);
 
-    const confirmed = window.confirm(
-      "Cette action retire votre foyer du recensement actif. Vos données restent archivées en base. Vous pourrez vous réinscrire plus tard avec le même courriel.\n\nContinuer ?",
-    );
+    const confirmed = window.confirm(t("confirm"));
 
     if (!confirmed) return;
 
@@ -28,9 +28,7 @@ export function UnregisterHouseholdSection({
       await onUnregister();
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Impossible de désinscrire ce foyer.",
+        err instanceof Error ? err.message : t("error"),
       );
     } finally {
       setIsUnregistering(false);
@@ -46,13 +44,9 @@ export function UnregisterHouseholdSection({
         id="unregister-household-heading"
         className="text-sm font-semibold text-gray-900"
       >
-        Désinscrire le foyer
+        {t("title")}
       </h3>
-      <p className="mt-2 text-sm text-gray-600">
-        Retire votre foyer du recensement actif sans supprimer l&apos;historique
-        en base. Vous ne pourrez plus le modifier tant qu&apos;il n&apos;est pas
-        réactivé par l&apos;administration.
-      </p>
+      <p className="mt-2 text-sm text-gray-600">{t("description")}</p>
 
       {error ? (
         <p className="mt-3 text-sm text-red-600" role="alert">
@@ -66,7 +60,7 @@ export function UnregisterHouseholdSection({
         disabled={disabled || isUnregistering}
         className="mt-4 rounded-md border border-red-300 bg-white px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isUnregistering ? "Désinscription…" : "Désinscrire ce foyer"}
+        {isUnregistering ? t("buttonLoading") : t("button")}
       </button>
     </section>
   );

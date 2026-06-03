@@ -2,7 +2,7 @@
 
 import { forwardRef, type InputHTMLAttributes } from "react";
 
-import { humanizeZodFieldMessage } from "@/lib/validations/format-zod-error";
+import { useRegistrationSchemas } from "@/lib/i18n/client";
 
 type FormFieldProps = {
   label: string;
@@ -11,6 +11,7 @@ type FormFieldProps = {
 
 export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
   function FormField({ label, error, id, className, name, ...props }, ref) {
+    const { humanizeZodFieldMessage } = useRegistrationSchemas();
     const fieldId = id ?? name;
     const displayError = error ? humanizeZodFieldMessage(error) : undefined;
     const hasError = Boolean(displayError);

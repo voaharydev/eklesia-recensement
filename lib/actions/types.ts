@@ -10,15 +10,17 @@ export function failure<T>(message: string): ActionResult<T> {
   return { data: null, error: message };
 }
 
-export function mapSupabaseError(error: {
-  message: string;
-  code?: string;
-}): string {
+type ErrorTranslator = (key: string) => string;
+
+export function mapSupabaseError(
+  error: { message: string; code?: string },
+  t: ErrorTranslator,
+): string {
   if (error.code === "23503") {
-    return "Référence invalide : le foyer associé n'existe pas.";
+    return t("fkInvalid");
   }
   if (error.code === "23505") {
-    return "Cet enregistrement existe déjà.";
+    return t("duplicate");
   }
-  return error.message || "Une erreur inattendue s'est produite.";
+  return error.message || t("unexpected");
 }

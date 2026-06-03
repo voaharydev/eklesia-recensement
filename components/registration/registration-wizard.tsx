@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 
 import { createHousehold, updateHousehold } from "@/app/actions/household";
 import {
@@ -15,6 +16,7 @@ import { EmailStep } from "@/components/registration/email-step";
 import { HouseholdStep } from "@/components/registration/household-step";
 import { MembersStep } from "@/components/registration/members-step";
 import { UnregisterHouseholdSection } from "@/components/registration/unregister-household-section";
+import type { Locale } from "@/i18n/routing";
 import {
   defaultHouseholdPersons,
   defaultMember,
@@ -30,20 +32,17 @@ function getStepLookupNotice(
   step: Step,
   mode: RegistrationMode,
   lookupNotice: string | null,
+  t: (key: string) => string,
 ): string | null {
   if (!lookupNotice || step === 0) return null;
 
   if (mode === "edit") {
-    if (step === 1) {
-      return "Nous avons retrouvé votre foyer. Vérifiez et mettez à jour si nécessaire.";
-    }
-    if (step === 2) {
-      return "Vérifiez les membres adultes et les enfants rattachés à votre foyer.";
-    }
+    if (step === 1) return t("notices.householdFound");
+    if (step === 2) return t("notices.personsReview");
   }
 
   if (mode === "create" && step === 1) {
-    return "Aucun dossier trouvé pour ce courriel. Complétez les informations de votre foyer.";
+    return t("notices.householdCreate");
   }
 
   return null;
@@ -55,12 +54,16 @@ const emptyHouseholdDefaults: HouseholdFormValues = {
 };
 
 type RegistrationWizardProps = {
+  locale: Locale;
   initialEmail?: string;
 };
 
 export function RegistrationWizard({
+  locale,
   initialEmail = "",
 }: RegistrationWizardProps) {
+  const t = useTranslations("wizard");
+
   const [step, setStep] = useState<Step>(0);
   const [mode, setMode] = useState<RegistrationMode>("create");
   const [lookupEmail, setLookupEmail] = useState(initialEmail);
@@ -73,6 +76,15 @@ export function RegistrationWizard({
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const stepLabels = useMemo(
+    () => [
+      { n: 0 as const, label: t("steps.email") },
+      { n: 1 as const, label: t("steps.household") },
+      { n: 2 as const, label: t("steps.persons") },
+    ],
+    [t],
+  );
 
   function resetWizard() {
     setStep(0);
@@ -91,11 +103,11 @@ export function RegistrationWizard({
     setLookupNotice(null);
     setIsSubmitting(true);
 
-    const result = await lookupByEmail(values);
+    const result = await lookupByEmail({ locale, email: values.email });
     setIsSubmitting(false);
 
     if (result.error || !result.data) {
-      setServerError(result.error ?? "Impossible de rechercher ce courriel.");
+      setServerError(result.error ?? t("errors.lookupFailed"));
       return;
     }
 
@@ -113,9 +125,7 @@ export function RegistrationWizard({
         members: result.data.members,
         children: result.data.children,
       });
-      setLookupNotice(
-        "Nous avons retrouvé votre foyer. Vérifiez et mettez à jour si nécessaire.",
-      );
+      setLookupNotice(t("notices.householdFound"));
     } else {
       setMode("create");
       setHouseholdId(null);
@@ -124,9 +134,7 @@ export function RegistrationWizard({
         members: [{ ...defaultMember, email }],
         children: [],
       });
-      setLookupNotice(
-        "Aucun dossier trouvé pour ce courriel. Complétez votre inscription.",
-      );
+      setLookupNotice(t("notices.registrationCreate"));
     }
 
     setStep(1);
@@ -137,13 +145,14 @@ export function RegistrationWizard({
     setIsSubmitting(true);
 
     if (mode === "edit" && householdId) {
-      const result = await updateHousehold(householdId, values);
+      const result = await updateHousehold(householdId, {
+        locale,
+        ...values,
+      });
       setIsSubmitting(false);
 
       if (result.error || !result.data) {
-        setServerError(
-          result.error ?? "Erreur lors de la mise à jour du foyer.",
-        );
+        setServerError(result.error ?? t("errors.householdUpdateFailed"));
         return;
       }
 
@@ -155,11 +164,11 @@ export function RegistrationWizard({
       return;
     }
 
-    const result = await createHousehold(values);
+    const result = await createHousehold({ locale, ...values });
     setIsSubmitting(false);
 
     if (result.error || !result.data) {
-      setServerError(result.error ?? "Erreur lors de la création du foyer.");
+      setServerError(result.error ?? t("errors.householdCreateFailed"));
       return;
     }
 
@@ -170,7 +179,7 @@ export function RegistrationWizard({
 
   async function handleMembersSubmit(values: HouseholdPersonsFormValues) {
     if (!householdId) {
-      setServerError("Identifiant de foyer manquant. Recommencez à l'étape 1.");
+      setServerError(t("errors.householdIdMissing"));
       return;
     }
 
@@ -178,10 +187,11 @@ export function RegistrationWizard({
     setSuccessMessage(null);
     setIsSubmitting(true);
 
+    const payload = { locale, ...values };
     const result =
       mode === "edit"
-        ? await upsertHouseholdPersons(householdId, values)
-        : await saveHouseholdPersons(householdId, values);
+        ? await upsertHouseholdPersons(householdId, payload)
+        : await saveHouseholdPersons(householdId, payload);
 
     setIsSubmitting(false);
 
@@ -189,8 +199,8 @@ export function RegistrationWizard({
       setServerError(
         result.error ??
           (mode === "edit"
-            ? "Erreur lors de la mise à jour des membres."
-            : "Erreur lors de l'enregistrement des membres."),
+            ? t("errors.membersUpdateFailed")
+            : t("errors.membersSaveFailed")),
       );
       return;
     }
@@ -199,13 +209,13 @@ export function RegistrationWizard({
     const children = values.children.length;
     const summary =
       children > 0
-        ? `${adults} membre(s) adulte(s) et ${children} enfant(s)`
-        : `${adults} membre(s) adulte(s)`;
+        ? t("success.summaryWithChildren", { adults, children })
+        : t("success.summaryAdultsOnly", { adults });
 
     setSuccessMessage(
       mode === "edit"
-        ? `Vos informations ont été mises à jour (${summary}).`
-        : `Inscription réussie ! ${summary} enregistré(s).`,
+        ? t("success.updated", { summary })
+        : t("success.registered", { summary }),
     );
     resetWizard();
   }
@@ -223,11 +233,12 @@ export function RegistrationWizard({
 
   async function handleUnregister() {
     if (!householdId || !lookupEmail) {
-      throw new Error("Impossible de désinscrire : foyer ou courriel manquant.");
+      throw new Error(t("errors.unregisterMissing"));
     }
 
     setServerError(null);
     const result = await unregisterHousehold({
+      locale,
       householdId,
       email: lookupEmail,
     });
@@ -236,9 +247,7 @@ export function RegistrationWizard({
       throw new Error(result.error);
     }
 
-    setSuccessMessage(
-      "Votre foyer a été désinscrit du recensement. Vous pouvez vous réinscrire à tout moment avec le même courriel.",
-    );
+    setSuccessMessage(t("success.unregistered"));
     resetWizard();
   }
 
@@ -250,19 +259,13 @@ export function RegistrationWizard({
       />
     ) : null;
 
-  const stepLabels = [
-    { n: 0, label: "Courriel" },
-    { n: 1, label: "Foyer" },
-    { n: 2, label: "Personnes" },
-  ] as const;
-
-  const stepLookupNotice = getStepLookupNotice(step, mode, lookupNotice);
+  const stepLookupNotice = getStepLookupNotice(step, mode, lookupNotice, t);
 
   return (
     <div
       className={`w-full ${step === 2 ? "max-w-3xl" : "max-w-lg"}`}
     >
-      <nav aria-label="Progression" className="mb-8">
+      <nav aria-label={t("progress")} className="mb-8">
         <ol className="flex flex-wrap items-center gap-3 text-sm sm:gap-4">
           {stepLabels.map(({ n, label }, index) => (
             <li key={n} className="flex items-center gap-3">
@@ -346,7 +349,7 @@ export function RegistrationWizard({
           defaultValues={membersDefaults}
           isEditMode={mode === "edit"}
           submitLabel={
-            mode === "edit" ? "Enregistrer les modifications" : undefined
+            mode === "edit" ? t("buttons.saveChanges") : undefined
           }
           onSubmit={handleMembersSubmit}
           onBack={handleBackFromMembers}

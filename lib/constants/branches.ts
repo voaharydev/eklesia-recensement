@@ -1,18 +1,18 @@
 export const BRANCH_OPTIONS = [
-  { code: "sekoly_alahady", label: "Sekoly Alahady" },
-  { code: "sampati", label: "Sampati" },
   { code: "aff", label: "AFF" },
-  { code: "safif", label: "Safif" },
-  { code: "slk", label: "SLK" },
   { code: "dorkasy", label: "Dorkasy" },
-  { code: "fimpiz", label: "Fimpiz" },
-  { code: "vaomiera_fananana", label: "Vaomiera Fananana" },
-  { code: "vaomiera_vola", label: "Vaomiera Vola" },
-  { code: "vaomiera_technika", label: "Vaomiera Technika" },
   { code: "fdl", label: "FDL" },
-  { code: "stk", label: "STK" },
-  { code: "vaomiera_hazakazaka_masina", label: "Vaomiera Hazakazaka Masina" },
+  { code: "fimpiz", label: "Fimpiz" },
   { code: "miako_fiderana", label: "Miako Fiderana" },
+  { code: "safif", label: "Safif" },
+  { code: "sampati", label: "Sampati" },
+  { code: "sekoly_alahady", label: "Sekoly Alahady" },
+  { code: "slk", label: "SLK" },
+  { code: "stk", label: "STK" },
+  { code: "vaomiera_fananana", label: "Vaomiera Fananana" },
+  { code: "vaomiera_hazakazaka_masina", label: "Vaomiera Hazakazaka Masina" },
+  { code: "vaomiera_technika", label: "Vaomiera Technika" },
+  { code: "vaomiera_vola", label: "Vaomiera Vola" },
 ] as const;
 
 export type BranchCode = (typeof BRANCH_OPTIONS)[number]["code"];

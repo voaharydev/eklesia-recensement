@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   useFieldArray,
   useWatch,
@@ -10,7 +11,7 @@ import {
 
 import { FormField } from "@/components/registration/form-field";
 import { BRANCH_OPTIONS } from "@/lib/constants/branches";
-import { humanizeZodFieldMessage } from "@/lib/validations/format-zod-error";
+import { useRegistrationSchemas } from "@/lib/i18n/client";
 import type {
   BranchAssignmentFormValues,
   HouseholdPersonsFormValues,
@@ -36,6 +37,8 @@ export function MemberBranchesField({
   register,
   errors,
 }: MemberBranchesFieldProps) {
+  const t = useTranslations("form.branches");
+  const { humanizeZodFieldMessage } = useRegistrationSchemas();
   const memberErrors = errors?.[index];
   const branchesErrors = memberErrors?.branches;
 
@@ -53,11 +56,8 @@ export function MemberBranchesField({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-gray-700">Branches</span>
-        <p className="text-xs text-gray-500">
-          Facultatif. Ajoutez une ou plusieurs branches et votre rôle dans
-          chacune.
-        </p>
+        <span className="text-sm font-medium text-gray-700">{t("title")}</span>
+        <p className="text-xs text-gray-500">{t("hint")}</p>
       </div>
 
       {typeof branchesErrors?.message === "string" ? (
@@ -67,7 +67,7 @@ export function MemberBranchesField({
       ) : null}
 
       {fields.length === 0 ? (
-        <p className="text-sm text-gray-500">Aucune branche sélectionnée.</p>
+        <p className="text-sm text-gray-500">{t("none")}</p>
       ) : (
         <ul className="flex flex-col gap-3">
           {fields.map((field, branchIndex) => {
@@ -102,7 +102,7 @@ export function MemberBranchesField({
                         branchCodeError ? "text-red-800" : "text-gray-700"
                       }`}
                     >
-                      Branche
+                      {t("branchLabel")}
                     </label>
                     <select
                       id={`members.${index}.branches.${branchIndex}.branch_code`}
@@ -141,8 +141,8 @@ export function MemberBranchesField({
 
                   <div className="min-w-0 flex-1">
                     <FormField
-                      label="Rôle dans cette branche (optionnel)"
-                      placeholder="Ex. responsable chorale"
+                      label={t("roleOptional")}
+                      placeholder={t("rolePlaceholder")}
                       error={roleError}
                       {...register(
                         `members.${index}.branches.${branchIndex}.role`,
@@ -155,7 +155,7 @@ export function MemberBranchesField({
                     onClick={() => remove(branchIndex)}
                     className="shrink-0 self-end text-sm text-red-600 hover:text-red-700 sm:self-center"
                   >
-                    Retirer
+                    {t("remove")}
                   </button>
                 </div>
               </li>
@@ -179,7 +179,7 @@ export function MemberBranchesField({
           }}
           className="self-start text-sm font-medium text-indigo-600 hover:text-indigo-700"
         >
-          + Ajouter une branche
+          {t("add")}
         </button>
       ) : null}
     </div>

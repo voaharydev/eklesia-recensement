@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type {
   Control,
   FieldErrors,
@@ -10,7 +11,7 @@ import type {
 import { FieldErrorSummary } from "@/components/registration/field-error-summary";
 import { FormField } from "@/components/registration/form-field";
 import { MemberBranchesField } from "@/components/registration/member-branches-field";
-import { humanizeZodFieldMessage } from "@/lib/validations/format-zod-error";
+import { useRegistrationSchemas } from "@/lib/i18n/client";
 import { collectFieldErrorMessages } from "@/lib/registration/person-form-ui";
 import type { HouseholdPersonsFormValues } from "@/lib/validations/registration";
 
@@ -80,6 +81,8 @@ export function MemberChurchFields({
   isExpanded,
   onToggle,
 }: MemberChurchFieldsProps) {
+  const t = useTranslations("form.church");
+  const { humanizeZodFieldMessage } = useRegistrationSchemas();
   const memberErrors = errors?.[index];
   const isBaptized = watch(`members.${index}.is_baptized`);
   const isMpiandry = watch(`members.${index}.is_mpiandry`);
@@ -113,10 +116,10 @@ export function MemberChurchFields({
         <span
           className={`text-sm font-semibold ${hasSectionError ? "text-red-800" : "text-gray-800"}`}
         >
-          Parcours ecclésial
+          {t("title")}
           {hasSectionError && !isExpanded ? (
             <span className="ml-2 text-xs font-medium text-red-600">
-              ({churchOnlyMessages.length} à corriger)
+              {t("toFixCount", { count: churchOnlyMessages.length })}
             </span>
           ) : null}
         </span>
@@ -142,8 +145,8 @@ export function MemberChurchFields({
 
           <CheckboxWithDate
             enabled={isBaptized}
-            flagLabel="Baptisé(e)"
-            dateLabel="Baptisé(e) depuis"
+            flagLabel={t("baptized")}
+            dateLabel={t("baptizedSince")}
             dateError={memberErrors?.baptized_since?.message}
             flagRegister={register(`members.${index}.is_baptized`)}
             dateRegister={register(`members.${index}.baptized_since`)}
@@ -151,8 +154,8 @@ export function MemberChurchFields({
 
           <CheckboxWithDate
             enabled={isMpiandry}
-            flagLabel="Mpiandry"
-            dateLabel="Mpiandry depuis"
+            flagLabel={t("mpiandry")}
+            dateLabel={t("mpiandrySince")}
             dateError={memberErrors?.mpiandry_since?.message}
             flagRegister={register(`members.${index}.is_mpiandry`)}
             dateRegister={register(`members.${index}.mpiandry_since`)}
@@ -160,8 +163,8 @@ export function MemberChurchFields({
 
           <CheckboxWithDate
             enabled={isMpandray}
-            flagLabel="Mpandray"
-            dateLabel="Mpandray depuis"
+            flagLabel={t("mpandray")}
+            dateLabel={t("mpandraySince")}
             dateError={memberErrors?.mpandray_since?.message}
             flagRegister={register(`members.${index}.is_mpandray`)}
             dateRegister={register(`members.${index}.mpandray_since`)}
@@ -179,12 +182,12 @@ export function MemberChurchFields({
               htmlFor={`members.${index}.church_assignments`}
               className="text-sm font-medium text-gray-700"
             >
-              Affectations dans l&apos;église
+              {t("assignments")}
             </label>
             <textarea
               id={`members.${index}.church_assignments`}
               rows={3}
-              placeholder="Ex. Chorale, accueil, enseignement…"
+              placeholder={t("assignmentsPlaceholder")}
               className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               {...register(`members.${index}.church_assignments`)}
             />

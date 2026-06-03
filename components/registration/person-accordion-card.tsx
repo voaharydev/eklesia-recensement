@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 type PersonAccordionCardProps = {
@@ -25,6 +26,8 @@ export function PersonAccordionCard({
   cardId,
   children,
 }: PersonAccordionCardProps) {
+  const t = useTranslations("form.status");
+
   const borderClass = hasError
     ? "border-red-400 ring-1 ring-red-200"
     : variant === "child"
@@ -32,10 +35,10 @@ export function PersonAccordionCard({
       : "border-gray-200";
 
   const statusLabel = hasError
-    ? "À corriger"
+    ? t("toFix")
     : isComplete
-      ? "Complet"
-      : "À compléter";
+      ? t("complete")
+      : t("toComplete");
 
   const statusClass = hasError
     ? "bg-red-100 text-red-800"

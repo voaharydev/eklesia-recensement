@@ -1,14 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { FormField } from "@/components/registration/form-field";
-import {
-  emailLookupSchema,
-  type EmailLookupFormValues,
-} from "@/lib/validations/registration";
+import { useRegistrationSchemas } from "@/lib/i18n/client";
+import type { EmailLookupFormValues } from "@/lib/validations/registration";
 
 type EmailStepProps = {
   defaultEmail?: string;
@@ -21,13 +20,20 @@ export function EmailStep({
   onSubmit,
   isSubmitting,
 }: EmailStepProps) {
+  const t = useTranslations("form.email");
+  const { schemas } = useRegistrationSchemas();
+  const resolver = useMemo(
+    () => zodResolver(schemas.emailLookupSchema),
+    [schemas],
+  );
+
   const {
     control,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<EmailLookupFormValues>({
-    resolver: zodResolver(emailLookupSchema),
+    resolver,
     defaultValues: {
       email: defaultEmail,
     },
@@ -43,19 +49,16 @@ export function EmailStep({
       className="flex flex-col gap-4"
       noValidate
     >
-      <p className="text-sm text-gray-600">
-        Saisissez votre courriel pour retrouver les informations de votre foyer
-        si elles existent déjà.
-      </p>
+      <p className="text-sm text-gray-600">{t("intro")}</p>
       <Controller
         name="email"
         control={control}
         render={({ field }) => (
           <FormField
-            label="Courriel"
+            label={t("label")}
             type="email"
             autoComplete="email"
-            placeholder="vous@exemple.com"
+            placeholder={t("placeholder")}
             error={errors.email?.message}
             value={field.value ?? ""}
             onChange={field.onChange}
@@ -70,7 +73,7 @@ export function EmailStep({
         disabled={isSubmitting}
         className="mt-2 rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isSubmitting ? "Recherche…" : "Continuer"}
+        {isSubmitting ? t("submitting") : t("submit")}
       </button>
     </form>
   );

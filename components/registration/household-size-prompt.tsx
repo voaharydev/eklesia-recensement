@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 type HouseholdSizePromptProps = {
@@ -7,22 +8,18 @@ type HouseholdSizePromptProps = {
 };
 
 export function HouseholdSizePrompt({ onApply }: HouseholdSizePromptProps) {
+  const t = useTranslations("wizard.householdSize");
   const [adultCount, setAdultCount] = useState(1);
   const [childCount, setChildCount] = useState(0);
 
   return (
     <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-      <h3 className="text-sm font-semibold text-blue-900">
-        Combien de personnes dans votre foyer ?
-      </h3>
-      <p className="mt-1 text-sm text-blue-800">
-        Indiquez le nombre d&apos;adultes et d&apos;enfants pour préparer le
-        formulaire en une fois.
-      </p>
+      <h3 className="text-sm font-semibold text-blue-900">{t("title")}</h3>
+      <p className="mt-1 text-sm text-blue-800">{t("description")}</p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-gray-800">Adultes (16 ans et +)</span>
+          <span className="font-medium text-gray-800">{t("adultsLabel")}</span>
           <input
             type="number"
             min={1}
@@ -35,7 +32,7 @@ export function HouseholdSizePrompt({ onApply }: HouseholdSizePromptProps) {
           />
         </label>
         <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-gray-800">Enfants (15 ans et −)</span>
+          <span className="font-medium text-gray-800">{t("childrenLabel")}</span>
           <input
             type="number"
             min={0}
@@ -54,7 +51,7 @@ export function HouseholdSizePrompt({ onApply }: HouseholdSizePromptProps) {
         onClick={() => onApply(adultCount, childCount)}
         className="mt-4 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
       >
-        Préparer le formulaire
+        {t("prepare")}
       </button>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type {
   FieldErrors,
   UseFormRegister,
@@ -23,6 +24,8 @@ export function HouseholdChildFields({
   watch,
   errors,
 }: HouseholdChildFieldsProps) {
+  const tPerson = useTranslations("form.person");
+  const tChurch = useTranslations("form.church");
   const childErrors = errors?.[index];
   const isBaptized = watch(`children.${index}.is_baptized`);
 
@@ -30,19 +33,19 @@ export function HouseholdChildFields({
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField
-          label="Prénom"
+          label={tPerson("firstName")}
           error={childErrors?.first_name?.message}
           {...register(`children.${index}.first_name`)}
         />
         <FormField
-          label="Nom"
+          label={tPerson("lastName")}
           error={childErrors?.last_name?.message}
           {...register(`children.${index}.last_name`)}
         />
       </div>
 
       <FormField
-        label="Âge"
+        label={tPerson("age")}
         type="number"
         min={0}
         max={MAX_CHILD_AGE}
@@ -64,12 +67,12 @@ export function HouseholdChildFields({
             className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             {...register(`children.${index}.is_baptized`)}
           />
-          Baptisé(e)
+          {tChurch("baptized")}
         </label>
         {isBaptized ? (
           <div className="mt-3">
             <FormField
-              label="Baptisé(e) depuis"
+              label={tChurch("baptizedSince")}
               type="date"
               error={childErrors?.baptized_since?.message}
               {...register(`children.${index}.baptized_since`)}

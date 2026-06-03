@@ -1,0 +1,198 @@
+{
+  "metadata": {
+    "title": "Fanisana — Fiangonana",
+    "description": "Fisoratana ny tokantrano sy ny mpikambana ho an'ny fanisana ny fiangonana"
+  },
+  "home": {
+    "title": "Fanisana",
+    "intro": "Atombohy amin'ny fampidirana ny mailakao : raha efa voarakitra ny tokantrananao, ho feno automatique ny fampahalalana. Raha tsia, fenoy ny fisoratana amin'ny dingana telo (olon-dehibe sy ankizy ao amin'ny tokantrano)."
+  },
+  "language": {
+    "label": "Fiteny",
+    "mg": "Malagasy",
+    "fr": "Frantsay"
+  },
+  "wizard": {
+    "progress": "Fandrosoana",
+    "steps": {
+      "email": "Mailaka",
+      "household": "Tokantrano",
+      "persons": "Olona"
+    },
+    "notices": {
+      "householdFound": "Hita ny tokantrananao. Hamarino ary havaozy raha ilaina.",
+      "personsReview": "Hamarino ny olon-dehibe sy ny ankizy ao amin'ny tokantrananao.",
+      "householdCreate": "Tsy hita ny rakitra amin'ity mailaka ity. Fenoy ny mombamomba ny tokantrano.",
+      "registrationCreate": "Tsy hita ny rakitra amin'ity mailaka ity. Fenoy ny fisoratana."
+    },
+    "errors": {
+      "lookupFailed": "Tsy afaka nitady ity mailaka ity.",
+      "householdUpdateFailed": "Hadisoana nandritra ny fanavaozana ny tokantrano.",
+      "householdCreateFailed": "Hadisoana nandritra ny famoronana ny tokantrano.",
+      "householdIdMissing": "Tsy hita ny ID tokantrano. Atombohy indray amin'ny dingana 1.",
+      "membersUpdateFailed": "Hadisoana nandritra ny fanavaozana ny mpikambana.",
+      "membersSaveFailed": "Hadisoana nandritra ny firaketana ny mpikambana.",
+      "unregisterMissing": "Tsy afaka namafa ny fisoratana : tokantrano na mailaka tsy hita."
+    },
+    "success": {
+      "updated": "Nohavaozina ny fampahalalanao ({summary}).",
+      "registered": "Vita soa aman-tsara ny fisoratana ! {summary} voarakitra.",
+      "unregistered": "Voafafa amin'ny fanisana ny tokantrananao. Afaka misoratra indray amin'ny mailaka mitovy ianao.",
+      "summaryWithChildren": "{adults} olon-dehibe sy {children} ankizy",
+      "summaryAdultsOnly": "{adults} olon-dehibe"
+    },
+    "buttons": {
+      "back": "Miverina",
+      "continue": "Tohizo",
+      "saving": "Mandrakitra…",
+      "finishRegistration": "Vitaina ny fisoratana",
+      "saveChanges": "Tehirizo ny fanovana"
+    },
+    "shortcuts": {
+      "applyBranches": "Ampiharo ny sampana an'ny mpikambana voalohany ho an'ny rehetra",
+      "sameLastName": "Anarana mitovy amin'ny mpikambana voalohany"
+    },
+    "unregister": {
+      "title": "Esorina amin'ny fanisana ny tokantrano",
+      "description": "Mamoaka ny tokantrananao amin'ny fanisana mavitrika nefa mitahiry ny tantara. Tsy afaka manova intsony mandra-piverina ny fitantanana.",
+      "confirm": "Mamoaka ny tokantrananao amin'ny fanisana mavitrika ity hetsika ity. Mitahiry ny angon-drakitra. Afaka misoratra indray ianao.\n\nTohizo ve?",
+      "button": "Esorina ity tokantrano ity",
+      "buttonLoading": "Fanafoanana…",
+      "error": "Tsy afaka namafa ny fisoratana ny tokantrano."
+    },
+    "householdSize": {
+      "title": "Firy ny olona ao amin'ny tokantrananao ?",
+      "description": "Lazao ny isan'ny olon-dehibe sy ankizy mba hanomanana ny taratasy indray mandeha.",
+      "adultsLabel": "Olon-dehibe (16 taona mahery)",
+      "childrenLabel": "Ankizy (15 taona sy eo ambaniny)",
+      "prepare": "Anomanina ny taratasy"
+    },
+    "sections": {
+      "adultsTitle": "Mpikambana olon-dehibe",
+      "adultsDescription": "Olona mihoatra ny 15 taona (farafahakeliny {minAge} taona). Karatra iray isaky ny mandeha.",
+      "childrenTitle": "Ankizy ao amin'ny tokantrano",
+      "childrenDescription": "Ankizy 15 taona sy eo ambaniny (tsy voatery).",
+      "noChildren": "Tsy misy ankizy nampiana.",
+      "addAdult": "+ Hanampy mpikambana olon-dehibe",
+      "addChild": "+ Hanampy ankizy",
+      "removeAdult": "Esorina ity mpikambana ity",
+      "removeChild": "Esorina ity ankizy ity"
+    },
+    "nav": {
+      "quickNav": "Fifamoivoana haingana eo amin'ny olona",
+      "adult": "Olon-dehibe {n}",
+      "child": "Ankizy {n}"
+    }
+  },
+  "form": {
+    "email": {
+      "intro": "Ampidiro ny mailakao mba hitadiavana ny mombamomba ny tokantranona raha efa voarakitra.",
+      "label": "Mailaka",
+      "placeholder": "anaranao@ohatra.com",
+      "submit": "Tohizo",
+      "submitting": "Mitady…"
+    },
+    "household": {
+      "nameLabel": "Anaran'ny tokantrano",
+      "namePlaceholder": "Ohatra : Tokantrano Rakoto",
+      "addressLabel": "Adiresy fototra",
+      "addressPlaceholder": "Ohatra : 12 rue de l'Église, Antananarivo"
+    },
+    "person": {
+      "firstName": "Anarana",
+      "lastName": "Fanampiny",
+      "emailOptional": "Mailaka (tsy voatery)",
+      "phoneOptional": "Telefaonina (tsy voatery)",
+      "preferredLanguage": "Fiteny tiana",
+      "age": "Taona",
+      "visibleInDirectory": "Hita ao amin'ny lisitra",
+      "notProvided": "Tsy voafaritra",
+      "ageSummary": "{age} taona",
+      "adultTitle": "Mpikambana olon-dehibe {n}",
+      "childTitle": "Ankizy {n}"
+    },
+    "church": {
+      "title": "Lalana ara-pivavahana",
+      "toFixCount": "({count} hovana)",
+      "baptized": "Vita batisa",
+      "baptizedSince": "Vita batisa hatramin'ny",
+      "mpiandry": "Mpiandry",
+      "mpiandrySince": "Mpiandry hatramin'ny",
+      "mpandray": "Mpandray",
+      "mpandraySince": "Mpandray hatramin'ny",
+      "assignments": "Asa ao amin'ny fiangonana",
+      "assignmentsPlaceholder": "Ohatra : Koraly, fiteny tonga, fampianarana…"
+    },
+    "branches": {
+      "title": "Sampana",
+      "hint": "Tsy voatery. Ampio sampana iray na maromaro sy ny anjara asanao amin'ny tsirairay.",
+      "none": "Tsy misy sampana voafidy.",
+      "branchLabel": "Sampana",
+      "roleOptional": "Anjara asa ao amin'ity sampana ity (tsy voatery)",
+      "rolePlaceholder": "Ohatra : mpitantana koraly",
+      "remove": "Esorina",
+      "add": "+ Hanampy sampana"
+    },
+    "status": {
+      "complete": "Feno",
+      "toFix": "Hovana",
+      "toComplete": "Ho fenoina",
+      "fieldsToFix": "Saha hovana"
+    }
+  },
+  "validation": {
+    "emailRequired": "Ilaina ny mailaka.",
+    "emailInvalid": "Mailaka tsy manan-kery.",
+    "householdNameRequired": "Ilaina ny anaran'ny tokantrano.",
+    "householdAddressRequired": "Ilaina ny adiresy fototra.",
+    "firstNameRequired": "Ilaina ny anarana.",
+    "lastNameRequired": "Ilaina ny fanampiny.",
+    "ageRequired": "Ilaina ny taona.",
+    "languageRequired": "Ilaina ny fiteny.",
+    "branchInvalid": "Sampana tsy manan-kery.",
+    "branchDuplicate": "Efa voafidy ity sampana ity.",
+    "personIdInvalid": "ID olona tsy manan-kery.",
+    "householdIdInvalid": "ID tokantrano tsy manan-kery.",
+    "minOneAdult": "Ampio farafahakeliny mpikambana olon-dehibe iray.",
+    "adultAgeRequired": "Ilaina ny taonan'ny olon-dehibe.",
+    "adultMinAge": "Ny mpikambana dia tsy maintsy mihoatra ny 15 taona (farafahakeliny {min} taona).",
+    "baptismDateRequired": "Lazao ny datin'ny batisa.",
+    "mpiandryDateRequired": "Lazao hatramin'iza ny mpiandry.",
+    "mpandrayDateRequired": "Lazao hatramin'iza ny mpandray.",
+    "childAgeRequired": "Ilaina ny taonan'ny ankizy.",
+    "childAgeRange": "Ny taonan'ny ankizy dia eo anelanelan'ny 0 sy {max} taona.",
+    "invalidData": "Angona tsy manan-kery.",
+    "invalidInputEmailRequired": "Ilaina ny mailaka.",
+    "invalidInputEmailInvalid": "Mailaka tsy manan-kery.",
+    "invalidInputPersonId": "ID olona tsy manan-kery.",
+    "invalidInputRequired": "Ilaina ity saha ity.",
+    "invalidInputGeneric": "Sandan'ny tsy manan-kery. Hamarino ity saha ity."
+  },
+  "errors": {
+    "householdNotFound": "Tsy hita ny tokantrano.",
+    "householdUnregistered": "Efa voafafa amin'ny fanisana ity tokantrano ity ary tsy azo ovaina intsony.",
+    "householdAlreadyUnregistered": "Efa voafafa amin'ny fanisana ity tokantrano ity.",
+    "emailNotInHousehold": "Ity mailaka ity dia tsy mifanaraka amin'ny mpikambana ao amin'ity tokantrano ity.",
+    "unregisterFailed": "Tsy afaka namafa ny fisoratana ny tokantrano.",
+    "lookupFailed": "Tsy afaka nitady ity mailaka ity.",
+    "invalidData": "Angona tsy manan-kery.",
+    "householdIdMissing": "Tsy hita ny ID tokantrano.",
+    "createHouseholdFailed": "Tsy afaka namorona ny tokantrano.",
+    "getHouseholdFailed": "Tsy afaka naka ny tokantrano.",
+    "updateHouseholdFailed": "Tsy afaka nanavao ny tokantrano.",
+    "deleteHouseholdFailed": "Tsy afaka namafa ny tokantrano.",
+    "addMemberFailed": "Tsy afaka nanampy mpikambana.",
+    "addChildFailed": "Tsy afaka nanampy ankizy.",
+    "savePersonsFailed": "Tsy afaka nandrakitra ny olona ao amin'ny tokantrano.",
+    "updateMemberFailed": "Tsy afaka nanavao mpikambana.",
+    "addMemberGenericFailed": "Tsy afaka nanampy mpikambana.",
+    "updateChildFailed": "Tsy afaka nanavao ankizy.",
+    "addChildGenericFailed": "Tsy afaka nanampy ankizy.",
+    "verifyHouseholdFailed": "Tsy afaka nanamarina ny tokantrano.",
+    "deletePersonFailed": "Tsy afaka namafa ny olona.",
+    "invalidMembers": "Ampio farafahakeliny mpikambana iray manan-kery.",
+    "fkInvalid": "Fanondroana tsy manan-kery : tsy misy ny tokantrano mifandray.",
+    "duplicate": "Efa misy ity firaketana ity.",
+    "unexpected": "Nisy hadisoana tsy nampoizina."
+  }
+}

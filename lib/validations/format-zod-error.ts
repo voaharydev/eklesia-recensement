@@ -1,40 +1,44 @@
 import type { ZodError } from "zod";
 
-/** Messages génériques Zod 4 (souvent en anglais) → libellés français. */
-export function humanizeZodFieldMessage(
-  message: string,
-  fieldPath?: string,
-): string {
-  if (!message.startsWith("Invalid input")) {
-    return message;
-  }
+import type { ValidationTranslator } from "@/lib/validations/create-schemas";
 
-  const path = fieldPath ?? "";
-
-  if (path.endsWith("email") || path.includes(".email")) {
-    if (message.includes("undefined") || message.includes("null")) {
-      return "Le courriel est requis.";
+export function createHumanizeZodFieldMessage(t: ValidationTranslator) {
+  return (message: string, fieldPath?: string): string => {
+    if (!message.startsWith("Invalid input")) {
+      return message;
     }
-    return "Adresse e-mail invalide.";
-  }
 
-  if (path.endsWith("id") || path.includes(".id")) {
-    return "Identifiant de personne invalide.";
-  }
+    const path = fieldPath ?? "";
 
-  if (message.includes("undefined") || message.includes("null")) {
-    return "Ce champ est requis.";
-  }
+    if (path.endsWith("email") || path.includes(".email")) {
+      if (message.includes("undefined") || message.includes("null")) {
+        return t("invalidInputEmailRequired");
+      }
+      return t("invalidInputEmailInvalid");
+    }
 
-  return "Valeur invalide. Vérifiez ce champ.";
+    if (path.endsWith("id") || path.includes(".id")) {
+      return t("invalidInputPersonId");
+    }
+
+    if (message.includes("undefined") || message.includes("null")) {
+      return t("invalidInputRequired");
+    }
+
+    return t("invalidInputGeneric");
+  };
 }
 
-export function formatZodError(error: ZodError): string {
-  const issue = error.issues[0];
-  if (!issue) {
-    return "Données invalides.";
-  }
+export function createFormatZodError(t: ValidationTranslator) {
+  const humanize = createHumanizeZodFieldMessage(t);
 
-  const path = issue.path.join(".");
-  return humanizeZodFieldMessage(issue.message, path);
+  return (error: ZodError): string => {
+    const issue = error.issues[0];
+    if (!issue) {
+      return t("invalidData");
+    }
+
+    const path = issue.path.join(".");
+    return humanize(issue.message, path);
+  };
 }
