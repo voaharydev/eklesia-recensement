@@ -26,7 +26,13 @@ export default async function Home({ params: { locale }, searchParams }: HomePro
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">
               {t("title")}
             </h1>
-            <p className="mt-2 text-gray-600">{t("intro")}</p>
+            <blockquote className="mt-4 border-l-4 border-indigo-200 pl-4 text-sm text-gray-600">
+              <p className="italic">{t("verse.text")}</p>
+              <footer className="mt-2 font-medium not-italic text-gray-500">
+                — {t("verse.reference")}
+              </footer>
+            </blockquote>
+            <p className="mt-4 text-gray-600">{t("intro")}</p>
           </div>
           <LanguageSwitcher className="shrink-0 self-center sm:self-start" />
         </header>

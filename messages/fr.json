@@ -5,6 +5,10 @@
   },
   "home": {
     "title": "Recensement",
+    "verse": {
+      "reference": "Nombres 1:2",
+      "text": "Faites le dénombrement de toute l'assemblée des enfants d'Israël, selon leurs familles, selon les maisons de leurs pères, en comptant par tête les noms de tous les mâles."
+    },
     "intro": "Commencez par saisir votre courriel : si votre foyer est déjà enregistré, vos informations seront préremplies. Sinon, complétez l'inscription en trois étapes (membres adultes et enfants du foyer)."
   },
   "language": {

@@ -5,6 +5,10 @@
   },
   "home": {
     "title": "Fanisana",
+    "verse": {
+      "reference": "Nomery 1:2",
+      "text": "Alao isa ny fiangonana, dia ny Zanak'Isiraely rehetra, araka ny fokony sy ny fianakaviany avy, ary araka ny anarany tsirairay,"
+    },
     "intro": "Atombohy amin'ny fampidirana ny mailakao : raha efa voarakitra ny tokantrananao, ho feno automatique ny fampahalalana. Raha tsia, fenoy ny fisoratana amin'ny dingana telo (olon-dehibe sy ankizy ao amin'ny tokantrano)."
   },
   "language": {
