@@ -26,7 +26,9 @@ export type RegistrationLookupResult =
   | {
       found: true;
       household: Household;
-      members: MemberFormValues[];
+      head: MemberFormValues;
+      spouse: MemberFormValues | null;
+      otherAdults: MemberFormValues[];
       children: ChildFormValues[];
     }
   | { found: false };
@@ -118,14 +120,16 @@ export async function lookupByEmail(
       return failure(mapSupabaseError(membersError, tErrors));
     }
 
-    const { members: adultMembers, children } = splitPersonsForForm(
+    const { head, spouse, otherAdults, children } = splitPersonsForForm(
       members ?? [],
     );
 
     return success({
       found: true,
       household,
-      members: adultMembers,
+      head,
+      spouse,
+      otherAdults,
       children,
     });
   } catch (err) {

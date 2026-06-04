@@ -1,12 +1,15 @@
 import { z } from "zod";
 
 import { BRANCH_CODES } from "@/lib/constants/branches";
+import { isSpouseFilled } from "@/lib/registration/spouse";
 import { createRefinements } from "@/lib/validations/member-refinements";
 
 export type ValidationTranslator = (
   key: string,
   values?: Record<string, string | number>,
 ) => string;
+
+const optionalTrimmedText = z.string().optional().or(z.literal(""));
 
 export function createRegistrationSchemas(t: ValidationTranslator) {
   const { refineAdultProfile, refineChildProfile } = createRefinements(t);
@@ -71,10 +74,13 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
   const householdSchema = z.object({
     name: z.string().min(1, t("householdNameRequired")),
     main_address: z.string().min(1, t("householdAddressRequired")),
+    landline_phone: optionalTrimmedText,
+    arrival_date_fjkm: optionalTrimmedText,
   });
 
   const memberBaseSchema = z.object({
     id: optionalUuid,
+    civility: optionalTrimmedText,
     first_name: z.string().min(1, t("firstNameRequired")),
     last_name: z.string().min(1, t("lastNameRequired")),
     age: z.string().min(1, t("ageRequired")),
@@ -96,6 +102,26 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
     refineAdultProfile(data, ctx);
   });
 
+  const spouseDraftSchema = z.object({
+    id: optionalUuid,
+    civility: optionalTrimmedText,
+    first_name: z.string().optional().or(z.literal("")),
+    last_name: z.string().optional().or(z.literal("")),
+    age: z.string().optional().or(z.literal("")),
+    email: optionalEmail,
+    phone: z.string().optional(),
+    preferred_language: z.string().optional().or(z.literal("")),
+    is_visible_in_directory: z.boolean(),
+    is_baptized: z.boolean(),
+    baptized_since: optionalDate,
+    is_mpiandry: z.boolean(),
+    mpiandry_since: optionalDate,
+    is_mpandray: z.boolean(),
+    mpandray_since: optionalDate,
+    branches: branchesSchema,
+    church_assignments: z.string().optional(),
+  });
+
   const childBaseSchema = z.object({
     id: optionalUuid,
     first_name: z.string().min(1, t("firstNameRequired")),
@@ -111,13 +137,30 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
 
   const householdPersonsSchema = z
     .object({
-      members: z.array(memberSchema).min(1, t("minOneAdult")),
+      head: memberSchema,
+      spouse: spouseDraftSchema,
+      otherAdults: z.array(memberSchema),
       children: z.array(childSchema),
     })
     .superRefine((data, ctx) => {
-      data.members.forEach((member, index) => {
-        refineAdultProfile(member, ctx, ["members", index]);
+      refineAdultProfile(data.head, ctx, ["head"]);
+
+      if (isSpouseFilled(data.spouse)) {
+        const spouseCheck = memberSchema.safeParse(data.spouse);
+        if (!spouseCheck.success) {
+          spouseCheck.error.issues.forEach((issue) => {
+            ctx.addIssue({
+              ...issue,
+              path: ["spouse", ...(issue.path ?? [])],
+            });
+          });
+        }
+      }
+
+      data.otherAdults.forEach((adult, index) => {
+        refineAdultProfile(adult, ctx, ["otherAdults", index]);
       });
+
       data.children.forEach((child, index) => {
         refineChildProfile(child, ctx, ["children", index]);
       });

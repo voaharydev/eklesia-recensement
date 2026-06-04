@@ -14,11 +14,11 @@ import { getServerI18n } from "@/lib/i18n/server";
 import { localeSchema } from "@/lib/i18n/locale";
 import {
   childFormValuesToPersonInsert,
+  flattenHouseholdPersonsForm,
   memberFormValuesToPersonInsert,
 } from "@/lib/registration/mappers";
 import { createAdminClient } from "@/lib/supabase/supabase";
 import type {
-  ChildFormValues,
   HouseholdPersonsFormValues,
   MemberFormValues,
 } from "@/lib/validations/registration";
@@ -28,16 +28,20 @@ const localePayloadSchema = z.object({
   locale: localeSchema,
 });
 
-function normalizeAdult(
-  member: MemberFormValues,
-): Omit<PersonInsert, "household_id"> {
-  return memberFormValuesToPersonInsert(member);
-}
-
-function normalizeChild(
-  child: ChildFormValues,
-): Omit<PersonInsert, "household_id"> {
-  return childFormValuesToPersonInsert(child);
+function personInsertFromFlattenedEntry(
+  householdId: string,
+  entry: ReturnType<typeof flattenHouseholdPersonsForm>[number],
+): PersonInsert {
+  if (entry.kind === "adult") {
+    return {
+      household_id: householdId,
+      ...memberFormValuesToPersonInsert(entry.values, entry.role),
+    };
+  }
+  return {
+    household_id: householdId,
+    ...childFormValuesToPersonInsert(entry.values),
+  };
 }
 
 export async function createAdult(
@@ -64,7 +68,7 @@ export async function createAdult(
       .from("persons")
       .insert({
         household_id,
-        ...normalizeAdult(member),
+        ...memberFormValuesToPersonInsert(member, "chef_de_famille"),
       })
       .select("*")
       .single();
@@ -106,7 +110,7 @@ export async function createChild(
       .from("persons")
       .insert({
         household_id,
-        ...normalizeChild(child),
+        ...childFormValuesToPersonInsert(child),
       })
       .select("*")
       .single();
@@ -137,7 +141,35 @@ export async function createPersons(
   members: unknown,
   locale: string,
 ): Promise<ActionResult<Person[]>> {
-  return saveHouseholdPersons(householdId, { members, children: [], locale });
+  const parsedMembers = Array.isArray(members) ? members : [];
+  const first = parsedMembers[0] as MemberFormValues | undefined;
+  if (!first) {
+    return failure("Invalid request");
+  }
+  return saveHouseholdPersons(householdId, {
+    locale,
+    head: first,
+    spouse: {
+      civility: "",
+      first_name: "",
+      last_name: "",
+      age: "",
+      email: "",
+      phone: "",
+      preferred_language: "fr",
+      is_visible_in_directory: true,
+      is_baptized: false,
+      baptized_since: "",
+      is_mpiandry: false,
+      mpiandry_since: "",
+      is_mpandray: false,
+      mpandray_since: "",
+      branches: [],
+      church_assignments: "",
+    },
+    otherAdults: [],
+    children: [],
+  });
 }
 
 export async function saveHouseholdPersons(
@@ -172,16 +204,9 @@ export async function saveHouseholdPersons(
       return failure(activeCheck.message);
     }
 
-    const rows = [
-      ...parsed.data.members.map((member) => ({
-        household_id: householdId,
-        ...normalizeAdult(member),
-      })),
-      ...parsed.data.children.map((child) => ({
-        household_id: householdId,
-        ...normalizeChild(child),
-      })),
-    ];
+    const rows = flattenHouseholdPersonsForm(parsed.data).map((entry) =>
+      personInsertFromFlattenedEntry(householdId, entry),
+    );
 
     const { data, error } = await supabase
       .from("persons")
@@ -248,7 +273,7 @@ export async function updateAdult(
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("persons")
-      .update(normalizeAdult(parsed.data))
+      .update(memberFormValuesToPersonInsert(parsed.data, "chef_de_famille"))
       .eq("id", id)
       .select("*")
       .single();
@@ -287,7 +312,7 @@ export async function updateChild(
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("persons")
-      .update(normalizeChild(parsed.data))
+      .update(childFormValuesToPersonInsert(parsed.data))
       .eq("id", id)
       .select("*")
       .single();
@@ -352,64 +377,75 @@ export async function upsertHouseholdPersons(
 
   const results: Person[] = [];
 
-  for (const member of parsed.data.members) {
-    const { id: memberId, ...memberData } = member;
-    const personId = memberId?.trim() ? memberId.trim() : undefined;
+  try {
+    const supabase = createAdminClient();
 
-    if (personId) {
-      const updateResult = await updateAdult(personId, {
-        locale,
-        ...memberData,
-      });
-      if (updateResult.error || !updateResult.data) {
-        return failure(
-          updateResult.error ?? tErrors("updateMemberFailed"),
-        );
+    for (const entry of flattenHouseholdPersonsForm(parsed.data)) {
+    if (entry.kind === "adult") {
+      const { id: memberId, ...memberData } = entry.values;
+      const personId = memberId?.trim() ? memberId.trim() : undefined;
+
+      if (personId) {
+        const { data, error } = await supabase
+          .from("persons")
+          .update(memberFormValuesToPersonInsert(memberData, entry.role))
+          .eq("id", personId)
+          .select("*")
+          .single();
+
+        if (error) {
+          return failure(mapSupabaseError(error, tErrors));
+        }
+        results.push(data);
+      } else {
+        const { data, error } = await supabase
+          .from("persons")
+          .insert(personInsertFromFlattenedEntry(householdId, entry))
+          .select("*")
+          .single();
+
+        if (error) {
+          return failure(
+            mapSupabaseError(error, tErrors) ??
+              tErrors("addMemberGenericFailed"),
+          );
+        }
+        results.push(data);
       }
-      results.push(updateResult.data);
     } else {
-      const createResult = await createAdult({
-        locale,
-        household_id: householdId,
-        ...memberData,
-      });
-      if (createResult.error || !createResult.data) {
-        return failure(
-          createResult.error ?? tErrors("addMemberGenericFailed"),
-        );
-      }
-      results.push(createResult.data);
-    }
-  }
+      const { id: childId, ...childData } = entry.values;
+      const personId = childId?.trim() ? childId.trim() : undefined;
 
-  for (const child of parsed.data.children) {
-    const { id: childId, ...childData } = child;
-    const personId = childId?.trim() ? childId.trim() : undefined;
-
-    if (personId) {
-      const updateResult = await updateChild(personId, {
-        locale,
-        ...childData,
-      });
-      if (updateResult.error || !updateResult.data) {
-        return failure(
-          updateResult.error ?? tErrors("updateChildFailed"),
-        );
+      if (personId) {
+        const updateResult = await updateChild(personId, {
+          locale,
+          ...childData,
+        });
+        if (updateResult.error || !updateResult.data) {
+          return failure(
+            updateResult.error ?? tErrors("updateChildFailed"),
+          );
+        }
+        results.push(updateResult.data);
+      } else {
+        const createResult = await createChild({
+          locale,
+          household_id: householdId,
+          ...childData,
+        });
+        if (createResult.error || !createResult.data) {
+          return failure(
+            createResult.error ?? tErrors("addChildGenericFailed"),
+          );
+        }
+        results.push(createResult.data);
       }
-      results.push(updateResult.data);
-    } else {
-      const createResult = await createChild({
-        locale,
-        household_id: householdId,
-        ...childData,
-      });
-      if (createResult.error || !createResult.data) {
-        return failure(
-          createResult.error ?? tErrors("addChildGenericFailed"),
-        );
-      }
-      results.push(createResult.data);
     }
+    }
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : tErrors("updateMemberFailed");
+    return failure(message);
   }
 
   revalidatePath("/");
@@ -430,9 +466,29 @@ export async function upsertHouseholdMembers(
     );
   }
 
+  const first = parsedMembers.data[0];
   return upsertHouseholdPersons(householdId, {
     locale,
-    members: parsedMembers.data,
+    head: first,
+    spouse: {
+      civility: "",
+      first_name: "",
+      last_name: "",
+      age: "",
+      email: "",
+      phone: "",
+      preferred_language: "fr",
+      is_visible_in_directory: true,
+      is_baptized: false,
+      baptized_since: "",
+      is_mpiandry: false,
+      mpiandry_since: "",
+      is_mpandray: false,
+      mpandray_since: "",
+      branches: [],
+      church_assignments: "",
+    },
+    otherAdults: [],
     children: [],
   });
 }

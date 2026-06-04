@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 export type PersonNavItem = {
   id: string;
   label: string;
-  kind: "adult" | "child";
+  kind: "adult" | "otherAdult" | "child";
   index: number;
   hasError?: boolean;
   isActive?: boolean;

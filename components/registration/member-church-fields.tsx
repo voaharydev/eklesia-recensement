@@ -12,15 +12,19 @@ import { FieldErrorSummary } from "@/components/registration/field-error-summary
 import { FormField } from "@/components/registration/form-field";
 import { MemberBranchesField } from "@/components/registration/member-branches-field";
 import { useRegistrationSchemas } from "@/lib/i18n/client";
-import { collectFieldErrorMessages } from "@/lib/registration/person-form-ui";
+import {
+  collectFieldErrorMessages,
+  getMemberFieldErrors,
+  type MemberFieldPrefix,
+} from "@/lib/registration/person-form-ui";
 import type { HouseholdPersonsFormValues } from "@/lib/validations/registration";
 
 type MemberChurchFieldsProps = {
-  index: number;
+  fieldPrefix: MemberFieldPrefix;
   control: Control<HouseholdPersonsFormValues>;
   register: UseFormRegister<HouseholdPersonsFormValues>;
   watch: UseFormWatch<HouseholdPersonsFormValues>;
-  errors: FieldErrors<HouseholdPersonsFormValues>["members"];
+  errors: FieldErrors<HouseholdPersonsFormValues>;
   isExpanded: boolean;
   onToggle: () => void;
 };
@@ -73,7 +77,7 @@ function CheckboxWithDate({
 }
 
 export function MemberChurchFields({
-  index,
+  fieldPrefix,
   control,
   register,
   watch,
@@ -83,10 +87,10 @@ export function MemberChurchFields({
 }: MemberChurchFieldsProps) {
   const t = useTranslations("form.church");
   const { humanizeZodFieldMessage } = useRegistrationSchemas();
-  const memberErrors = errors?.[index];
-  const isBaptized = watch(`members.${index}.is_baptized`);
-  const isMpiandry = watch(`members.${index}.is_mpiandry`);
-  const isMpandray = watch(`members.${index}.is_mpandray`);
+  const memberErrors = getMemberFieldErrors(errors, fieldPrefix);
+  const isBaptized = watch(`${fieldPrefix}.is_baptized`);
+  const isMpiandry = watch(`${fieldPrefix}.is_mpiandry`);
+  const isMpandray = watch(`${fieldPrefix}.is_mpandray`);
 
   const branchMessages = collectFieldErrorMessages(
     memberErrors?.branches as Record<string, unknown> | undefined,
@@ -148,8 +152,8 @@ export function MemberChurchFields({
             flagLabel={t("baptized")}
             dateLabel={t("baptizedSince")}
             dateError={memberErrors?.baptized_since?.message}
-            flagRegister={register(`members.${index}.is_baptized`)}
-            dateRegister={register(`members.${index}.baptized_since`)}
+            flagRegister={register(`${fieldPrefix}.is_baptized`)}
+            dateRegister={register(`${fieldPrefix}.baptized_since`)}
           />
 
           <CheckboxWithDate
@@ -157,8 +161,8 @@ export function MemberChurchFields({
             flagLabel={t("mpiandry")}
             dateLabel={t("mpiandrySince")}
             dateError={memberErrors?.mpiandry_since?.message}
-            flagRegister={register(`members.${index}.is_mpiandry`)}
-            dateRegister={register(`members.${index}.mpiandry_since`)}
+            flagRegister={register(`${fieldPrefix}.is_mpiandry`)}
+            dateRegister={register(`${fieldPrefix}.mpiandry_since`)}
           />
 
           <CheckboxWithDate
@@ -166,12 +170,12 @@ export function MemberChurchFields({
             flagLabel={t("mpandray")}
             dateLabel={t("mpandraySince")}
             dateError={memberErrors?.mpandray_since?.message}
-            flagRegister={register(`members.${index}.is_mpandray`)}
-            dateRegister={register(`members.${index}.mpandray_since`)}
+            flagRegister={register(`${fieldPrefix}.is_mpandray`)}
+            dateRegister={register(`${fieldPrefix}.mpandray_since`)}
           />
 
           <MemberBranchesField
-            index={index}
+            fieldPrefix={fieldPrefix}
             control={control}
             register={register}
             errors={errors}
@@ -179,17 +183,17 @@ export function MemberChurchFields({
 
           <div className="flex flex-col gap-1.5">
             <label
-              htmlFor={`members.${index}.church_assignments`}
+              htmlFor={`${fieldPrefix}.church_assignments`}
               className="text-sm font-medium text-gray-700"
             >
               {t("assignments")}
             </label>
             <textarea
-              id={`members.${index}.church_assignments`}
+              id={`${fieldPrefix}.church_assignments`}
               rows={3}
               placeholder={t("assignmentsPlaceholder")}
               className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              {...register(`members.${index}.church_assignments`)}
+              {...register(`${fieldPrefix}.church_assignments`)}
             />
           </div>
         </div>

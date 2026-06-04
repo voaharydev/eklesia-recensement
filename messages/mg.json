@@ -72,6 +72,17 @@
       "prepare": "Anomanina ny taratasy"
     },
     "sections": {
+      "headTitle": "Loham-pianakaviana",
+      "headDescription": "Olona mitarika ny tokantrano (16 taona mahery).",
+      "spouseTitle": "Vady",
+      "spouseDescription": "Vadin'ny loham-pianakaviana (tsy voatery).",
+      "addSpouse": "Hanampy vady",
+      "removeSpouse": "Esorina ny vady",
+      "otherAdultsTitle": "Olon-dehibe hafa ao amin'ny tokantrano",
+      "otherAdultsDescription": "Olon-dehibe 16 taona mahery miara-mipetraka (ray aman-dreny, havana, sns.).",
+      "noOtherAdults": "Tsy misy olon-dehibe hafa nampiana.",
+      "addOtherAdult": "+ Hanampy olon-dehibe hafa",
+      "removeOtherAdult": "Esorina ity olon-dehibe ity",
       "adultsTitle": "Mpikambana olon-dehibe",
       "adultsDescription": "Olona mihoatra ny 15 taona (farafahakeliny {minAge} taona). Karatra iray isaky ny mandeha.",
       "childrenTitle": "Ankizy ao amin'ny tokantrano",
@@ -85,6 +96,7 @@
     "nav": {
       "quickNav": "Fifamoivoana haingana eo amin'ny olona",
       "adult": "Olon-dehibe {n}",
+      "otherAdult": "Olon-dehibe {n}",
       "child": "Ankizy {n}"
     }
   },
@@ -100,9 +112,15 @@
       "nameLabel": "Anaran'ny tokantrano",
       "namePlaceholder": "Ohatra : Tokantrano Rakoto",
       "addressLabel": "Adiresy fototra",
-      "addressPlaceholder": "Ohatra : 12 rue de l'Église, Antananarivo"
+      "addressPlaceholder": "Ohatra : 12 rue de l'Église, Antananarivo",
+      "landlinePhone": "Telefaonina finday (tsy voatery)",
+      "landlinePhonePlaceholder": "Ohatra : 022 22 123 45",
+      "arrivalDateFjkm": "Daty nahatongavanana FJKM Québec (tsy voatery)",
+      "arrivalDateFjkmPlaceholder": "Ohatra : May 2018"
     },
     "person": {
+      "civility": "Fiheverana (tsy voatery)",
+      "civilityPlaceholder": "Ohatra : M., Mme",
       "firstName": "Anarana",
       "lastName": "Fanampiny",
       "emailOptional": "Mailaka (tsy voatery)",

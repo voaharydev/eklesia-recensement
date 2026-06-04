@@ -1,8 +1,8 @@
 -- Données de test pour le recensement (idempotent)
 -- Courriels de test pour la recherche :
---   faniry.rakoto@eklesia.test  → Famille Rakoto (2 membres)
---   jean.rasoa@eklesia.test     → Famille Rasoa (3 membres)
---   marie.andria@eklesia.test   → Famille Andria (1 membre)
+--   faniry.rakoto@eklesia.test  → Famille Rakoto (chef + 1 enfant)
+--   jean.rasoa@eklesia.test     → Famille Rasoa (chef + conjoint + 1 autre adulte + 1 enfant)
+--   marie.andria@eklesia.test   → Famille Andria (chef seul)
 
 delete from public.persons
 where household_id in (
@@ -18,21 +18,27 @@ where id in (
   'a0000001-0001-4001-8001-000000000003'
 );
 
-insert into public.households (id, name, main_address) values
+insert into public.households (id, name, main_address, landline_phone, arrival_date_fjkm) values
   (
     'a0000001-0001-4001-8001-000000000001',
     'Famille Rakoto',
-    '12 rue de l''Église, Antananarivo 101'
+    '12 rue de l''Église, Antananarivo 101',
+    '022 22 123 45',
+    'Mai 2018'
   ),
   (
     'a0000001-0001-4001-8001-000000000002',
     'Famille Rasoa',
-    '45 avenue de la Mission, Toamasina 501'
+    '45 avenue de la Mission, Toamasina 501',
+    null,
+    'Septembre 2015'
   ),
   (
     'a0000001-0001-4001-8001-000000000003',
     'Famille Andria',
-    '8 lotissement Ankadifotsy, Antananarivo 102'
+    '8 lotissement Ankadifotsy, Antananarivo 102',
+    '022 44 555 00',
+    null
   );
 
 insert into public.persons (
@@ -53,7 +59,9 @@ insert into public.persons (
   is_child,
   age,
   branches,
-  church_assignments
+  church_assignments,
+  civility,
+  role
 ) values
   (
     'b0000001-0001-4001-8001-000000000001',
@@ -73,7 +81,9 @@ insert into public.persons (
     false,
     38,
     '[{"branch_code": "sekoly_alahady", "role": "Chorale"}]'::jsonb,
-    'Chorale, comité d''accueil'
+    'Chorale, comité d''accueil',
+    'Mme',
+    'chef_de_famille'
   ),
   (
     'b0000001-0001-4001-8001-000000000002',
@@ -93,7 +103,9 @@ insert into public.persons (
     true,
     9,
     '[]'::jsonb,
-    'Catéchisme enfants'
+    'Catéchisme enfants',
+    null,
+    'enfant'
   ),
   (
     'b0000001-0001-4001-8001-000000000003',
@@ -113,7 +125,9 @@ insert into public.persons (
     false,
     48,
     '[{"branch_code": "aff", "role": "Président de filiale"}]'::jsonb,
-    'Président de filiale, enseignement'
+    'Président de filiale, enseignement',
+    'M.',
+    'chef_de_famille'
   ),
   (
     'b0000001-0001-4001-8001-000000000004',
@@ -133,7 +147,31 @@ insert into public.persons (
     false,
     44,
     '[{"branch_code": "sampati", "role": null}]'::jsonb,
-    'Diaconie, visites aux malades'
+    'Diaconie, visites aux malades',
+    'Mme',
+    'conjoint'
+  ),
+  (
+    'b0000001-0001-4001-8001-000000000007',
+    'a0000001-0001-4001-8001-000000000002',
+    'Luc',
+    'Rasoa',
+    null,
+    '+261 34 22 333 99',
+    'mg',
+    true,
+    true,
+    '1975-02-10',
+    false,
+    null,
+    false,
+    null,
+    false,
+    72,
+    '[]'::jsonb,
+    'Parent vivant au foyer',
+    'M.',
+    'autre'
   ),
   (
     'b0000001-0001-4001-8001-000000000005',
@@ -153,7 +191,9 @@ insert into public.persons (
     true,
     6,
     '[]'::jsonb,
-    null
+    null,
+    null,
+    'enfant'
   ),
   (
     'b0000001-0001-4001-8001-000000000006',
@@ -173,5 +213,7 @@ insert into public.persons (
     false,
     39,
     '[{"branch_code": "vaomiera_fananana", "role": "Louange"}]'::jsonb,
-    'Secrétariat paroissial, louange'
+    'Secrétariat paroissial, louange',
+    'Mme',
+    'chef_de_famille'
   );

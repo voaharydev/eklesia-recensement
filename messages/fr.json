@@ -72,6 +72,17 @@
       "prepare": "Préparer le formulaire"
     },
     "sections": {
+      "headTitle": "Chef de famille",
+      "headDescription": "Personne responsable du foyer (16 ans et +).",
+      "spouseTitle": "Conjoint(e)",
+      "spouseDescription": "Époux ou épouse du chef de famille (facultatif).",
+      "addSpouse": "Ajouter un conjoint",
+      "removeSpouse": "Retirer le conjoint",
+      "otherAdultsTitle": "Autres adultes du foyer",
+      "otherAdultsDescription": "Autres personnes de 16 ans et plus vivant dans le foyer (parent, proche, etc.).",
+      "noOtherAdults": "Aucun autre adulte ajouté.",
+      "addOtherAdult": "+ Ajouter un autre adulte",
+      "removeOtherAdult": "Retirer cet adulte",
       "adultsTitle": "Membres adultes",
       "adultsDescription": "Personnes de plus de 15 ans ({minAge} ans minimum). Une carte à la fois pour faciliter la saisie.",
       "childrenTitle": "Enfants du foyer",
@@ -85,6 +96,7 @@
     "nav": {
       "quickNav": "Navigation rapide entre les personnes",
       "adult": "Adulte {n}",
+      "otherAdult": "Adulte {n}",
       "child": "Enfant {n}"
     }
   },
@@ -100,9 +112,15 @@
       "nameLabel": "Nom du foyer",
       "namePlaceholder": "Ex. Famille Rakoto",
       "addressLabel": "Adresse principale",
-      "addressPlaceholder": "Ex. 12 rue de l'Église, Antananarivo"
+      "addressPlaceholder": "Ex. 12 rue de l'Église, Antananarivo",
+      "landlinePhone": "Téléphone fixe (optionnel)",
+      "landlinePhonePlaceholder": "Ex. 418 123-4567",
+      "arrivalDateFjkm": "Date d'arrivée à la FJKM Québec (optionnel)",
+      "arrivalDateFjkmPlaceholder": "Ex. Mai 2018"
     },
     "person": {
+      "civility": "Civilité (optionnel)",
+      "civilityPlaceholder": "Ex. M., Mme",
       "firstName": "Prénom",
       "lastName": "Nom",
       "emailOptional": "E-mail (optionnel)",

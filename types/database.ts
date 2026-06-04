@@ -22,6 +22,8 @@ export interface Database {
           main_address: string;
           created_at: string;
           unregistered_at: string | null;
+          landline_phone: string | null;
+          arrival_date_fjkm: string | null;
         };
         Insert: {
           id?: string;
@@ -29,6 +31,8 @@ export interface Database {
           main_address: string;
           created_at?: string;
           unregistered_at?: string | null;
+          landline_phone?: string | null;
+          arrival_date_fjkm?: string | null;
         };
         Update: {
           id?: string;
@@ -36,6 +40,8 @@ export interface Database {
           main_address?: string;
           created_at?: string;
           unregistered_at?: string | null;
+          landline_phone?: string | null;
+          arrival_date_fjkm?: string | null;
         };
         Relationships: [];
       };
@@ -59,6 +65,8 @@ export interface Database {
           age: number | null;
           branches: PersonBranchAssignment[];
           church_assignments: string | null;
+          civility: string | null;
+          role: string;
         };
         Insert: {
           id?: string;
@@ -79,6 +87,8 @@ export interface Database {
           age?: number | null;
           branches?: PersonBranchAssignment[];
           church_assignments?: string | null;
+          civility?: string | null;
+          role: string;
         };
         Update: {
           id?: string;
@@ -99,6 +109,8 @@ export interface Database {
           age?: number | null;
           branches?: PersonBranchAssignment[];
           church_assignments?: string | null;
+          civility?: string | null;
+          role?: string;
         };
         Relationships: [
           {

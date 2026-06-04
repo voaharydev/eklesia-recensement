@@ -64,6 +64,19 @@ export function HouseholdStep({
         error={errors.main_address?.message}
         {...register("main_address")}
       />
+      <FormField
+        label={tForm("landlinePhone")}
+        type="tel"
+        placeholder={tForm("landlinePhonePlaceholder")}
+        error={errors.landline_phone?.message}
+        {...register("landline_phone")}
+      />
+      <FormField
+        label={tForm("arrivalDateFjkm")}
+        placeholder={tForm("arrivalDateFjkmPlaceholder")}
+        error={errors.arrival_date_fjkm?.message}
+        {...register("arrival_date_fjkm")}
+      />
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         <button

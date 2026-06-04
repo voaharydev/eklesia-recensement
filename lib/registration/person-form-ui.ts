@@ -6,14 +6,33 @@ import type {
   MemberFormValues,
 } from "@/lib/validations/registration";
 
-export type PersonSummaryLabels = {
-  notProvided: string;
-  ageSummary: (age: string) => string;
+export type AdultFieldPrefix = "head" | "spouse";
+export type OtherAdultFieldPrefix = `otherAdults.${number}`;
+export type MemberFieldPrefix = AdultFieldPrefix | OtherAdultFieldPrefix;
+
+export function getMemberFieldErrors(
+  errors: FieldErrors<HouseholdPersonsFormValues>,
+  prefix: MemberFieldPrefix,
+): FieldErrors<MemberFormValues> | undefined {
+  const match = /^otherAdults\.(\d+)$/.exec(prefix);
+  if (match) {
+    const index = Number(match[1]);
+    return errors.otherAdults?.[index] as FieldErrors<MemberFormValues> | undefined;
+  }
+  return errors[prefix as AdultFieldPrefix] as
+    | FieldErrors<MemberFormValues>
+    | undefined;
+}
+
+type MemberSummaryInput = {
+  first_name?: string;
+  last_name?: string;
+  age?: string;
 };
 
 export function getMemberSummary(
-  member: MemberFormValues | undefined,
-  labels: PersonSummaryLabels,
+  member: MemberSummaryInput | undefined,
+  labels: { notProvided: string; ageSummary: (age: string) => string },
 ): string {
   if (!member) return labels.notProvided;
   const name = [member.first_name, member.last_name].filter(Boolean).join(" ");
@@ -25,7 +44,7 @@ export function getMemberSummary(
 
 export function getChildSummary(
   child: ChildFormValues | undefined,
-  labels: PersonSummaryLabels,
+  labels: { notProvided: string; ageSummary: (age: string) => string },
 ): string {
   if (!child) return labels.notProvided;
   const name = [child.first_name, child.last_name].filter(Boolean).join(" ");
@@ -35,7 +54,11 @@ export function getChildSummary(
   return labels.notProvided;
 }
 
-export function isMemberComplete(member: MemberFormValues | undefined): boolean {
+export function isMemberComplete(
+  member: MemberSummaryInput & {
+    preferred_language?: string;
+  } | undefined,
+): boolean {
   if (!member) return false;
   return Boolean(
     member.first_name?.trim() &&
@@ -65,7 +88,6 @@ function getErrorMessage(value: unknown): string | undefined {
   return undefined;
 }
 
-/** Messages d'erreur Zod/RHF pour une entrée de tableau (membre ou enfant). */
 export function collectFieldErrorMessages(
   fieldErrors: Record<string, unknown> | undefined,
 ): string[] {
@@ -86,8 +108,15 @@ export function collectFieldErrorMessages(
   return messages;
 }
 
-export function memberHasErrors(
-  errors: FieldErrors<HouseholdPersonsFormValues>["members"],
+export function adultHasErrors(
+  errors: FieldErrors<HouseholdPersonsFormValues>,
+  prefix: MemberFieldPrefix,
+): boolean {
+  return collectFieldErrorMessages(getMemberFieldErrors(errors, prefix)).length > 0;
+}
+
+export function otherAdultHasErrors(
+  errors: FieldErrors<HouseholdPersonsFormValues>["otherAdults"],
   index: number,
 ): boolean {
   return (
@@ -115,27 +144,42 @@ const MEMBER_CHURCH_ERROR_KEYS = [
   "branches",
 ] as const;
 
-export function memberHasChurchErrors(
-  errors: FieldErrors<HouseholdPersonsFormValues>["members"],
-  index: number,
+export function adultHasChurchErrors(
+  errors: FieldErrors<HouseholdPersonsFormValues>,
+  prefix: MemberFieldPrefix,
 ): boolean {
-  const item = errors?.[index];
-  if (!item) return false;
+  const item = getMemberFieldErrors(errors, prefix);
+  if (!item || typeof item !== "object") return false;
+  const record = item;
   if (
     collectFieldErrorMessages(
-      item.branches as Record<string, unknown> | undefined,
+      record.branches as Record<string, unknown> | undefined,
     ).length > 0
   ) {
     return true;
   }
   return MEMBER_CHURCH_ERROR_KEYS.some((key) => {
     if (key === "branches") return false;
-    return getErrorMessage(item[key]) !== undefined;
+    return getErrorMessage(record[key]) !== undefined;
   });
 }
 
-export function getMemberErrorMessages(
-  errors: FieldErrors<HouseholdPersonsFormValues>["members"],
+export function getAdultErrorMessages(
+  errors: FieldErrors<HouseholdPersonsFormValues>,
+  prefix: MemberFieldPrefix,
+): string[] {
+  return collectFieldErrorMessages(getMemberFieldErrors(errors, prefix));
+}
+
+export function otherAdultHasChurchErrors(
+  errors: FieldErrors<HouseholdPersonsFormValues>,
+  index: number,
+): boolean {
+  return adultHasChurchErrors(errors, `otherAdults.${index}`);
+}
+
+export function getOtherAdultErrorMessages(
+  errors: FieldErrors<HouseholdPersonsFormValues>["otherAdults"],
   index: number,
 ): string[] {
   return collectFieldErrorMessages(
@@ -154,12 +198,21 @@ export function getChildErrorMessages(
 
 export function findFirstErrorIndex(
   errors: FieldErrors<HouseholdPersonsFormValues>,
-): { kind: "adult" | "child"; index: number } | null {
-  if (errors.members?.length) {
-    for (let i = 0; i < errors.members.length; i++) {
-      if (memberHasErrors(errors.members, i)) {
-        return { kind: "adult", index: i };
-      }
+  hasSpouse: boolean,
+  otherAdultCount: number,
+): {
+  kind: "head" | "spouse" | "otherAdult" | "child";
+  index?: number;
+} | null {
+  if (adultHasErrors(errors, "head")) {
+    return { kind: "head" };
+  }
+  if (hasSpouse && adultHasErrors(errors, "spouse")) {
+    return { kind: "spouse" };
+  }
+  for (let i = 0; i < otherAdultCount; i++) {
+    if (otherAdultHasErrors(errors.otherAdults, i)) {
+      return { kind: "otherAdult", index: i };
     }
   }
   if (errors.children?.length) {
@@ -172,7 +225,17 @@ export function findFirstErrorIndex(
   return null;
 }
 
-export function memberHasChurchData(member: MemberFormValues | undefined): boolean {
+export function adultHasChurchData(
+  member:
+    | (MemberSummaryInput & {
+        is_baptized?: boolean;
+        is_mpiandry?: boolean;
+        is_mpandray?: boolean;
+        branches?: { branch_code: string }[];
+        church_assignments?: string;
+      })
+    | undefined,
+): boolean {
   if (!member) return false;
   return Boolean(
     member.is_baptized ||
@@ -182,3 +245,4 @@ export function memberHasChurchData(member: MemberFormValues | undefined): boole
       member.church_assignments?.trim(),
   );
 }
+

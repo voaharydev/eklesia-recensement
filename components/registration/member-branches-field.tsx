@@ -12,16 +12,20 @@ import {
 import { FormField } from "@/components/registration/form-field";
 import { BRANCH_OPTIONS } from "@/lib/constants/branches";
 import { useRegistrationSchemas } from "@/lib/i18n/client";
+import {
+  getMemberFieldErrors,
+  type MemberFieldPrefix,
+} from "@/lib/registration/person-form-ui";
 import type {
   BranchAssignmentFormValues,
   HouseholdPersonsFormValues,
 } from "@/lib/validations/registration";
 
 type MemberBranchesFieldProps = {
-  index: number;
+  fieldPrefix: MemberFieldPrefix;
   control: Control<HouseholdPersonsFormValues>;
   register: UseFormRegister<HouseholdPersonsFormValues>;
-  errors: FieldErrors<HouseholdPersonsFormValues>["members"];
+  errors: FieldErrors<HouseholdPersonsFormValues>;
 };
 
 function getFirstAvailableBranchCode(
@@ -32,25 +36,25 @@ function getFirstAvailableBranchCode(
 }
 
 export function MemberBranchesField({
-  index,
+  fieldPrefix,
   control,
   register,
   errors,
 }: MemberBranchesFieldProps) {
   const t = useTranslations("form.branches");
   const { humanizeZodFieldMessage } = useRegistrationSchemas();
-  const memberErrors = errors?.[index];
+  const memberErrors = getMemberFieldErrors(errors, fieldPrefix);
   const branchesErrors = memberErrors?.branches;
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: `members.${index}.branches`,
+    name: `${fieldPrefix}.branches`,
   });
 
   const watchedBranches =
     useWatch({
       control,
-      name: `members.${index}.branches`,
+      name: `${fieldPrefix}.branches`,
     }) ?? [];
 
   return (
@@ -97,7 +101,7 @@ export function MemberBranchesField({
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
                   <div className="min-w-0 flex-1">
                     <label
-                      htmlFor={`members.${index}.branches.${branchIndex}.branch_code`}
+                      htmlFor={`${fieldPrefix}.branches.${branchIndex}.branch_code`}
                       className={`mb-1.5 block text-sm font-medium ${
                         branchCodeError ? "text-red-800" : "text-gray-700"
                       }`}
@@ -105,7 +109,7 @@ export function MemberBranchesField({
                       {t("branchLabel")}
                     </label>
                     <select
-                      id={`members.${index}.branches.${branchIndex}.branch_code`}
+                      id={`${fieldPrefix}.branches.${branchIndex}.branch_code`}
                       className={`w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 ${
                         branchCodeError
                           ? "border-red-500 bg-red-50/50 focus:border-red-500 focus:ring-red-500"
@@ -113,7 +117,7 @@ export function MemberBranchesField({
                       }`}
                       aria-invalid={Boolean(branchCodeError)}
                       {...register(
-                        `members.${index}.branches.${branchIndex}.branch_code`,
+                        `${fieldPrefix}.branches.${branchIndex}.branch_code`,
                       )}
                     >
                       {BRANCH_OPTIONS.map((option) => (
@@ -145,7 +149,7 @@ export function MemberBranchesField({
                       placeholder={t("rolePlaceholder")}
                       error={roleError}
                       {...register(
-                        `members.${index}.branches.${branchIndex}.role`,
+                        `${fieldPrefix}.branches.${branchIndex}.role`,
                       )}
                     />
                   </div>

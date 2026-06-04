@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { createHousehold, updateHousehold } from "@/app/actions/household";
 import {
@@ -17,13 +17,39 @@ import { HouseholdStep } from "@/components/registration/household-step";
 import { MembersStep } from "@/components/registration/members-step";
 import { UnregisterHouseholdSection } from "@/components/registration/unregister-household-section";
 import type { Locale } from "@/i18n/routing";
+import { householdToFormValues } from "@/lib/registration/mappers";
+import { isSpouseFilled } from "@/lib/registration/spouse";
+import { useSetRegistrationWizardStep } from "@/lib/registration/wizard-state-context";
 import {
   defaultHouseholdPersons,
   defaultMember,
+  emptyHouseholdDefaults,
   type EmailLookupFormValues,
   type HouseholdFormValues,
   type HouseholdPersonsFormValues,
 } from "@/lib/validations/registration";
+
+function countRegisteredPersons(values: HouseholdPersonsFormValues) {
+  const adults =
+    1 +
+    (isSpouseFilled(values.spouse) ? 1 : 0) +
+    values.otherAdults.length;
+  return { adults, children: values.children.length };
+}
+
+function membersDefaultsFromLookup(
+  head: HouseholdPersonsFormValues["head"],
+  spouse: HouseholdPersonsFormValues["spouse"] | null,
+  otherAdults: HouseholdPersonsFormValues["otherAdults"],
+  children: HouseholdPersonsFormValues["children"],
+): HouseholdPersonsFormValues {
+  return {
+    head,
+    spouse: spouse ?? { ...defaultMember, email: "", phone: "" },
+    otherAdults,
+    children,
+  };
+}
 
 type Step = 0 | 1 | 2;
 type RegistrationMode = "create" | "edit";
@@ -48,11 +74,6 @@ function getStepLookupNotice(
   return null;
 }
 
-const emptyHouseholdDefaults: HouseholdFormValues = {
-  name: "",
-  main_address: "",
-};
-
 type RegistrationWizardProps = {
   locale: Locale;
   initialEmail?: string;
@@ -63,6 +84,7 @@ export function RegistrationWizard({
   initialEmail = "",
 }: RegistrationWizardProps) {
   const t = useTranslations("wizard");
+  const setWizardStep = useSetRegistrationWizardStep();
 
   const [step, setStep] = useState<Step>(0);
   const [mode, setMode] = useState<RegistrationMode>("create");
@@ -85,6 +107,10 @@ export function RegistrationWizard({
     ],
     [t],
   );
+
+  useEffect(() => {
+    setWizardStep(step);
+  }, [step, setWizardStep]);
 
   function resetWizard() {
     setStep(0);
@@ -117,21 +143,24 @@ export function RegistrationWizard({
     if (result.data.found) {
       setMode("edit");
       setHouseholdId(result.data.household.id);
-      setHouseholdDefaults({
-        name: result.data.household.name,
-        main_address: result.data.household.main_address,
-      });
-      setMembersDefaults({
-        members: result.data.members,
-        children: result.data.children,
-      });
+      setHouseholdDefaults(householdToFormValues(result.data.household));
+      setMembersDefaults(
+        membersDefaultsFromLookup(
+          result.data.head,
+          result.data.spouse,
+          result.data.otherAdults,
+          result.data.children,
+        ),
+      );
       setLookupNotice(t("notices.householdFound"));
     } else {
       setMode("create");
       setHouseholdId(null);
       setHouseholdDefaults(emptyHouseholdDefaults);
       setMembersDefaults({
-        members: [{ ...defaultMember, email }],
+        head: { ...defaultMember, email },
+        spouse: { ...defaultMember, email: "", phone: "" },
+        otherAdults: [],
         children: [],
       });
       setLookupNotice(t("notices.registrationCreate"));
@@ -156,10 +185,7 @@ export function RegistrationWizard({
         return;
       }
 
-      setHouseholdDefaults({
-        name: result.data.name,
-        main_address: result.data.main_address,
-      });
+      setHouseholdDefaults(householdToFormValues(result.data));
       setStep(2);
       return;
     }
@@ -205,8 +231,7 @@ export function RegistrationWizard({
       return;
     }
 
-    const adults = values.members.length;
-    const children = values.children.length;
+    const { adults, children } = countRegisteredPersons(values);
     const summary =
       children > 0
         ? t("success.summaryWithChildren", { adults, children })

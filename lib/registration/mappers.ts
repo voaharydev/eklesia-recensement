@@ -1,9 +1,17 @@
 import { resolveBranchCode } from "@/lib/constants/branches";
+import type { FormHouseholdRole, HouseholdRole } from "@/lib/constants/person-roles";
+import {
+  isSpouseFilled,
+  optionalTextToNull,
+} from "@/lib/registration/spouse";
 import type {
   ChildFormValues,
+  HouseholdFormValues,
+  HouseholdPersonsFormValues,
   MemberFormValues,
 } from "@/lib/validations/registration";
 import type {
+  Household,
   Person,
   PersonBranchAssignment,
   PersonInsert,
@@ -50,8 +58,18 @@ function parseRequiredAge(age: string | undefined): number {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
+export function householdToFormValues(household: Household): HouseholdFormValues {
+  return {
+    name: household.name,
+    main_address: household.main_address,
+    landline_phone: household.landline_phone ?? "",
+    arrival_date_fjkm: household.arrival_date_fjkm ?? "",
+  };
+}
+
 export function memberFormValuesToPersonInsert(
   member: MemberFormValues,
+  householdRole: FormHouseholdRole,
 ): Omit<PersonInsert, "household_id"> {
   const {
     first_name,
@@ -69,6 +87,7 @@ export function memberFormValuesToPersonInsert(
     age,
     branches,
     church_assignments,
+    civility,
   } = member;
 
   return {
@@ -90,6 +109,8 @@ export function memberFormValuesToPersonInsert(
     church_assignments: church_assignments?.trim()
       ? church_assignments.trim()
       : null,
+    civility: optionalTextToNull(civility),
+    role: householdRole,
   };
 }
 
@@ -115,12 +136,15 @@ export function childFormValuesToPersonInsert(
     age: parseRequiredAge(age),
     branches: [],
     church_assignments: null,
+    civility: null,
+    role: "enfant",
   };
 }
 
 export function personToMemberFormValues(person: Person): MemberFormValues {
   return {
     id: person.id,
+    civility: person.civility ?? "",
     first_name: person.first_name,
     last_name: person.last_name,
     age: person.age != null ? String(person.age) : "",
@@ -150,22 +174,102 @@ export function personToChildFormValues(person: Person): ChildFormValues {
   };
 }
 
+function sortAdultsForLegacy(adults: Person[]): Person[] {
+  return [...adults].sort((a, b) => {
+    const last = a.last_name.localeCompare(b.last_name);
+    if (last !== 0) return last;
+    const first = a.first_name.localeCompare(b.first_name);
+    if (first !== 0) return first;
+    return a.id.localeCompare(b.id);
+  });
+}
+
+function pickHeadAndSpouse(adults: Person[]): {
+  head: Person;
+  spouse: Person | null;
+} {
+  const byRole = (role: HouseholdRole) =>
+    adults.find((p) => p.role === role);
+
+  const head =
+    byRole("chef_de_famille") ?? sortAdultsForLegacy(adults)[0];
+  if (!head) {
+    throw new Error("Household has no adult member");
+  }
+
+  const spouseByRole = byRole("conjoint");
+  const spouse =
+    spouseByRole && spouseByRole.id !== head.id
+      ? spouseByRole
+      : sortAdultsForLegacy(adults).find(
+          (p) => p.id !== head.id && p.role !== "autre",
+        ) ?? null;
+
+  return { head, spouse };
+}
+
 export function splitPersonsForForm(persons: Person[]): {
-  members: MemberFormValues[];
+  head: MemberFormValues;
+  spouse: MemberFormValues | null;
+  otherAdults: MemberFormValues[];
   children: ChildFormValues[];
 } {
-  const members: MemberFormValues[] = [];
   const children: ChildFormValues[] = [];
+  const otherAdults: MemberFormValues[] = [];
+  const adults: Person[] = [];
 
   for (const person of persons) {
-    if (person.is_child) {
+    if (person.is_child || person.role === "enfant") {
       children.push(personToChildFormValues(person));
+    } else if (person.role === "autre") {
+      otherAdults.push(personToMemberFormValues(person));
     } else {
-      members.push(personToMemberFormValues(person));
+      adults.push(person);
     }
   }
 
-  return { members, children };
+  const { head, spouse } = pickHeadAndSpouse(adults);
+
+  return {
+    head: personToMemberFormValues(head),
+    spouse: spouse ? personToMemberFormValues(spouse) : null,
+    otherAdults,
+    children,
+  };
+}
+
+export type FlattenedPersonEntry =
+  | { kind: "adult"; role: FormHouseholdRole; values: MemberFormValues }
+  | { kind: "child"; values: ChildFormValues };
+
+export function flattenHouseholdPersonsForm(
+  form: HouseholdPersonsFormValues,
+): FlattenedPersonEntry[] {
+  const entries: FlattenedPersonEntry[] = [
+    { kind: "adult", role: "chef_de_famille", values: form.head },
+  ];
+
+  if (isSpouseFilled(form.spouse)) {
+    entries.push({
+      kind: "adult",
+      role: "conjoint",
+      values: form.spouse as MemberFormValues,
+    });
+  }
+
+  for (const adult of form.otherAdults) {
+    entries.push({
+      kind: "adult",
+      role: "autre",
+      values: adult,
+    });
+  }
+
+  for (const child of form.children) {
+    entries.push({ kind: "child", values: child });
+  }
+
+  return entries;
 }
 
 export function normalizeEmailForLookup(email: string): string {

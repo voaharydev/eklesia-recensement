@@ -4,12 +4,13 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 type HouseholdSizePromptProps = {
-  onApply: (adultCount: number, childCount: number) => void;
+  onApply: (hasSpouse: boolean, childCount: number) => void;
 };
 
 export function HouseholdSizePrompt({ onApply }: HouseholdSizePromptProps) {
   const t = useTranslations("wizard.householdSize");
-  const [adultCount, setAdultCount] = useState(1);
+  const tSections = useTranslations("wizard.sections");
+  const [withSpouse, setWithSpouse] = useState(false);
   const [childCount, setChildCount] = useState(0);
 
   return (
@@ -18,18 +19,14 @@ export function HouseholdSizePrompt({ onApply }: HouseholdSizePromptProps) {
       <p className="mt-1 text-sm text-blue-800">{t("description")}</p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-gray-800">{t("adultsLabel")}</span>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-800">
           <input
-            type="number"
-            min={1}
-            max={20}
-            value={adultCount}
-            onChange={(e) =>
-              setAdultCount(Math.max(1, Number.parseInt(e.target.value, 10) || 1))
-            }
-            className="rounded-md border border-gray-300 px-3 py-2"
+            type="checkbox"
+            checked={withSpouse}
+            onChange={(e) => setWithSpouse(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
           />
+          {tSections("spouseTitle")}
         </label>
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-gray-800">{t("childrenLabel")}</span>
@@ -48,7 +45,7 @@ export function HouseholdSizePrompt({ onApply }: HouseholdSizePromptProps) {
 
       <button
         type="button"
-        onClick={() => onApply(adultCount, childCount)}
+        onClick={() => onApply(withSpouse, childCount)}
         className="mt-4 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
       >
         {t("prepare")}

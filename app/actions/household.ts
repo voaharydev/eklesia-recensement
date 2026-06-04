@@ -12,6 +12,7 @@ import {
 import { assertHouseholdIsActive } from "@/lib/actions/household-guard";
 import { getServerI18n } from "@/lib/i18n/server";
 import { localeSchema } from "@/lib/i18n/locale";
+import { optionalTextToNull } from "@/lib/registration/spouse";
 import { createAdminClient } from "@/lib/supabase/supabase";
 import type { Household, HouseholdInsert } from "@/types/database";
 
@@ -44,6 +45,8 @@ export async function createHousehold(
       .insert({
         name: parsed.data.name,
         main_address: parsed.data.main_address,
+        landline_phone: optionalTextToNull(parsed.data.landline_phone),
+        arrival_date_fjkm: optionalTextToNull(parsed.data.arrival_date_fjkm),
       } satisfies HouseholdInsert)
       .select("id")
       .single();
@@ -116,6 +119,8 @@ export async function updateHousehold(
       .update({
         name: parsed.data.name,
         main_address: parsed.data.main_address,
+        landline_phone: optionalTextToNull(parsed.data.landline_phone),
+        arrival_date_fjkm: optionalTextToNull(parsed.data.arrival_date_fjkm),
       })
       .eq("id", id)
       .select("*")
