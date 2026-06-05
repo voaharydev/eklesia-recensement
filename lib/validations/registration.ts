@@ -52,6 +52,7 @@ export const defaultMember: MemberFormValues = {
   mpiandry_since: "",
   is_mpandray: false,
   mpandray_since: "",
+  is_mpamaky_teny: false,
   branches: [],
   church_assignments: "",
 };
@@ -62,6 +63,7 @@ export const defaultChild: ChildFormValues = {
   age: "",
   is_baptized: false,
   baptized_since: "",
+  is_mpamaky_teny: false,
 };
 
 export const defaultHouseholdPersons: HouseholdPersonsFormValues = {

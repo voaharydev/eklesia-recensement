@@ -231,6 +231,7 @@ export function adultHasChurchData(
         is_baptized?: boolean;
         is_mpiandry?: boolean;
         is_mpandray?: boolean;
+        is_mpamaky_teny?: boolean;
         branches?: { branch_code: string }[];
         church_assignments?: string;
       })
@@ -241,6 +242,7 @@ export function adultHasChurchData(
     member.is_baptized ||
       member.is_mpiandry ||
       member.is_mpandray ||
+      member.is_mpamaky_teny ||
       (member.branches?.length ?? 0) > 0 ||
       member.church_assignments?.trim(),
   );

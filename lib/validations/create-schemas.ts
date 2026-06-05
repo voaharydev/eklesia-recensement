@@ -99,6 +99,7 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
     mpiandry_since: optionalDate,
     is_mpandray: z.boolean(),
     mpandray_since: optionalDate,
+    is_mpamaky_teny: z.boolean(),
     branches: branchesSchema,
     church_assignments: z.string().optional(),
   });
@@ -124,6 +125,7 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
     mpiandry_since: optionalDate,
     is_mpandray: z.boolean(),
     mpandray_since: optionalDate,
+    is_mpamaky_teny: z.boolean(),
     branches: branchesSchema,
     church_assignments: z.string().optional(),
   });
@@ -135,6 +137,7 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
     age: z.string().min(1, t("ageRequired")),
     is_baptized: z.boolean(),
     baptized_since: optionalDate,
+    is_mpamaky_teny: z.boolean(),
   });
 
   const childSchema = childBaseSchema.superRefine((data, ctx) => {

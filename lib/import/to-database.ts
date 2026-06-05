@@ -54,6 +54,7 @@ function draftToMemberFormValues(draft: ImportPersonDraft): MemberFormValues {
     mpiandry_since: draft.mpiandrySince ?? "",
     is_mpandray: draft.isMpandray,
     mpandray_since: draft.mpandraySince ?? "",
+    is_mpamaky_teny: false,
     branches: draft.branches.flatMap((b) => {
       const code = resolveBranchCode(b.branch_code);
       if (!code) return [];
@@ -70,6 +71,7 @@ function draftToChildFormValues(draft: ImportPersonDraft): ChildFormValues {
     age: String(draft.age),
     is_baptized: draft.isBaptized,
     baptized_since: draft.baptizedSince ?? "",
+    is_mpamaky_teny: false,
   };
 }
 

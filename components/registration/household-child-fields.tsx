@@ -80,6 +80,17 @@ export function HouseholdChildFields({
           </div>
         ) : null}
       </div>
+
+      <div className="rounded-md border border-gray-100 bg-gray-50 p-3">
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-800">
+          <input
+            type="checkbox"
+            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            {...register(`children.${index}.is_mpamaky_teny`)}
+          />
+          {tChurch("mpamakyTeny")}
+        </label>
+      </div>
     </div>
   );
 }

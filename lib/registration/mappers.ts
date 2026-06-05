@@ -89,6 +89,7 @@ export function memberFormValuesToPersonInsert(
     mpiandry_since,
     is_mpandray,
     mpandray_since,
+    is_mpamaky_teny,
     age,
     branches,
     church_assignments,
@@ -110,6 +111,7 @@ export function memberFormValuesToPersonInsert(
     mpiandry_since: is_mpiandry ? dateFromFormValue(mpiandry_since) : null,
     is_mpandray,
     mpandray_since: is_mpandray ? dateFromFormValue(mpandray_since) : null,
+    is_mpamaky_teny,
     is_child: false,
     age: parseRequiredAge(age),
     branches: normalizeBranchesForDb(branches),
@@ -124,7 +126,14 @@ export function memberFormValuesToPersonInsert(
 export function childFormValuesToPersonInsert(
   child: ChildFormValues,
 ): Omit<PersonInsert, "household_id"> {
-  const { first_name, last_name, age, is_baptized, baptized_since } = child;
+  const {
+    first_name,
+    last_name,
+    age,
+    is_baptized,
+    baptized_since,
+    is_mpamaky_teny,
+  } = child;
 
   return {
     first_name,
@@ -139,6 +148,7 @@ export function childFormValuesToPersonInsert(
     mpiandry_since: null,
     is_mpandray: false,
     mpandray_since: null,
+    is_mpamaky_teny,
     is_child: true,
     age: parseRequiredAge(age),
     branches: [],
@@ -166,6 +176,7 @@ export function personToMemberFormValues(person: Person): MemberFormValues {
     mpiandry_since: dateToFormValue(person.mpiandry_since),
     is_mpandray: person.is_mpandray,
     mpandray_since: dateToFormValue(person.mpandray_since),
+    is_mpamaky_teny: person.is_mpamaky_teny,
     branches: parseBranchesFromPerson(person.branches),
     church_assignments: person.church_assignments ?? "",
   };
@@ -179,6 +190,7 @@ export function personToChildFormValues(person: Person): ChildFormValues {
     age: person.age != null ? String(person.age) : "",
     is_baptized: person.is_baptized,
     baptized_since: dateToFormValue(person.baptized_since),
+    is_mpamaky_teny: person.is_mpamaky_teny,
   };
 }
 
