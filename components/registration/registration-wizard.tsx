@@ -158,7 +158,11 @@ export function RegistrationWizard({
       setHouseholdId(null);
       setHouseholdDefaults(emptyHouseholdDefaults);
       setMembersDefaults({
-        head: { ...defaultMember, email },
+        head: {
+          ...defaultMember,
+          email,
+          household_role: "chef_de_famille",
+        },
         spouse: { ...defaultMember, email: "", phone: "" },
         otherAdults: [],
         children: [],

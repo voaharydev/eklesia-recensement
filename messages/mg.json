@@ -91,7 +91,8 @@
       "addAdult": "+ Hanampy mpikambana olon-dehibe",
       "addChild": "+ Hanampy ankizy",
       "removeAdult": "Esorina ity mpikambana ity",
-      "removeChild": "Esorina ity ankizy ity"
+      "removeChild": "Esorina ity ankizy ity",
+      "promoteToHead": "Ataovy loham-pianakaviana"
     },
     "nav": {
       "quickNav": "Fifamoivoana haingana eo amin'ny olona",
@@ -131,7 +132,12 @@
       "notProvided": "Tsy voafaritra",
       "ageSummary": "{age} taona",
       "adultTitle": "Mpikambana olon-dehibe {n}",
-      "childTitle": "Ankizy {n}"
+      "childTitle": "Ankizy {n}",
+      "householdRole": "Karazana ao amin'ny tokantrano",
+      "householdRoleChef": "Loham-pianakaviana",
+      "householdRoleSpouse": "Vady",
+      "householdRoleOther": "Olon-dehibe hafa",
+      "cannotDemoteHead": "Mametraho olon-dehibe hafa ho loham-pianakaviana aloha."
     },
     "church": {
       "title": "Lalana ara-pivavahana",
@@ -188,7 +194,9 @@
     "invalidInputEmailInvalid": "Mailaka tsy manan-kery.",
     "invalidInputPersonId": "ID olona tsy manan-kery.",
     "invalidInputRequired": "Ilaina ity saha ity.",
-    "invalidInputGeneric": "Sandan'ny tsy manan-kery. Hamarino ity saha ity."
+    "invalidInputGeneric": "Sandan'ny tsy manan-kery. Hamarino ity saha ity.",
+    "singleHeadRequired": "Tokony hisy loham-pianakaviana iray ihany ao amin'ny tokantrano.",
+    "singleSpouseMax": "Vady iray ihany no azo atao isaky ny tokantrano."
   },
   "errors": {
     "householdNotFound": "Tsy hita ny tokantrano.",
@@ -216,5 +224,35 @@
     "fkInvalid": "Fanondroana tsy manan-kery : tsy misy ny tokantrano mifandray.",
     "duplicate": "Efa misy ity firaketana ity.",
     "unexpected": "Nisy hadisoana tsy nampoizina."
+  },
+  "admin": {
+    "import": {
+      "title": "Import Excel",
+      "backToRegistration": "Hiverina amin'ny fisoratana",
+      "description": "Mampiditra fichier .xlsx ao amin'ny base. Alaina voalohany ny simulation (dry-run). Ny import tena izy manolo ny angona rehetra momba ny tokantrano sy ny olona.",
+      "tokenLabel": "Token admin",
+      "fileLabel": "Fichier Excel (.xlsx)",
+      "sheetLabel": "Feuille (tsy voatery)",
+      "sheetPlaceholder": "Merge",
+      "dryRun": "Simulation fotsiny (dry-run)",
+      "confirmReplace": "Manamafy fa hanolo ny angona rehetra ao amin'ny base aho",
+      "submit": "Atombohy ny import",
+      "submitting": "Import eo am-pandeha…",
+      "reportTitle": "Tatitra",
+      "reportSheet": "Feuille",
+      "reportRows": "Andalana voapetraka",
+      "reportHouseholds": "Tokantrano",
+      "reportPersons": "Olona",
+      "reportPersisted": "Voarakitra ao amin'ny base",
+      "yes": "Eny",
+      "no": "Tsia",
+      "warnings": "Fampitandremana",
+      "errorsTitle": "Lesoka fanamarinana",
+      "errorLine": "Andalana {line} : {message}",
+      "errors": {
+        "noFile": "Misafidiana fichier Excel.",
+        "unexpected": "Nisy hadisoana tsy nampoizina."
+      }
+    }
   }
 }

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { useFieldArray, useForm, type FieldErrors } from "react-hook-form";
 
 import { HouseholdChildFields } from "@/components/registration/household-child-fields";
+import { HouseholdRoleSelect } from "@/components/registration/household-role-select";
 import { HouseholdSizePrompt } from "@/components/registration/household-size-prompt";
 import { MemberAdultFields } from "@/components/registration/member-adult-fields";
 import { PersonAccordionCard } from "@/components/registration/person-accordion-card";
@@ -13,6 +14,11 @@ import {
   PersonQuickNav,
   type PersonNavItem,
 } from "@/components/registration/person-quick-nav";
+import type { AdultFormHouseholdRole } from "@/lib/constants/person-roles";
+import {
+  canDemoteHead,
+  swapAdultWithHead,
+} from "@/lib/registration/household-role";
 import { isSpouseFilled } from "@/lib/registration/spouse";
 import {
   adultHasChurchData,
@@ -77,6 +83,9 @@ export function MembersStep({
   const [churchExpanded, setChurchExpanded] = useState<
     Record<string, boolean>
   >({});
+  const [headDemoteMessage, setHeadDemoteMessage] = useState<string | null>(
+    null,
+  );
 
   const [sizePromptDone, setSizePromptDone] = useState(
     isEditMode ||
@@ -90,6 +99,7 @@ export function MembersStep({
     handleSubmit,
     reset,
     watch,
+    getValues,
     setValue,
     formState: { errors, submitCount },
   } = useForm<HouseholdPersonsFormValues>({
@@ -284,6 +294,57 @@ export function MembersStep({
     setOpenOtherAdultIndex(null);
   }
 
+  function applyHouseholdPersonsSnapshot(
+    snapshot: HouseholdPersonsFormValues,
+  ): void {
+    setValue("head", snapshot.head);
+    setValue("spouse", snapshot.spouse);
+    setValue("otherAdults", snapshot.otherAdults);
+  }
+
+  function promoteSpouseToHead(): void {
+    const updated = swapAdultWithHead(getValues(), "spouse");
+    applyHouseholdPersonsSnapshot(updated);
+    setHasSpouse(true);
+    setHeadDemoteMessage(null);
+    setOpenSection("head");
+  }
+
+  function promoteOtherToHead(index: number): void {
+    const updated = swapAdultWithHead(getValues(), index);
+    applyHouseholdPersonsSnapshot(updated);
+    setHeadDemoteMessage(null);
+    setOpenSection("head");
+  }
+
+  function handleHeadRoleChange(role: AdultFormHouseholdRole): void {
+    if (role === "chef_de_famille") {
+      setHeadDemoteMessage(null);
+      return;
+    }
+    if (!canDemoteHead(getValues())) {
+      setValue("head.household_role", "chef_de_famille");
+      setHeadDemoteMessage(tForm("cannotDemoteHead"));
+    } else {
+      setHeadDemoteMessage(null);
+    }
+  }
+
+  function handleSpouseRoleChange(role: AdultFormHouseholdRole): void {
+    if (role === "chef_de_famille") {
+      promoteSpouseToHead();
+    }
+  }
+
+  function handleOtherAdultRoleChange(
+    index: number,
+    role: AdultFormHouseholdRole,
+  ): void {
+    if (role === "chef_de_famille") {
+      promoteOtherToHead(index);
+    }
+  }
+
   function enableSpouse() {
     setHasSpouse(true);
     if (!isSpouseFilled(watchedValues.spouse)) {
@@ -292,6 +353,7 @@ export function MembersStep({
         last_name: watchedValues.head?.last_name ?? "",
         email: "",
         phone: "",
+        household_role: "conjoint",
       });
     }
     setOpenSection("spouse");
@@ -383,6 +445,14 @@ export function MembersStep({
               {watchedValues.head?.id ? (
                 <input type="hidden" {...register("head.id")} />
               ) : null}
+              <HouseholdRoleSelect
+                fieldPrefix="head"
+                register={register}
+                errors={errors}
+                isHead
+                onRoleChange={handleHeadRoleChange}
+                demoteBlockedMessage={headDemoteMessage}
+              />
               <MemberAdultFields
                 fieldPrefix="head"
                 control={control}
@@ -458,6 +528,14 @@ export function MembersStep({
                   {watchedValues.spouse?.id ? (
                     <input type="hidden" {...register("spouse.id")} />
                   ) : null}
+                  <HouseholdRoleSelect
+                    fieldPrefix="spouse"
+                    register={register}
+                    errors={errors}
+                    showPromoteButton
+                    onPromoteToHead={promoteSpouseToHead}
+                    onRoleChange={handleSpouseRoleChange}
+                  />
                   <MemberAdultFields
                     fieldPrefix="spouse"
                     control={control}
@@ -528,6 +606,16 @@ export function MembersStep({
                         />
                       ) : null}
                       <div className="flex flex-col gap-4">
+                        <HouseholdRoleSelect
+                          fieldPrefix={fieldPrefix}
+                          register={register}
+                          errors={errors}
+                          showPromoteButton
+                          onPromoteToHead={() => promoteOtherToHead(index)}
+                          onRoleChange={(role) =>
+                            handleOtherAdultRoleChange(index, role)
+                          }
+                        />
                         <MemberAdultFields
                           fieldPrefix={fieldPrefix}
                           control={control}
@@ -564,7 +652,12 @@ export function MembersStep({
             <button
               type="button"
               onClick={() => {
-                appendOtherAdult({ ...defaultMember, email: "", phone: "" });
+                appendOtherAdult({
+                  ...defaultMember,
+                  email: "",
+                  phone: "",
+                  household_role: "autre",
+                });
                 setOpenSection("otherAdult");
                 setOpenOtherAdultIndex(otherAdultFields.length);
               }}

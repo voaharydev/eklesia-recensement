@@ -91,7 +91,8 @@
       "addAdult": "+ Ajouter un membre adulte",
       "addChild": "+ Ajouter un enfant",
       "removeAdult": "Retirer ce membre",
-      "removeChild": "Retirer cet enfant"
+      "removeChild": "Retirer cet enfant",
+      "promoteToHead": "Définir comme chef de famille"
     },
     "nav": {
       "quickNav": "Navigation rapide entre les personnes",
@@ -131,7 +132,12 @@
       "notProvided": "Non renseigné",
       "ageSummary": "{age} ans",
       "adultTitle": "Membre adulte {n}",
-      "childTitle": "Enfant {n}"
+      "childTitle": "Enfant {n}",
+      "householdRole": "Type dans le foyer",
+      "householdRoleChef": "Chef de famille",
+      "householdRoleSpouse": "Conjoint(e)",
+      "householdRoleOther": "Autre adulte",
+      "cannotDemoteHead": "Désignez d'abord un autre adulte comme chef de famille."
     },
     "church": {
       "title": "Parcours ecclésial",
@@ -188,7 +194,9 @@
     "invalidInputEmailInvalid": "Adresse e-mail invalide.",
     "invalidInputPersonId": "Identifiant de personne invalide.",
     "invalidInputRequired": "Ce champ est requis.",
-    "invalidInputGeneric": "Valeur invalide. Vérifiez ce champ."
+    "invalidInputGeneric": "Valeur invalide. Vérifiez ce champ.",
+    "singleHeadRequired": "Le foyer doit compter exactement un chef de famille.",
+    "singleSpouseMax": "Un seul conjoint est autorisé par foyer."
   },
   "errors": {
     "householdNotFound": "Foyer introuvable.",
@@ -216,5 +224,35 @@
     "fkInvalid": "Référence invalide : le foyer associé n'existe pas.",
     "duplicate": "Cet enregistrement existe déjà.",
     "unexpected": "Une erreur inattendue s'est produite."
+  },
+  "admin": {
+    "import": {
+      "title": "Import Excel",
+      "backToRegistration": "Retour au recensement",
+      "description": "Charge un fichier .xlsx dans la base. Par défaut, utilisez d’abord la simulation (dry-run). L’import réel remplace toutes les données des foyers et personnes.",
+      "tokenLabel": "Jeton admin",
+      "fileLabel": "Fichier Excel (.xlsx)",
+      "sheetLabel": "Feuille (optionnel)",
+      "sheetPlaceholder": "Merge",
+      "dryRun": "Simulation uniquement (dry-run)",
+      "confirmReplace": "Je confirme le remplacement de toutes les données en base",
+      "submit": "Lancer l’import",
+      "submitting": "Import en cours…",
+      "reportTitle": "Rapport",
+      "reportSheet": "Feuille",
+      "reportRows": "Lignes traitées",
+      "reportHouseholds": "Foyers",
+      "reportPersons": "Personnes",
+      "reportPersisted": "Enregistré en base",
+      "yes": "Oui",
+      "no": "Non",
+      "warnings": "Avertissements",
+      "errorsTitle": "Erreurs de validation",
+      "errorLine": "Ligne {line} : {message}",
+      "errors": {
+        "noFile": "Choisissez un fichier Excel.",
+        "unexpected": "Une erreur inattendue s’est produite."
+      }
+    }
   }
 }

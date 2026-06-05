@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "db:seed": "node scripts/seed.mjs",
-    "db:seed:sql": "supabase db query -f supabase/seed.sql --linked"
+    "db:seed:sql": "supabase db query -f supabase/seed.sql --linked",
+    "db:import:inspect": "tsx scripts/import-excel.ts --inspect",
+    "db:import": "tsx scripts/import-excel.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -19,6 +21,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.77.0",
     "server-only": "^0.0.1",
+    "xlsx": "^0.18.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -29,6 +32,7 @@
     "eslint-config-next": "14.2.35",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }

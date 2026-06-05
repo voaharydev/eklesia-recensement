@@ -12,6 +12,8 @@ import {
 import { assertHouseholdIsActive } from "@/lib/actions/household-guard";
 import { getServerI18n } from "@/lib/i18n/server";
 import { localeSchema } from "@/lib/i18n/locale";
+import type { FormHouseholdRole } from "@/lib/constants/person-roles";
+import { validateHouseholdRoles } from "@/lib/registration/household-role";
 import {
   childFormValuesToPersonInsert,
   flattenHouseholdPersonsForm,
@@ -269,11 +271,14 @@ export async function updateAdult(
     return failure(formatZodError(parsed.error) ?? tErrors("invalidData"));
   }
 
+  const householdRole = (parsed.data.household_role ??
+    "chef_de_famille") as FormHouseholdRole;
+
   try {
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("persons")
-      .update(memberFormValuesToPersonInsert(parsed.data, "chef_de_famille"))
+      .update(memberFormValuesToPersonInsert(parsed.data, householdRole))
       .eq("id", id)
       .select("*")
       .single();
@@ -348,7 +353,8 @@ export async function upsertHouseholdPersons(
   }
 
   const { locale } = localeField.data;
-  const { schemas, formatZodError, tErrors } = await getServerI18n(locale);
+  const { schemas, formatZodError, tErrors, tValidation } =
+    await getServerI18n(locale);
 
   const parsed = schemas.householdPersonsSchema.safeParse(input);
   if (!parsed.success) {
@@ -357,6 +363,11 @@ export async function upsertHouseholdPersons(
 
   if (!householdId) {
     return failure(tErrors("householdIdMissing"));
+  }
+
+  const roleError = validateHouseholdRoles(parsed.data);
+  if (roleError) {
+    return failure(tValidation(roleError));
   }
 
   try {

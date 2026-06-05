@@ -37,6 +37,7 @@ export type AdultInputValues = z.infer<typeof adultInputSchema>;
 export type ChildInputValues = z.infer<typeof childInputSchema>;
 
 export const defaultMember: MemberFormValues = {
+  household_role: "autre",
   civility: "",
   first_name: "",
   last_name: "",
@@ -64,8 +65,8 @@ export const defaultChild: ChildFormValues = {
 };
 
 export const defaultHouseholdPersons: HouseholdPersonsFormValues = {
-  head: { ...defaultMember },
-  spouse: { ...defaultMember, email: "", phone: "" },
+  head: { ...defaultMember, household_role: "chef_de_famille" },
+  spouse: { ...defaultMember, email: "", phone: "", household_role: "conjoint" },
   otherAdults: [],
   children: [],
 };

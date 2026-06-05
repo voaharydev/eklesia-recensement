@@ -1,6 +1,10 @@
 import { resolveBranchCode } from "@/lib/constants/branches";
 import type { FormHouseholdRole, HouseholdRole } from "@/lib/constants/person-roles";
 import {
+  adultRoleFromPersonRole,
+  resolveAdultRole,
+} from "@/lib/registration/household-role";
+import {
   isSpouseFilled,
   optionalTextToNull,
 } from "@/lib/registration/spouse";
@@ -72,6 +76,7 @@ export function memberFormValuesToPersonInsert(
   householdRole: FormHouseholdRole,
 ): Omit<PersonInsert, "household_id"> {
   const {
+    household_role: householdRoleField,
     first_name,
     last_name,
     email,
@@ -89,6 +94,8 @@ export function memberFormValuesToPersonInsert(
     church_assignments,
     civility,
   } = member;
+
+  void householdRoleField;
 
   return {
     first_name,
@@ -144,6 +151,7 @@ export function childFormValuesToPersonInsert(
 export function personToMemberFormValues(person: Person): MemberFormValues {
   return {
     id: person.id,
+    household_role: adultRoleFromPersonRole(person.role),
     civility: person.civility ?? "",
     first_name: person.first_name,
     last_name: person.last_name,
@@ -246,13 +254,17 @@ export function flattenHouseholdPersonsForm(
   form: HouseholdPersonsFormValues,
 ): FlattenedPersonEntry[] {
   const entries: FlattenedPersonEntry[] = [
-    { kind: "adult", role: "chef_de_famille", values: form.head },
+    {
+      kind: "adult",
+      role: resolveAdultRole(form.head, "chef_de_famille"),
+      values: form.head,
+    },
   ];
 
   if (isSpouseFilled(form.spouse)) {
     entries.push({
       kind: "adult",
-      role: "conjoint",
+      role: resolveAdultRole(form.spouse as MemberFormValues, "conjoint"),
       values: form.spouse as MemberFormValues,
     });
   }
@@ -260,7 +272,7 @@ export function flattenHouseholdPersonsForm(
   for (const adult of form.otherAdults) {
     entries.push({
       kind: "adult",
-      role: "autre",
+      role: resolveAdultRole(adult, "autre"),
       values: adult,
     });
   }

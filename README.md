@@ -31,6 +31,19 @@ supabase db push
 # - 20260203000000_persons_email_lookup.sql
 ```
 
+## Import Excel (Listing mai 2026)
+
+1. Copier le fichier dans [`data/listing-mai-2026.xlsx`](data/README.md) (voir [`data/README.md`](data/README.md)).
+2. Inspecter (onglet **Merge**, 1 ligne = 1 foyer) : `npm run db:import:inspect -- data/listing-mai-2026.xlsx`
+3. Simuler : `npm run db:import -- data/listing-mai-2026.xlsx --sheet Merge --dry-run`
+4. Importer (remplace toute la base) : `npm run db:import -- data/listing-mai-2026.xlsx --sheet Merge --yes`
+
+Options : `--layout merge|long`, `--sheet "NomFeuille"`. Détail : [`data/README.md`](data/README.md).
+
+Interface admin (jeton `IMPORT_ADMIN_TOKEN` dans `.env.local`) : `/fr/admin/import` — feuille vide = **Merge**.
+
+Pour un export « une ligne = une personne », utiliser `--layout long` et ajuster [`lib/import/excel-column-map.ts`](lib/import/excel-column-map.ts).
+
 ## Données de test
 
 Après avoir appliqué les migrations :

@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import { BRANCH_CODES } from "@/lib/constants/branches";
+import { ADULT_FORM_HOUSEHOLD_ROLES } from "@/lib/constants/person-roles";
+import { validateHouseholdRoles } from "@/lib/registration/household-role";
 import { isSpouseFilled } from "@/lib/registration/spouse";
 import { createRefinements } from "@/lib/validations/member-refinements";
 
@@ -78,8 +80,11 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
     arrival_date_fjkm: optionalTrimmedText,
   });
 
+  const householdRoleSchema = z.enum(ADULT_FORM_HOUSEHOLD_ROLES);
+
   const memberBaseSchema = z.object({
     id: optionalUuid,
+    household_role: householdRoleSchema.optional(),
     civility: optionalTrimmedText,
     first_name: z.string().min(1, t("firstNameRequired")),
     last_name: z.string().min(1, t("lastNameRequired")),
@@ -104,6 +109,7 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
 
   const spouseDraftSchema = z.object({
     id: optionalUuid,
+    household_role: householdRoleSchema.optional(),
     civility: optionalTrimmedText,
     first_name: z.string().optional().or(z.literal("")),
     last_name: z.string().optional().or(z.literal("")),
@@ -164,6 +170,21 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
       data.children.forEach((child, index) => {
         refineChildProfile(child, ctx, ["children", index]);
       });
+
+      const roleError = validateHouseholdRoles(data);
+      if (roleError === "singleHeadRequired") {
+        ctx.addIssue({
+          code: "custom",
+          message: t("singleHeadRequired"),
+          path: ["head", "household_role"],
+        });
+      } else if (roleError === "singleSpouseMax") {
+        ctx.addIssue({
+          code: "custom",
+          message: t("singleSpouseMax"),
+          path: ["spouse", "household_role"],
+        });
+      }
     });
 
   const adultInputSchema = memberBaseSchema
