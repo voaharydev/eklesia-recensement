@@ -21,6 +21,7 @@ export interface Database {
           name: string;
           main_address: string;
           created_at: string;
+          updated_at: string;
           unregistered_at: string | null;
           landline_phone: string | null;
           arrival_date_fjkm: string | null;
@@ -30,6 +31,7 @@ export interface Database {
           name: string;
           main_address: string;
           created_at?: string;
+          updated_at?: string;
           unregistered_at?: string | null;
           landline_phone?: string | null;
           arrival_date_fjkm?: string | null;
@@ -39,6 +41,7 @@ export interface Database {
           name?: string;
           main_address?: string;
           created_at?: string;
+          updated_at?: string;
           unregistered_at?: string | null;
           landline_phone?: string | null;
           arrival_date_fjkm?: string | null;

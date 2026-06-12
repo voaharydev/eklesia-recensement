@@ -244,6 +244,130 @@
     "unexpected": "Une erreur inattendue s'est produite."
   },
   "admin": {
+    "nav": {
+      "title": "Gestion du recensement",
+      "dashboard": "Tableau de bord",
+      "members": "Membres",
+      "importExcel": "Import Excel",
+      "logout": "Déconnexion"
+    },
+    "login": {
+      "title": "Connexion administration",
+      "description": "Saisissez le jeton admin pour accéder à l’espace de gestion.",
+      "formTitle": "Authentification",
+      "tokenLabel": "Jeton admin",
+      "submit": "Se connecter",
+      "submitting": "Connexion…"
+    },
+    "dashboard": {
+      "title": "Tableau de bord",
+      "subtitle": "Vue d’ensemble du recensement actif.",
+      "loadError": "Impossible de charger les indicateurs.",
+      "activeHouseholds": "Foyers actifs",
+      "totalMembers": "Membres totaux",
+      "adultCount": "Adultes",
+      "childCount": "Enfants",
+      "baptizedCount": "Baptisés",
+      "mpandrayCount": "Mpandray",
+      "mpiandryCount": "Mpiandry",
+      "mpamakyTenyCount": "Mpamaky teny",
+      "branchDistribution": "Répartition par branche",
+      "noBranches": "Aucune affectation enregistrée."
+    },
+    "members": {
+      "title": "Membres",
+      "description": "Liste paginée des personnes recensées.",
+      "loadError": "Impossible de charger les membres.",
+      "empty": "Aucun membre ne correspond aux filtres.",
+      "filters": {
+        "search": "Recherche",
+        "searchPlaceholder": "Nom, courriel, foyer…",
+        "role": "Rôle",
+        "roleAll": "Tous les rôles",
+        "ageGroup": "Catégorie",
+        "ageAll": "Tous",
+        "adult": "Adulte",
+        "child": "Enfant",
+        "status": "Statut foyer",
+        "statusActive": "Actif",
+        "statusArchived": "Archivé",
+        "branch": "Branche",
+        "branchAll": "Toutes les branches",
+        "updated": "MAJ du foyer",
+        "updatedAll": "Toutes les périodes",
+        "updated7d": "7 derniers jours",
+        "updated30d": "30 derniers jours",
+        "updated90d": "90 derniers jours",
+        "updatedNever": "Jamais mises à jour",
+        "updatedFrom": "MAJ du",
+        "updatedTo": "MAJ au"
+      },
+      "columns": {
+        "name": "Nom",
+        "household": "Foyer",
+        "role": "Rôle",
+        "age": "Âge",
+        "email": "Courriel",
+        "phone": "Tél.",
+        "spiritual": "Parcours",
+        "assignments": "Affectations",
+        "householdUpdated": "MAJ foyer"
+      },
+      "spiritual": {
+        "baptized": "Baptisé",
+        "mpandray": "Mpandray",
+        "mpiandry": "Mpiandry",
+        "mpamakyTeny": "Mpamaky teny"
+      },
+      "pagination": {
+        "previous": "Précédent",
+        "next": "Suivant",
+        "pageInfo": "Page {page} / {totalPages} — {total} membres"
+      }
+    },
+    "household": {
+      "backToMembers": "← Retour aux membres",
+      "statusActive": "Foyer actif",
+      "statusArchived": "Foyer archivé",
+      "infoTitle": "Informations du foyer",
+      "address": "Adresse",
+      "phone": "Téléphone",
+      "arrivalFjkm": "Arrivée FJKM",
+      "unregisteredAt": "Désinscrit le",
+      "membersTitle": "Membres du foyer",
+      "membersEmpty": "Aucun membre enregistré.",
+      "email": "Courriel",
+      "age": "Âge",
+      "branches": "Branches",
+      "spiritualTitle": "Parcours",
+      "groups": {
+        "head": "Chef de famille",
+        "spouse": "Conjoint",
+        "otherAdults": "Autres adultes",
+        "children": "Enfants"
+      },
+      "spiritual": {
+        "baptized": "Baptisé",
+        "mpandray": "Mpandray",
+        "mpiandry": "Mpiandry",
+        "mpamakyTeny": "Mpamaky teny"
+      },
+      "unregister": {
+        "button": "Désinscrire le foyer",
+        "buttonLoading": "Désinscription…",
+        "title": "Désinscrire ce foyer ?",
+        "description": "Le foyer sera retiré du recensement actif. Les données restent en base et pourront être consultées via le filtre « archivé ».",
+        "confirm": "Confirmer la désinscription",
+        "cancel": "Annuler",
+        "error": "La désinscription a échoué."
+      }
+    },
+    "roles": {
+      "chef_de_famille": "Chef de famille",
+      "conjoint": "Conjoint",
+      "autre": "Autre",
+      "enfant": "Enfant"
+    },
     "import": {
       "title": "Import Excel",
       "backToRegistration": "Retour au recensement",

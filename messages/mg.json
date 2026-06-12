@@ -265,6 +265,21 @@
         "noFile": "Misafidiana fichier Excel.",
         "unexpected": "Nisy hadisoana tsy nampoizina."
       }
+    },
+    "members": {
+      "filters": {
+        "updated": "Fanavaozana tokantrano",
+        "updatedAll": "Fotoana rehetra",
+        "updated7d": "7 andro farany",
+        "updated30d": "30 andro farany",
+        "updated90d": "90 andro farany",
+        "updatedNever": "Tsy mbola navaozina",
+        "updatedFrom": "Navaozina hatramin'ny",
+        "updatedTo": "Navaozina hatramin'ny"
+      },
+      "columns": {
+        "householdUpdated": "Fanavaozana tokantrano"
+      }
     }
   }
 }
