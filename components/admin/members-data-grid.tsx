@@ -28,6 +28,7 @@ type MembersDataGridProps = {
     exportExcel: string;
     exportCsv: string;
     exportHint: string;
+    editHousehold: string;
     roleLabels: Record<string, string>;
     spiritualLabels: {
       baptized: string;
@@ -175,12 +176,22 @@ export function MembersDataGrid({
                       {person.last_name} {person.first_name}
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        href={`/admin/households/${person.household.id}`}
-                        className="text-primary hover:text-primary-hover"
-                      >
-                        {person.household.name}
-                      </Link>
+                      <div className="flex flex-col gap-1">
+                        <Link
+                          href={`/admin/households/${person.household.id}`}
+                          className="text-primary hover:text-primary-hover"
+                        >
+                          {person.household.name}
+                        </Link>
+                        {person.household.unregistered_at == null ? (
+                          <Link
+                            href={`/admin/households/${person.household.id}/edit`}
+                            className="text-xs text-muted hover:text-primary"
+                          >
+                            {labels.editHousehold}
+                          </Link>
+                        ) : null}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-muted">
                       {formatHouseholdUpdated(person.household.updated_at)}

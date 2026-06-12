@@ -8,11 +8,12 @@ import {
   isSpouseFilled,
   optionalTextToNull,
 } from "@/lib/registration/spouse";
-import type {
-  ChildFormValues,
-  HouseholdFormValues,
-  HouseholdPersonsFormValues,
-  MemberFormValues,
+import {
+  defaultMember,
+  type ChildFormValues,
+  type HouseholdFormValues,
+  type HouseholdPersonsFormValues,
+  type MemberFormValues,
 } from "@/lib/validations/registration";
 import type {
   Household,
@@ -261,6 +262,24 @@ export function splitPersonsForForm(persons: Person[]): {
 export type FlattenedPersonEntry =
   | { kind: "adult"; role: FormHouseholdRole; values: MemberFormValues }
   | { kind: "child"; values: ChildFormValues };
+
+export function personsToHouseholdPersonsFormValues(
+  persons: Person[],
+): HouseholdPersonsFormValues {
+  const { head, spouse, otherAdults, children } = splitPersonsForForm(persons);
+
+  return {
+    head,
+    spouse: spouse ?? {
+      ...defaultMember,
+      email: "",
+      phone: "",
+      household_role: "conjoint",
+    },
+    otherAdults,
+    children,
+  };
+}
 
 export function flattenHouseholdPersonsForm(
   form: HouseholdPersonsFormValues,

@@ -71,18 +71,26 @@ export default async function AdminHouseholdPage({
         </div>
 
         {!isArchived ? (
-          <UnregisterHouseholdButton
-            householdId={household.id}
-            labels={{
-              button: t("unregister.button"),
-              buttonLoading: t("unregister.buttonLoading"),
-              title: t("unregister.title"),
-              description: t("unregister.description"),
-              confirm: t("unregister.confirm"),
-              cancel: t("unregister.cancel"),
-              error: t("unregister.error"),
-            }}
-          />
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={`/admin/households/${household.id}/edit`}
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted"
+            >
+              {t("edit.button")}
+            </Link>
+            <UnregisterHouseholdButton
+              householdId={household.id}
+              labels={{
+                button: t("unregister.button"),
+                buttonLoading: t("unregister.buttonLoading"),
+                title: t("unregister.title"),
+                description: t("unregister.description"),
+                confirm: t("unregister.confirm"),
+                cancel: t("unregister.cancel"),
+                error: t("unregister.error"),
+              }}
+            />
+          </div>
         ) : null}
       </header>
 

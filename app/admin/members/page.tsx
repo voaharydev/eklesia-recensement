@@ -20,6 +20,10 @@ export default async function AdminMembersPage({
 }: AdminMembersPageProps) {
   await requireAdminPage();
   const t = await getTranslations({ locale: "fr", namespace: "admin.members" });
+  const tHousehold = await getTranslations({
+    locale: "fr",
+    namespace: "admin.household",
+  });
   const tRoles = await getTranslations({ locale: "fr", namespace: "admin.roles" });
 
   const filters = parseMembersSearchParams(searchParams);
@@ -73,6 +77,7 @@ export default async function AdminMembersPage({
       members: exportCounts.memberCount,
     }),
     exportHint: t("export.hint"),
+    editHousehold: tHousehold("edit.link"),
     roleLabels,
     spiritualLabels: {
       baptized: t("spiritual.baptized"),

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import {
   assertAdminSession,
@@ -23,11 +24,21 @@ import type {
 } from "@/lib/admin/types";
 import { MAX_MEMBERS_EXPORT } from "@/lib/admin/export-limits";
 import { resolveUpdatedFilter } from "@/lib/admin/updated-filter";
+import { createChild, updateChild } from "@/app/actions/person";
 import {
   failure,
+  mapSupabaseError,
   success,
   type ActionResult,
 } from "@/lib/actions/types";
+import { getServerI18n } from "@/lib/i18n/server";
+import { localeSchema } from "@/lib/i18n/locale";
+import { validateHouseholdRoles } from "@/lib/registration/household-role";
+import {
+  flattenHouseholdPersonsForm,
+  memberFormValuesToPersonInsert,
+} from "@/lib/registration/mappers";
+import { optionalTextToNull } from "@/lib/registration/spouse";
 import { resolveBranchCode } from "@/lib/constants/branches";
 import { createAdminClient } from "@/lib/supabase/supabase";
 import type { Household, Person } from "@/types/database";
@@ -40,6 +51,10 @@ const FILTERED_HOUSEHOLD_ID_SELECT =
 
 const EXPORT_BATCH_SIZE = 1000;
 const HOUSEHOLD_ID_CHUNK_SIZE = 200;
+
+const localePayloadSchema = z.object({
+  locale: localeSchema,
+});
 
 type MembersFilterOptions = {
   searchHouseholdIds?: string[];
@@ -625,6 +640,237 @@ export async function getHouseholdMembers(
     grouped: groupPersonsForAdmin(data.members),
     members: data.members,
   });
+}
+
+function revalidateHouseholdAdminPaths(householdId: string): void {
+  revalidatePath("/admin/members");
+  revalidatePath(`/admin/households/${householdId}`);
+  revalidatePath(`/admin/households/${householdId}/edit`);
+}
+
+async function assertHouseholdEditable(
+  householdId: string,
+): Promise<ActionResult<never> | null> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("households")
+      .select("unregistered_at")
+      .eq("id", householdId)
+      .maybeSingle();
+
+    if (error) {
+      return failure(error.message);
+    }
+
+    if (!data) {
+      return failure("Foyer introuvable.");
+    }
+
+    if (data.unregistered_at) {
+      return failure("Ce foyer est archivé et ne peut pas être modifié.");
+    }
+
+    return null;
+  } catch (err) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : "Impossible de vérifier ce foyer.";
+    return failure(message);
+  }
+}
+
+export async function adminUpdateHousehold(
+  householdId: string,
+  input: unknown,
+): Promise<ActionResult<Household>> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const localeField = localePayloadSchema.safeParse(input);
+  if (!localeField.success) {
+    return failure("Invalid request");
+  }
+
+  const { locale } = localeField.data;
+  const { schemas, formatZodError, tErrors } = await getServerI18n(locale);
+
+  const parsed = schemas.householdSchema.safeParse(input);
+  if (!parsed.success) {
+    return failure(formatZodError(parsed.error) ?? tErrors("invalidData"));
+  }
+
+  const editableError = await assertHouseholdEditable(householdId);
+  if (editableError) return editableError;
+
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("households")
+      .update({
+        name: parsed.data.name,
+        main_address: parsed.data.main_address,
+        landline_phone: optionalTextToNull(parsed.data.landline_phone),
+        arrival_date_fjkm: optionalTextToNull(parsed.data.arrival_date_fjkm),
+      })
+      .eq("id", householdId)
+      .select("*")
+      .single();
+
+    if (error) {
+      return failure(mapSupabaseError(error, tErrors));
+    }
+
+    revalidateHouseholdAdminPaths(householdId);
+    revalidatePath("/");
+    return success(data);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : tErrors("updateHouseholdFailed");
+    return failure(message);
+  }
+}
+
+export async function adminUpsertHouseholdPersons(
+  householdId: string,
+  input: unknown,
+): Promise<ActionResult<Person[]>> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const localeField = localePayloadSchema.safeParse(input);
+  if (!localeField.success) {
+    return failure("Invalid request");
+  }
+
+  const { locale } = localeField.data;
+  const { schemas, formatZodError, tErrors, tValidation } =
+    await getServerI18n(locale);
+
+  const parsed = schemas.householdPersonsSchema.safeParse(input);
+  if (!parsed.success) {
+    return failure(formatZodError(parsed.error) ?? tErrors("invalidData"));
+  }
+
+  if (!householdId) {
+    return failure(tErrors("householdIdMissing"));
+  }
+
+  const roleError = validateHouseholdRoles(parsed.data);
+  if (roleError) {
+    return failure(tValidation(roleError));
+  }
+
+  const editableError = await assertHouseholdEditable(householdId);
+  if (editableError) return editableError;
+
+  const results: Person[] = [];
+
+  try {
+    const supabase = createAdminClient();
+
+    for (const entry of flattenHouseholdPersonsForm(parsed.data)) {
+      if (entry.kind === "adult") {
+        const { id: memberId, ...memberData } = entry.values;
+        const personId = memberId?.trim() ? memberId.trim() : undefined;
+
+        if (personId) {
+          const { data, error } = await supabase
+            .from("persons")
+            .update(
+              memberFormValuesToPersonInsert(memberData, entry.role),
+            )
+            .eq("id", personId)
+            .select("*")
+            .single();
+
+          if (error) {
+            return failure(mapSupabaseError(error, tErrors));
+          }
+          results.push(data);
+        } else {
+          const { data, error } = await supabase
+            .from("persons")
+            .insert({
+              household_id: householdId,
+              ...memberFormValuesToPersonInsert(memberData, entry.role),
+            })
+            .select("*")
+            .single();
+
+          if (error) {
+            return failure(
+              mapSupabaseError(error, tErrors) ??
+                tErrors("addMemberGenericFailed"),
+            );
+          }
+          results.push(data);
+        }
+      } else {
+        const { id: childId, ...childData } = entry.values;
+        const personId = childId?.trim() ? childId.trim() : undefined;
+
+        if (personId) {
+          const updateResult = await updateChild(personId, {
+            locale,
+            ...childData,
+          });
+          if (updateResult.error || !updateResult.data) {
+            return failure(
+              updateResult.error ?? tErrors("updateChildFailed"),
+            );
+          }
+          results.push(updateResult.data);
+        } else {
+          const createResult = await createChild({
+            locale,
+            household_id: householdId,
+            ...childData,
+          });
+          if (createResult.error || !createResult.data) {
+            return failure(
+              createResult.error ?? tErrors("addChildGenericFailed"),
+            );
+          }
+          results.push(createResult.data);
+        }
+      }
+    }
+
+    const keptIdSet = new Set(results.map((person) => person.id));
+    const { data: existingMembers, error: fetchMembersError } = await supabase
+      .from("persons")
+      .select("id")
+      .eq("household_id", householdId);
+
+    if (fetchMembersError) {
+      return failure(mapSupabaseError(fetchMembersError, tErrors));
+    }
+
+    const idsToDelete = (existingMembers ?? [])
+      .map((row) => row.id)
+      .filter((id) => !keptIdSet.has(id));
+
+    if (idsToDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from("persons")
+        .delete()
+        .in("id", idsToDelete);
+
+      if (deleteError) {
+        return failure(mapSupabaseError(deleteError, tErrors));
+      }
+    }
+
+    revalidateHouseholdAdminPaths(householdId);
+    revalidatePath("/");
+    return success(results);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : tErrors("updateMemberFailed");
+    return failure(message);
+  }
 }
 
 export async function unregisterHouseholdAction(

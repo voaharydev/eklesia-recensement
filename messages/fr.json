@@ -367,6 +367,20 @@
         "confirm": "Confirmer la désinscription",
         "cancel": "Annuler",
         "error": "La désinscription a échoué."
+      },
+      "edit": {
+        "button": "Modifier",
+        "link": "Modifier le foyer",
+        "title": "Modifier {name}",
+        "householdSection": "Informations du foyer",
+        "membersSection": "Membres du foyer",
+        "saveHousehold": "Enregistrer le foyer",
+        "saveMembers": "Enregistrer les membres",
+        "householdSaved": "Informations du foyer enregistrées.",
+        "membersSaved": "Membres du foyer enregistrés.",
+        "error": "L'enregistrement a échoué.",
+        "backToDetail": "Retour à la fiche foyer",
+        "archivedReadOnly": "Ce foyer archivé ne peut pas être modifié."
       }
     },
     "roles": {

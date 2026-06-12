@@ -15,6 +15,7 @@ type HouseholdStepProps = {
   onSubmit: (values: HouseholdFormValues) => Promise<void>;
   onBack: () => void;
   isSubmitting: boolean;
+  submitLabel?: string;
 };
 
 export function HouseholdStep({
@@ -22,9 +23,11 @@ export function HouseholdStep({
   onSubmit,
   onBack,
   isSubmitting,
+  submitLabel,
 }: HouseholdStepProps) {
   const tForm = useTranslations("form.household");
   const tWizard = useTranslations("wizard.buttons");
+  const resolvedSubmitLabel = submitLabel ?? tWizard("continue");
   const { schemas } = useRegistrationSchemas();
   const resolver = useMemo(
     () => zodResolver(schemas.householdSchema),
@@ -80,7 +83,7 @@ export function HouseholdStep({
       <WizardActionBar
         onBack={onBack}
         backLabel={tWizard("back")}
-        submitLabel={tWizard("continue")}
+        submitLabel={resolvedSubmitLabel}
         submittingLabel={tWizard("saving")}
         isSubmitting={isSubmitting}
       />
