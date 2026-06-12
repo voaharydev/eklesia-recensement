@@ -2,18 +2,26 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, type FieldErrors } from "react-hook-form";
 
 import { HouseholdChildFields } from "@/components/registration/household-child-fields";
 import { HouseholdRoleSelect } from "@/components/registration/household-role-select";
 import { HouseholdSizePrompt } from "@/components/registration/household-size-prompt";
 import { MemberAdultFields } from "@/components/registration/member-adult-fields";
+import { MemberChurchFields } from "@/components/registration/member-church-fields";
+import {
+  PersonFormTabs,
+  type PersonFormTab,
+} from "@/components/registration/person-form-tabs";
 import { PersonAccordionCard } from "@/components/registration/person-accordion-card";
 import {
   PersonQuickNav,
   type PersonNavItem,
 } from "@/components/registration/person-quick-nav";
+import { SectionLabel } from "@/components/registration/section-label";
+import { WizardActionBar } from "@/components/registration/wizard-action-bar";
+import { Button } from "@/components/ui/button";
 import type { AdultFormHouseholdRole } from "@/lib/constants/person-roles";
 import {
   canDemoteHead,
@@ -21,7 +29,6 @@ import {
 } from "@/lib/registration/household-role";
 import { isSpouseFilled } from "@/lib/registration/spouse";
 import {
-  adultHasChurchData,
   adultHasChurchErrors,
   adultHasErrors,
   childHasErrors,
@@ -32,11 +39,13 @@ import {
   getMemberSummary,
   isChildComplete,
   isMemberComplete,
+  type MemberFieldPrefix,
 } from "@/lib/registration/person-form-ui";
 import { useRegistrationSchemas } from "@/lib/i18n/client";
 import {
   defaultChild,
   defaultMember,
+  type BranchAssignmentFormValues,
   type HouseholdPersonsFormValues,
 } from "@/lib/validations/registration";
 
@@ -47,8 +56,16 @@ type MembersStepProps = {
   onSubmit: (values: HouseholdPersonsFormValues) => Promise<void>;
   onBack: () => void;
   isSubmitting: boolean;
-  afterForm?: ReactNode;
 };
+
+function cloneBranches(
+  branches: BranchAssignmentFormValues[] | undefined,
+): BranchAssignmentFormValues[] {
+  return (branches ?? []).map((b) => ({
+    branch_code: b.branch_code,
+    role: b.role ?? "",
+  }));
+}
 
 export function MembersStep({
   defaultValues,
@@ -57,7 +74,6 @@ export function MembersStep({
   onSubmit,
   onBack,
   isSubmitting,
-  afterForm,
 }: MembersStepProps) {
   const tWizard = useTranslations("wizard");
   const tForm = useTranslations("form.person");
@@ -80,9 +96,9 @@ export function MembersStep({
     null,
   );
   const [openChildIndex, setOpenChildIndex] = useState<number | null>(null);
-  const [churchExpanded, setChurchExpanded] = useState<
-    Record<string, boolean>
-  >({});
+  const [personTabs, setPersonTabs] = useState<Record<string, PersonFormTab>>(
+    {},
+  );
   const [headDemoteMessage, setHeadDemoteMessage] = useState<string | null>(
     null,
   );
@@ -90,6 +106,7 @@ export function MembersStep({
   const [sizePromptDone, setSizePromptDone] = useState(
     isEditMode ||
       initialHasSpouse ||
+      defaultValues.otherAdults.length > 0 ||
       defaultValues.children.length > 0,
   );
 
@@ -122,6 +139,7 @@ export function MembersStep({
     setHasSpouse(isSpouseFilled(defaultValues.spouse));
     setOpenSection("head");
     setOpenChildIndex(null);
+    setPersonTabs({});
     setSizePromptDone(
       isEditMode ||
         isSpouseFilled(defaultValues.spouse) ||
@@ -148,52 +166,36 @@ export function MembersStep({
     name: "children",
   });
 
-  const toggleChurch = useCallback((key: string) => {
-    setChurchExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
+  const adultCount =
+    1 + (hasSpouse ? 1 : 0) + otherAdultFields.length;
+  const childCount = childFields.length;
 
-  const expandChurchForAdult = useCallback((key: string) => {
-    setChurchExpanded((prev) => ({ ...prev, [key]: true }));
-  }, []);
-
-  function isChurchExpanded(
-    key: string,
-    member: Parameters<typeof adultHasChurchData>[0],
-    sectionMatches: boolean,
-  ) {
-    if (
-      key === "head"
-        ? adultHasChurchErrors(errors, "head")
-        : key === "spouse"
-          ? adultHasChurchErrors(errors, "spouse")
-          : /^otherAdults\.\d+$/.test(key) &&
-            otherAdultHasChurchErrors(
-              errors,
-              Number(key.replace("otherAdults.", "")),
-            )
-    ) {
-      return true;
-    }
-    if (key in churchExpanded) {
-      return churchExpanded[key];
-    }
-    return sectionMatches && (isEditMode || adultHasChurchData(member));
+  function getPersonTab(key: string): PersonFormTab {
+    return personTabs[key] ?? "identity";
   }
+
+  function setPersonTab(key: string, tab: PersonFormTab) {
+    setPersonTabs((prev) => ({ ...prev, [key]: tab }));
+  }
+
+  const switchToChurchTab = useCallback((key: string) => {
+    setPersonTabs((prev) => ({ ...prev, [key]: "church" }));
+  }, []);
 
   useEffect(() => {
     if (submitCount === 0) return;
     if (adultHasChurchErrors(errors, "head")) {
-      expandChurchForAdult("head");
+      switchToChurchTab("head");
     }
     if (hasSpouse && adultHasChurchErrors(errors, "spouse")) {
-      expandChurchForAdult("spouse");
+      switchToChurchTab("spouse");
     }
     otherAdultFields.forEach((_, index) => {
       if (otherAdultHasChurchErrors(errors, index)) {
-        expandChurchForAdult(`otherAdults.${index}`);
+        switchToChurchTab(`otherAdults.${index}`);
       }
     });
-  }, [errors, submitCount, hasSpouse, otherAdultFields, expandChurchForAdult]);
+  }, [errors, submitCount, hasSpouse, otherAdultFields, switchToChurchTab]);
 
   const navItems: PersonNavItem[] = useMemo(() => {
     const items: PersonNavItem[] = [
@@ -372,6 +374,16 @@ export function MembersStep({
     setValue("spouse.last_name", lastName);
   }
 
+  function applyHeadBranchesToAll() {
+    const cloned = cloneBranches(getValues("head.branches"));
+    if (hasSpouse) {
+      setValue("spouse.branches", cloned);
+    }
+    otherAdultFields.forEach((_, index) => {
+      setValue(`otherAdults.${index}.branches`, cloned);
+    });
+  }
+
   const onInvalid = useCallback(
     (formErrors: FieldErrors<HouseholdPersonsFormValues>) => {
       const first = findFirstErrorIndex(
@@ -383,50 +395,136 @@ export function MembersStep({
       if (first.kind === "head") {
         setOpenSection("head");
         if (adultHasChurchErrors(formErrors, "head")) {
-          expandChurchForAdult("head");
+          switchToChurchTab("head");
         }
       } else if (first.kind === "spouse") {
         setOpenSection("spouse");
         if (adultHasChurchErrors(formErrors, "spouse")) {
-          expandChurchForAdult("spouse");
+          switchToChurchTab("spouse");
         }
       } else if (first.kind === "otherAdult" && first.index != null) {
         setOpenSection("otherAdult");
         setOpenOtherAdultIndex(first.index);
         if (otherAdultHasChurchErrors(formErrors, first.index)) {
-          expandChurchForAdult(`otherAdults.${first.index}`);
+          switchToChurchTab(`otherAdults.${first.index}`);
         }
       } else if (first.kind === "child" && first.index != null) {
         setOpenSection("child");
         setOpenChildIndex(first.index);
       }
     },
-    [hasSpouse, otherAdultFields.length, expandChurchForAdult],
+    [hasSpouse, otherAdultFields.length, switchToChurchTab],
   );
+
+  function renderAdultForm(
+    fieldPrefix: MemberFieldPrefix,
+    tabKey: string,
+    options?: {
+      isHead?: boolean;
+      showPromoteButton?: boolean;
+      onPromoteToHead?: () => void;
+      onRoleChange?: (role: AdultFormHouseholdRole) => void;
+      demoteBlockedMessage?: string | null;
+      showApplyBranches?: boolean;
+    },
+  ) {
+    const churchHasError =
+      fieldPrefix === "head"
+        ? adultHasChurchErrors(errors, "head")
+        : fieldPrefix === "spouse"
+          ? adultHasChurchErrors(errors, "spouse")
+          : otherAdultHasChurchErrors(
+              errors,
+              Number(fieldPrefix.replace("otherAdults.", "")),
+            );
+
+    return (
+      <div className="flex flex-col gap-4">
+        <HouseholdRoleSelect
+          fieldPrefix={fieldPrefix}
+          register={register}
+          errors={errors}
+          isHead={options?.isHead}
+          showPromoteButton={options?.showPromoteButton}
+          onPromoteToHead={options?.onPromoteToHead}
+          onRoleChange={options?.onRoleChange}
+          demoteBlockedMessage={options?.demoteBlockedMessage}
+        />
+        <PersonFormTabs
+          activeTab={getPersonTab(tabKey)}
+          onTabChange={(tab) => setPersonTab(tabKey, tab)}
+          identityLabel={tWizard("tabs.identity")}
+          churchLabel={tWizard("tabs.church")}
+          churchHasError={churchHasError}
+          identityContent={
+            <MemberAdultFields
+              fieldPrefix={fieldPrefix}
+              control={control}
+              register={register}
+              errors={errors}
+            />
+          }
+          churchContent={
+            <MemberChurchFields
+              fieldPrefix={fieldPrefix}
+              control={control}
+              register={register}
+              watch={watch}
+              errors={errors}
+            />
+          }
+          churchFooter={
+            options?.showApplyBranches ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="mt-4 self-start"
+                onClick={applyHeadBranchesToAll}
+              >
+                {tWizard("shortcuts.applyBranches")}
+              </Button>
+            ) : undefined
+          }
+        />
+      </div>
+    );
+  }
 
   const showSizePrompt = !isEditMode && !sizePromptDone;
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit, onInvalid)}
-      className="flex flex-col gap-8"
+      className="flex flex-col gap-6"
       noValidate
     >
       {showSizePrompt ? (
         <HouseholdSizePrompt onApply={handleApplyHouseholdSize} />
       ) : (
         <>
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface-muted px-4 py-3 text-sm">
+            <span className="text-foreground">
+              {tWizard("householdContext", {
+                adults: adultCount,
+                children: childCount,
+              })}
+            </span>
+            {!isEditMode ? (
+              <button
+                type="button"
+                onClick={() => setSizePromptDone(false)}
+                className="font-medium text-primary hover:text-primary-hover focus-ring rounded"
+              >
+                {tWizard("editHouseholdSize")}
+              </button>
+            ) : null}
+          </div>
+
           <PersonQuickNav items={navItems} onSelect={handleNavSelect} />
 
-          <section className="flex flex-col gap-4">
-            <div>
-              <h3 className="text-base font-semibold text-gray-900">
-                {tWizard("sections.headTitle")}
-              </h3>
-              <p className="mt-1 text-sm text-gray-600">
-                {tWizard("sections.headDescription")}
-              </p>
-            </div>
+          <div className="flex flex-col gap-3">
+            <SectionLabel>{tWizard("sections.headTitle")}</SectionLabel>
 
             <PersonAccordionCard
               cardId="adult-card-head"
@@ -445,68 +543,39 @@ export function MembersStep({
               {watchedValues.head?.id ? (
                 <input type="hidden" {...register("head.id")} />
               ) : null}
-              <HouseholdRoleSelect
-                fieldPrefix="head"
-                register={register}
-                errors={errors}
-                isHead
-                onRoleChange={handleHeadRoleChange}
-                demoteBlockedMessage={headDemoteMessage}
-              />
-              <MemberAdultFields
-                fieldPrefix="head"
-                control={control}
-                register={register}
-                watch={watch}
-                errors={errors}
-                onToggleChurch={() => toggleChurch("head")}
-                isChurchExpanded={isChurchExpanded(
-                  "head",
-                  watchedValues.head,
-                  openSection === "head",
-                )}
-              />
+              {renderAdultForm("head", "head", {
+                isHead: true,
+                onRoleChange: handleHeadRoleChange,
+                demoteBlockedMessage: headDemoteMessage,
+                showApplyBranches: true,
+              })}
             </PersonAccordionCard>
-          </section>
+          </div>
 
-          <section className="flex flex-col gap-4 border-t border-gray-200 pt-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">
-                  {tWizard("sections.spouseTitle")}
-                </h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  {tWizard("sections.spouseDescription")}
-                </p>
-              </div>
-              {hasSpouse ? (
-                <button
-                  type="button"
-                  onClick={disableSpouse}
-                  className="text-sm text-red-600 hover:text-red-700"
-                >
-                  {tWizard("sections.removeSpouse")}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={enableSpouse}
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
-                >
-                  {tWizard("sections.addSpouse")}
-                </button>
-              )}
-            </div>
+          <div className="flex flex-col gap-3">
+            <SectionLabel>{tWizard("sections.spouseTitle")}</SectionLabel>
 
             {hasSpouse ? (
               <>
-                <button
-                  type="button"
-                  onClick={applyLastNameToSpouse}
-                  className="self-start rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  {tWizard("shortcuts.sameLastName")}
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={applyLastNameToSpouse}
+                  >
+                    {tWizard("shortcuts.sameLastName")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={disableSpouse}
+                    className="text-status-error hover:bg-status-error/5"
+                  >
+                    {tWizard("sections.removeSpouse")}
+                  </Button>
+                </div>
 
                 <PersonAccordionCard
                   cardId="adult-card-spouse"
@@ -528,44 +597,25 @@ export function MembersStep({
                   {watchedValues.spouse?.id ? (
                     <input type="hidden" {...register("spouse.id")} />
                   ) : null}
-                  <HouseholdRoleSelect
-                    fieldPrefix="spouse"
-                    register={register}
-                    errors={errors}
-                    showPromoteButton
-                    onPromoteToHead={promoteSpouseToHead}
-                    onRoleChange={handleSpouseRoleChange}
-                  />
-                  <MemberAdultFields
-                    fieldPrefix="spouse"
-                    control={control}
-                    register={register}
-                    watch={watch}
-                    errors={errors}
-                    onToggleChurch={() => toggleChurch("spouse")}
-                    isChurchExpanded={isChurchExpanded(
-                      "spouse",
-                      watchedValues.spouse,
-                      openSection === "spouse",
-                    )}
-                  />
+                  {renderAdultForm("spouse", "spouse", {
+                    showPromoteButton: true,
+                    onPromoteToHead: promoteSpouseToHead,
+                    onRoleChange: handleSpouseRoleChange,
+                  })}
                 </PersonAccordionCard>
               </>
-            ) : null}
-          </section>
+            ) : (
+              <Button type="button" variant="ghost" onClick={enableSpouse}>
+                {tWizard("sections.addSpouse")}
+              </Button>
+            )}
+          </div>
 
-          <section className="flex flex-col gap-4 border-t border-gray-200 pt-6">
-            <div>
-              <h3 className="text-base font-semibold text-gray-900">
-                {tWizard("sections.otherAdultsTitle")}
-              </h3>
-              <p className="mt-1 text-sm text-gray-600">
-                {tWizard("sections.otherAdultsDescription")}
-              </p>
-            </div>
+          <div className="flex flex-col gap-3">
+            <SectionLabel>{tWizard("sections.otherAdultsTitle")}</SectionLabel>
 
             {otherAdultFields.length === 0 ? (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted">
                 {tWizard("sections.noOtherAdults")}
               </p>
             ) : (
@@ -573,6 +623,7 @@ export function MembersStep({
                 {otherAdultFields.map((field, index) => {
                   const adult = watchedValues.otherAdults?.[index];
                   const fieldPrefix = `otherAdults.${index}` as const;
+                  const tabKey = fieldPrefix;
 
                   return (
                     <PersonAccordionCard
@@ -606,42 +657,26 @@ export function MembersStep({
                         />
                       ) : null}
                       <div className="flex flex-col gap-4">
-                        <HouseholdRoleSelect
-                          fieldPrefix={fieldPrefix}
-                          register={register}
-                          errors={errors}
-                          showPromoteButton
-                          onPromoteToHead={() => promoteOtherToHead(index)}
-                          onRoleChange={(role) =>
-                            handleOtherAdultRoleChange(index, role)
-                          }
-                        />
-                        <MemberAdultFields
-                          fieldPrefix={fieldPrefix}
-                          control={control}
-                          register={register}
-                          watch={watch}
-                          errors={errors}
-                          onToggleChurch={() => toggleChurch(fieldPrefix)}
-                          isChurchExpanded={isChurchExpanded(
-                            fieldPrefix,
-                            adult,
-                            openSection === "otherAdult" &&
-                              openOtherAdultIndex === index,
-                          )}
-                        />
-                        <button
+                        {renderAdultForm(fieldPrefix, tabKey, {
+                          showPromoteButton: true,
+                          onPromoteToHead: () => promoteOtherToHead(index),
+                          onRoleChange: (role) =>
+                            handleOtherAdultRoleChange(index, role),
+                        })}
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="self-start text-status-error hover:bg-status-error/5"
                           onClick={() => {
                             removeOtherAdult(index);
                             if (openOtherAdultIndex === index) {
                               setOpenOtherAdultIndex(null);
                             }
                           }}
-                          className="self-start text-sm text-red-600 hover:text-red-700"
                         >
                           {tWizard("sections.removeOtherAdult")}
-                        </button>
+                        </Button>
                       </div>
                     </PersonAccordionCard>
                   );
@@ -649,8 +684,9 @@ export function MembersStep({
               </div>
             )}
 
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => {
                 appendOtherAdult({
                   ...defaultMember,
@@ -661,24 +697,16 @@ export function MembersStep({
                 setOpenSection("otherAdult");
                 setOpenOtherAdultIndex(otherAdultFields.length);
               }}
-              className="self-start text-sm font-medium text-indigo-600 hover:text-indigo-700"
             >
               {tWizard("sections.addOtherAdult")}
-            </button>
-          </section>
+            </Button>
+          </div>
 
-          <section className="flex flex-col gap-4 border-t border-gray-200 pt-6">
-            <div>
-              <h3 className="text-base font-semibold text-gray-900">
-                {tWizard("sections.childrenTitle")}
-              </h3>
-              <p className="mt-1 text-sm text-gray-600">
-                {tWizard("sections.childrenDescription")}
-              </p>
-            </div>
+          <div className="flex flex-col gap-3">
+            <SectionLabel>{tWizard("sections.childrenTitle")}</SectionLabel>
 
             {childFields.length === 0 ? (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted">
                 {tWizard("sections.noChildren")}
               </p>
             ) : (
@@ -706,9 +734,7 @@ export function MembersStep({
                           setOpenChildIndex(index);
                         }
                       }}
-                      hasError={Boolean(
-                        errors.children?.[index],
-                      )}
+                      hasError={Boolean(errors.children?.[index])}
                       isComplete={isChildComplete(child)}
                       variant="child"
                     >
@@ -725,18 +751,20 @@ export function MembersStep({
                           watch={watch}
                           errors={errors.children}
                         />
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="self-start text-status-error hover:bg-status-error/5"
                           onClick={() => {
                             removeChild(index);
                             if (openChildIndex === index) {
                               setOpenChildIndex(null);
                             }
                           }}
-                          className="self-start text-sm text-red-600 hover:text-red-700"
                         >
                           {tWizard("sections.removeChild")}
-                        </button>
+                        </Button>
                       </div>
                     </PersonAccordionCard>
                   );
@@ -744,42 +772,30 @@ export function MembersStep({
               </div>
             )}
 
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => {
                 appendChild(defaultChild);
                 setOpenSection("child");
                 setOpenChildIndex(childFields.length);
               }}
-              className="self-start text-sm font-medium text-indigo-600 hover:text-indigo-700"
             >
               {tWizard("sections.addChild")}
-            </button>
-          </section>
+            </Button>
+          </div>
         </>
       )}
 
-      {afterForm}
-
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={isSubmitting}
-          className="rounded-md border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
-        >
-          {tWizard("buttons.back")}
-        </button>
-        {!showSizePrompt ? (
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? tWizard("buttons.saving") : resolvedSubmitLabel}
-          </button>
-        ) : null}
-      </div>
+      <WizardActionBar
+        onBack={onBack}
+        backLabel={tWizard("buttons.back")}
+        submitLabel={resolvedSubmitLabel}
+        submittingLabel={tWizard("buttons.saving")}
+        isSubmitting={isSubmitting}
+        showSubmit={!showSizePrompt}
+        showBack={!showSizePrompt}
+      />
     </form>
   );
 }

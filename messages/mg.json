@@ -9,7 +9,7 @@
       "reference": "Nomery 1:2",
       "text": "Alao isa ny fiangonana, dia ny Zanak'Isiraely rehetra, araka ny fokony sy ny fianakaviany avy, ary araka ny anarany tsirairay,"
     },
-    "intro": "Atombohy amin'ny fampidirana ny mailakao : raha efa voarakitra ny tokantrananao, ho feno automatique ny fampahalalana. Raha tsia, fenoy ny fisoratana amin'ny dingana telo (olon-dehibe sy ankizy ao amin'ny tokantrano)."
+    "intro": "Atombohy amin'ny fampidirana ny mailakao : raha efa voarakitra ny tokantrananao, ho feno automatique ny fampahalalana. Raha tsia, fenoy ny fisoratana amin'ny dingana telo — ny dingana Olona (olon-dehibe 16+ sy ankizy ≤15) dia mety haka 5–10 minitra."
   },
   "language": {
     "label": "Fiteny",
@@ -53,13 +53,21 @@
       "saveChanges": "Tehirizo ny fanovana"
     },
     "shortcuts": {
-      "applyBranches": "Ampiharo ny sampana an'ny mpikambana voalohany ho an'ny rehetra",
-      "sameLastName": "Anarana mitovy amin'ny mpikambana voalohany"
+      "applyBranches": "Ampiharo ny sampan'ny loham-pianakaviana ho an'ny olon-dehibe rehetra",
+      "sameLastName": "Anarana mitovy amin'ny loham-pianakaviana"
+    },
+    "householdContext": "{adults} olon-dehibe, {children} ankizy",
+    "editHouseholdSize": "Hanova ny haben'ny tokantrano",
+    "tabs": {
+      "identity": "Identité",
+      "church": "Fiangonana"
     },
     "unregister": {
       "title": "Esorina amin'ny fanisana ny tokantrano",
       "description": "Mamoaka ny tokantrananao amin'ny fanisana mavitrika nefa mitahiry ny tantara. Tsy afaka manova intsony mandra-piverina ny fitantanana.",
-      "confirm": "Mamoaka ny tokantrananao amin'ny fanisana mavitrika ity hetsika ity. Mitahiry ny angon-drakitra. Afaka misoratra indray ianao.\n\nTohizo ve?",
+      "link": "Esorina amin'ny fanisana ny tokantrano",
+      "confirmDescription": "Mamoaka ny tokantrananao amin'ny fanisana mavitrika ity hetsika ity. Mitahiry ny angon-drakitra. Afaka misoratra indray ianao.",
+      "cancel": "Ajanona",
       "button": "Esorina ity tokantrano ity",
       "buttonLoading": "Fanafoanana…",
       "error": "Tsy afaka namafa ny fisoratana ny tokantrano."
@@ -83,20 +91,15 @@
       "noOtherAdults": "Tsy misy olon-dehibe hafa nampiana.",
       "addOtherAdult": "+ Hanampy olon-dehibe hafa",
       "removeOtherAdult": "Esorina ity olon-dehibe ity",
-      "adultsTitle": "Mpikambana olon-dehibe",
-      "adultsDescription": "Olona mihoatra ny 15 taona (farafahakeliny {minAge} taona). Karatra iray isaky ny mandeha.",
       "childrenTitle": "Ankizy ao amin'ny tokantrano",
-      "childrenDescription": "Ankizy 15 taona sy eo ambaniny (tsy voatery).",
+      "childrenDescription": "Ankizy 15 taona sy eo ambaniny (≤15) (tsy voatery).",
       "noChildren": "Tsy misy ankizy nampiana.",
-      "addAdult": "+ Hanampy mpikambana olon-dehibe",
       "addChild": "+ Hanampy ankizy",
-      "removeAdult": "Esorina ity mpikambana ity",
       "removeChild": "Esorina ity ankizy ity",
       "promoteToHead": "Ataovy loham-pianakaviana"
     },
     "nav": {
       "quickNav": "Fifamoivoana haingana eo amin'ny olona",
-      "adult": "Olon-dehibe {n}",
       "otherAdult": "Olon-dehibe {n}",
       "child": "Ankizy {n}"
     }
@@ -127,6 +130,11 @@
       "emailOptional": "Mailaka (tsy voatery)",
       "phoneOptional": "Telefaonina (tsy voatery)",
       "preferredLanguage": "Fiteny tiana",
+      "languageFr": "Frantsay",
+      "languageMg": "Malagasy",
+      "preferredLanguagePlaceholder": "Mifidiana fiteny",
+      "preferredLanguageFr": "Frantsay",
+      "preferredLanguageMg": "Malagasy",
       "age": "Taona",
       "visibleInDirectory": "Hita ao amin'ny lisitra",
       "notProvided": "Tsy voafaritra",
@@ -149,6 +157,9 @@
       "mpandray": "Mpandray",
       "mpandraySince": "Mpandray hatramin'ny",
       "mpamakyTeny": "Te ho mpamaky teny",
+      "mpiandryHint": "Olona mbola mianatra ho mpitondra fiangonana.",
+      "mpandrayHint": "Olona efa nahazo ny asa pastora.",
+      "mpamakyTenyHint": "Mpamaky teny amin'ny fivavahana.",
       "assignments": "Asa ao amin'ny fiangonana",
       "assignmentsPlaceholder": "Ohatra : Koraly, fiteny tonga, fampianarana…"
     },
@@ -184,7 +195,7 @@
     "householdIdInvalid": "ID tokantrano tsy manan-kery.",
     "minOneAdult": "Ampio farafahakeliny mpikambana olon-dehibe iray.",
     "adultAgeRequired": "Ilaina ny taonan'ny olon-dehibe.",
-    "adultMinAge": "Ny mpikambana dia tsy maintsy mihoatra ny 15 taona (farafahakeliny {min} taona).",
+    "adultMinAge": "Ny olon-dehibe dia tsy maintsy 16 taona mahery (farafahakeliny {min} taona).",
     "baptismDateRequired": "Lazao ny datin'ny batisa.",
     "mpiandryDateRequired": "Lazao hatramin'iza ny mpiandry.",
     "mpandrayDateRequired": "Lazao hatramin'iza ny mpandray.",

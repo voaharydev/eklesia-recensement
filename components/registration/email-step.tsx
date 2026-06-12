@@ -6,6 +6,7 @@ import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { FormField } from "@/components/registration/form-field";
+import { WizardActionBar } from "@/components/registration/wizard-action-bar";
 import { useRegistrationSchemas } from "@/lib/i18n/client";
 import type { EmailLookupFormValues } from "@/lib/validations/registration";
 
@@ -49,7 +50,7 @@ export function EmailStep({
       className="flex flex-col gap-4"
       noValidate
     >
-      <p className="text-sm text-gray-600">{t("intro")}</p>
+      <p className="text-sm text-muted">{t("intro")}</p>
       <Controller
         name="email"
         control={control}
@@ -68,13 +69,12 @@ export function EmailStep({
           />
         )}
       />
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="mt-2 rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {isSubmitting ? t("submitting") : t("submit")}
-      </button>
+      <WizardActionBar
+        submitLabel={t("submit")}
+        submittingLabel={t("submitting")}
+        isSubmitting={isSubmitting}
+        showBack={false}
+      />
     </form>
   );
 }

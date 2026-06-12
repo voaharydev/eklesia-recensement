@@ -3,6 +3,10 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+
 type HouseholdSizePromptProps = {
   onApply: (hasSpouse: boolean, childCount: number) => void;
 };
@@ -14,23 +18,21 @@ export function HouseholdSizePrompt({ onApply }: HouseholdSizePromptProps) {
   const [childCount, setChildCount] = useState(0);
 
   return (
-    <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-      <h3 className="text-sm font-semibold text-blue-900">{t("title")}</h3>
-      <p className="mt-1 text-sm text-blue-800">{t("description")}</p>
+    <div className="rounded-lg border border-blue-200 bg-status-info-bg p-4">
+      <h3 className="text-sm font-semibold text-status-info">{t("title")}</h3>
+      <p className="mt-1 text-sm text-status-info">{t("description")}</p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-800">
-          <input
-            type="checkbox"
+        <label className="flex min-h-[44px] items-center gap-3 text-sm font-medium text-gray-800">
+          <Checkbox
             checked={withSpouse}
             onChange={(e) => setWithSpouse(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
           />
           {tSections("spouseTitle")}
         </label>
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-gray-800">{t("childrenLabel")}</span>
-          <input
+          <Input
             type="number"
             min={0}
             max={20}
@@ -38,18 +40,17 @@ export function HouseholdSizePrompt({ onApply }: HouseholdSizePromptProps) {
             onChange={(e) =>
               setChildCount(Math.max(0, Number.parseInt(e.target.value, 10) || 0))
             }
-            className="rounded-md border border-gray-300 px-3 py-2"
           />
         </label>
       </div>
 
-      <button
+      <Button
         type="button"
         onClick={() => onApply(withSpouse, childCount)}
-        className="mt-4 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+        className="mt-4"
       >
         {t("prepare")}
-      </button>
+      </Button>
     </div>
   );
 }

@@ -11,6 +11,9 @@ import type {
 import { FieldErrorSummary } from "@/components/registration/field-error-summary";
 import { FormField } from "@/components/registration/form-field";
 import { MemberBranchesField } from "@/components/registration/member-branches-field";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/components/ui/cn";
 import { useRegistrationSchemas } from "@/lib/i18n/client";
 import {
   collectFieldErrorMessages,
@@ -25,13 +28,16 @@ type MemberChurchFieldsProps = {
   register: UseFormRegister<HouseholdPersonsFormValues>;
   watch: UseFormWatch<HouseholdPersonsFormValues>;
   errors: FieldErrors<HouseholdPersonsFormValues>;
-  isExpanded: boolean;
-  onToggle: () => void;
 };
+
+function TermHint({ children }: { children: React.ReactNode }) {
+  return <p className="mt-1 text-xs text-muted">{children}</p>;
+}
 
 function CheckboxWithDate({
   enabled,
   flagLabel,
+  hint,
   dateLabel,
   dateError,
   flagRegister,
@@ -39,6 +45,7 @@ function CheckboxWithDate({
 }: {
   enabled: boolean;
   flagLabel: string;
+  hint?: string;
   dateLabel: string;
   dateError?: string;
   flagRegister: ReturnType<UseFormRegister<HouseholdPersonsFormValues>>;
@@ -48,22 +55,22 @@ function CheckboxWithDate({
 
   return (
     <div
-      className={`rounded-md border p-3 ${
+      className={cn(
+        "rounded-md border p-3",
         hasDateError
-          ? "border-red-300 bg-red-50/60"
-          : "border-gray-100 bg-gray-50"
-      }`}
+          ? "border-status-error/40 bg-status-error/5"
+          : "border-border bg-surface-muted",
+      )}
     >
-      <label className="flex items-center gap-2 text-sm font-medium text-gray-800">
-        <input
-          type="checkbox"
-          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-          {...flagRegister}
-        />
-        {flagLabel}
+      <label className="flex min-h-11 items-start gap-3 text-sm font-medium text-foreground">
+        <Checkbox className="mt-0.5" {...flagRegister} />
+        <span>
+          {flagLabel}
+          {hint ? <TermHint>{hint}</TermHint> : null}
+        </span>
       </label>
       {enabled ? (
-        <div className="mt-3">
+        <div className="mt-3 pl-8">
           <FormField
             label={dateLabel}
             type="date"
@@ -82,8 +89,6 @@ export function MemberChurchFields({
   register,
   watch,
   errors,
-  isExpanded,
-  onToggle,
 }: MemberChurchFieldsProps) {
   const t = useTranslations("form.church");
   const { humanizeZodFieldMessage } = useRegistrationSchemas();
@@ -105,110 +110,72 @@ export function MemberChurchFields({
     .filter((m): m is string => Boolean(m))
     .map((message) => humanizeZodFieldMessage(message));
 
-  const hasSectionError = churchOnlyMessages.length > 0;
-
   return (
-    <div
-      className={`border-t pt-4 ${hasSectionError ? "border-red-200" : "border-gray-100"}`}
-    >
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={isExpanded}
-        className="flex w-full items-center justify-between gap-2 text-left"
-      >
-        <span
-          className={`text-sm font-semibold ${hasSectionError ? "text-red-800" : "text-gray-800"}`}
-        >
-          {t("title")}
-          {hasSectionError && !isExpanded ? (
-            <span className="ml-2 text-xs font-medium text-red-600">
-              {t("toFixCount", { count: churchOnlyMessages.length })}
-            </span>
-          ) : null}
-        </span>
-        <span
-          className={`text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-          aria-hidden
-        >
-          ▼
-        </span>
-      </button>
-
-      {!isExpanded && hasSectionError ? (
-        <div className="mt-2">
-          <FieldErrorSummary messages={churchOnlyMessages} />
-        </div>
+    <div className="flex flex-col gap-4">
+      {churchOnlyMessages.length > 0 ? (
+        <FieldErrorSummary messages={churchOnlyMessages} />
       ) : null}
 
-      {isExpanded ? (
-        <div className="mt-4 flex flex-col gap-4">
-          {churchOnlyMessages.length > 0 ? (
-            <FieldErrorSummary messages={churchOnlyMessages} />
-          ) : null}
+      <CheckboxWithDate
+        enabled={isBaptized}
+        flagLabel={t("baptized")}
+        dateLabel={t("baptizedSince")}
+        dateError={memberErrors?.baptized_since?.message}
+        flagRegister={register(`${fieldPrefix}.is_baptized`)}
+        dateRegister={register(`${fieldPrefix}.baptized_since`)}
+      />
 
-          <CheckboxWithDate
-            enabled={isBaptized}
-            flagLabel={t("baptized")}
-            dateLabel={t("baptizedSince")}
-            dateError={memberErrors?.baptized_since?.message}
-            flagRegister={register(`${fieldPrefix}.is_baptized`)}
-            dateRegister={register(`${fieldPrefix}.baptized_since`)}
-          />
+      <CheckboxWithDate
+        enabled={isMpiandry}
+        flagLabel={t("mpiandry")}
+        hint={t("mpiandryHint")}
+        dateLabel={t("mpiandrySince")}
+        dateError={memberErrors?.mpiandry_since?.message}
+        flagRegister={register(`${fieldPrefix}.is_mpiandry`)}
+        dateRegister={register(`${fieldPrefix}.mpiandry_since`)}
+      />
 
-          <CheckboxWithDate
-            enabled={isMpiandry}
-            flagLabel={t("mpiandry")}
-            dateLabel={t("mpiandrySince")}
-            dateError={memberErrors?.mpiandry_since?.message}
-            flagRegister={register(`${fieldPrefix}.is_mpiandry`)}
-            dateRegister={register(`${fieldPrefix}.mpiandry_since`)}
-          />
+      <CheckboxWithDate
+        enabled={isMpandray}
+        flagLabel={t("mpandray")}
+        hint={t("mpandrayHint")}
+        dateLabel={t("mpandraySince")}
+        dateError={memberErrors?.mpandray_since?.message}
+        flagRegister={register(`${fieldPrefix}.is_mpandray`)}
+        dateRegister={register(`${fieldPrefix}.mpandray_since`)}
+      />
 
-          <CheckboxWithDate
-            enabled={isMpandray}
-            flagLabel={t("mpandray")}
-            dateLabel={t("mpandraySince")}
-            dateError={memberErrors?.mpandray_since?.message}
-            flagRegister={register(`${fieldPrefix}.is_mpandray`)}
-            dateRegister={register(`${fieldPrefix}.mpandray_since`)}
-          />
+      <div className="rounded-md border border-border bg-surface-muted p-3">
+        <label className="flex min-h-11 items-start gap-3 text-sm font-medium text-foreground">
+          <Checkbox className="mt-0.5" {...register(`${fieldPrefix}.is_mpamaky_teny`)} />
+          <span>
+            {t("mpamakyTeny")}
+            <TermHint>{t("mpamakyTenyHint")}</TermHint>
+          </span>
+        </label>
+      </div>
 
-          <div className="rounded-md border border-gray-100 bg-gray-50 p-3">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-800">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                {...register(`${fieldPrefix}.is_mpamaky_teny`)}
-              />
-              {t("mpamakyTeny")}
-            </label>
-          </div>
+      <MemberBranchesField
+        fieldPrefix={fieldPrefix}
+        control={control}
+        register={register}
+        errors={errors}
+      />
 
-          <MemberBranchesField
-            fieldPrefix={fieldPrefix}
-            control={control}
-            register={register}
-            errors={errors}
-          />
-
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor={`${fieldPrefix}.church_assignments`}
-              className="text-sm font-medium text-gray-700"
-            >
-              {t("assignments")}
-            </label>
-            <textarea
-              id={`${fieldPrefix}.church_assignments`}
-              rows={3}
-              placeholder={t("assignmentsPlaceholder")}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              {...register(`${fieldPrefix}.church_assignments`)}
-            />
-          </div>
-        </div>
-      ) : null}
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor={`${fieldPrefix}.church_assignments`}
+          className="text-sm font-medium text-foreground"
+        >
+          {t("assignments")}
+        </label>
+        <Textarea
+          id={`${fieldPrefix}.church_assignments`}
+          rows={3}
+          placeholder={t("assignmentsPlaceholder")}
+          {...register(`${fieldPrefix}.church_assignments`)}
+        />
+      </div>
     </div>
   );
 }

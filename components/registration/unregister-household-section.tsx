@@ -3,65 +3,103 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+
 type UnregisterHouseholdSectionProps = {
   onUnregister: () => Promise<void>;
   disabled?: boolean;
+  variant?: "section" | "link";
 };
 
 export function UnregisterHouseholdSection({
   onUnregister,
   disabled = false,
+  variant = "section",
 }: UnregisterHouseholdSectionProps) {
   const t = useTranslations("wizard.unregister");
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [isUnregistering, setIsUnregistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleClick() {
+  async function handleConfirm() {
     setError(null);
-
-    const confirmed = window.confirm(t("confirm"));
-
-    if (!confirmed) return;
-
     setIsUnregistering(true);
     try {
       await onUnregister();
+      setDialogOpen(false);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : t("error"),
-      );
+      setError(err instanceof Error ? err.message : t("error"));
     } finally {
       setIsUnregistering(false);
     }
   }
 
-  return (
-    <section
-      className="mt-8 border-t border-gray-200 pt-6"
-      aria-labelledby="unregister-household-heading"
+  const dialog = (
+    <Dialog
+      open={dialogOpen}
+      onOpenChange={setDialogOpen}
+      title={t("title")}
+      description={t("confirmDescription")}
+      confirmLabel={isUnregistering ? t("buttonLoading") : t("button")}
+      cancelLabel={t("cancel")}
+      onConfirm={handleConfirm}
+      confirmVariant="danger"
+      isConfirming={isUnregistering}
     >
-      <h3
-        id="unregister-household-heading"
-        className="text-sm font-semibold text-gray-900"
-      >
-        {t("title")}
-      </h3>
-      <p className="mt-2 text-sm text-gray-600">{t("description")}</p>
-
       {error ? (
-        <p className="mt-3 text-sm text-red-600" role="alert">
+        <p className="text-sm text-status-error" role="alert">
           {error}
         </p>
       ) : null}
+    </Dialog>
+  );
 
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={disabled || isUnregistering}
-        className="mt-4 rounded-md border border-red-300 bg-white px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+  if (variant === "link") {
+    return (
+      <>
+        <div className="mt-6 border-t border-border pt-4 text-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setDialogOpen(true)}
+            disabled={disabled || isUnregistering}
+            className="text-gray-500 hover:text-red-700"
+          >
+            {t("link")}
+          </Button>
+        </div>
+        {dialog}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <section
+        className="mt-8 border-t border-border pt-6"
+        aria-labelledby="unregister-household-heading"
       >
-        {isUnregistering ? t("buttonLoading") : t("button")}
-      </button>
-    </section>
+        <h3
+          id="unregister-household-heading"
+          className="text-sm font-semibold text-gray-900"
+        >
+          {t("title")}
+        </h3>
+        <p className="mt-2 text-sm text-gray-600">{t("description")}</p>
+
+        <Button
+          type="button"
+          variant="danger"
+          onClick={() => setDialogOpen(true)}
+          disabled={disabled || isUnregistering}
+          className="mt-4"
+        >
+          {isUnregistering ? t("buttonLoading") : t("button")}
+        </Button>
+      </section>
+      {dialog}
+    </>
   );
 }

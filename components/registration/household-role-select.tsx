@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
+import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import {
   ADULT_FORM_HOUSEHOLD_ROLES,
   type AdultFormHouseholdRole,
@@ -45,13 +47,14 @@ export function HouseholdRoleSelect({
   const tWizard = useTranslations("wizard.sections");
   const memberErrors = getMemberFieldErrors(errors, fieldPrefix);
   const roleField = `${fieldPrefix}.household_role` as const;
+  const roleError = memberErrors?.household_role?.message;
 
   return (
     <div className="flex flex-col gap-2">
       <label className="flex flex-col gap-1.5 text-sm">
-        <span className="font-medium text-gray-800">{tForm("householdRole")}</span>
-        <select
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+        <span className="font-medium text-foreground">{tForm("householdRole")}</span>
+        <Select
+          hasError={Boolean(roleError)}
           {...register(roleField, {
             onChange: (event) => {
               onRoleChange?.(event.target.value as AdultFormHouseholdRole);
@@ -63,27 +66,23 @@ export function HouseholdRoleSelect({
               {tForm(ROLE_LABEL_KEYS[role])}
             </option>
           ))}
-        </select>
-        {memberErrors?.household_role?.message ? (
-          <span className="text-sm text-red-600" role="alert">
-            {memberErrors.household_role.message}
+        </Select>
+        {roleError ? (
+          <span className="text-sm text-status-error" role="alert">
+            {roleError}
           </span>
         ) : null}
         {demoteBlockedMessage ? (
-          <span className="text-sm text-amber-700" role="status">
+          <span className="text-sm text-status-warning" role="status">
             {demoteBlockedMessage}
           </span>
         ) : null}
       </label>
 
       {showPromoteButton && !isHead ? (
-        <button
-          type="button"
-          onClick={onPromoteToHead}
-          className="self-start text-sm font-medium text-indigo-600 hover:text-indigo-700"
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={onPromoteToHead}>
           {tWizard("promoteToHead")}
-        </button>
+        </Button>
       ) : null}
     </div>
   );

@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 
 import { ExcelImportForm } from "@/components/admin/excel-import-form";
+import { Card } from "@/components/ui/card";
 import { Link } from "@/i18n/routing";
 import type { Locale } from "@/i18n/routing";
 
@@ -16,21 +17,21 @@ export default async function AdminImportPage({
   const t = await getTranslations("admin.import");
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-12 font-[family-name:var(--font-geist-sans)]">
-      <main className="mx-auto max-w-xl">
-        <header className="mb-8">
+    <div className="min-h-screen bg-gray-50 px-4 py-12">
+      <main className="mx-auto max-w-2xl">
+        <header className="mb-6">
           <Link
             href="/"
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+            className="text-sm font-medium text-primary hover:text-primary-hover"
           >
             {t("backToRegistration")}
           </Link>
           <h1 className="mt-4 text-2xl font-bold text-gray-900">{t("title")}</h1>
         </header>
 
-        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <Card>
           <ExcelImportForm />
-        </section>
+        </Card>
       </main>
     </div>
   );

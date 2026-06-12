@@ -16,6 +16,8 @@ import { EmailStep } from "@/components/registration/email-step";
 import { HouseholdStep } from "@/components/registration/household-step";
 import { MembersStep } from "@/components/registration/members-step";
 import { UnregisterHouseholdSection } from "@/components/registration/unregister-household-section";
+import { Alert } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
 import type { Locale } from "@/i18n/routing";
 import { householdToFormValues } from "@/lib/registration/mappers";
 import { isSpouseFilled } from "@/lib/registration/spouse";
@@ -79,6 +81,11 @@ type RegistrationWizardProps = {
   initialEmail?: string;
 };
 
+type BannerMessage = {
+  variant: "error" | "info" | "success";
+  text: string;
+};
+
 export function RegistrationWizard({
   locale,
   initialEmail = "",
@@ -98,6 +105,7 @@ export function RegistrationWizard({
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [maxReachedStep, setMaxReachedStep] = useState<Step>(0);
 
   const stepLabels = useMemo(
     () => [
@@ -112,8 +120,13 @@ export function RegistrationWizard({
     setWizardStep(step);
   }, [step, setWizardStep]);
 
+  useEffect(() => {
+    setMaxReachedStep((prev) => (step > prev ? step : prev));
+  }, [step]);
+
   function resetWizard() {
     setStep(0);
+    setMaxReachedStep(0);
     setMode("create");
     setLookupEmail("");
     setHouseholdId(null);
@@ -121,6 +134,12 @@ export function RegistrationWizard({
     setMembersDefaults(defaultHouseholdPersons);
     setLookupNotice(null);
     setServerError(null);
+  }
+
+  function handleStepClick(targetStep: Step) {
+    if (targetStep > maxReachedStep || targetStep === step) return;
+    setServerError(null);
+    setStep(targetStep);
   }
 
   async function handleEmailSubmit(values: EmailLookupFormValues) {
@@ -171,6 +190,7 @@ export function RegistrationWizard({
     }
 
     setStep(1);
+    setMaxReachedStep(1);
   }
 
   async function handleHouseholdSubmit(values: HouseholdFormValues) {
@@ -191,6 +211,7 @@ export function RegistrationWizard({
 
       setHouseholdDefaults(householdToFormValues(result.data));
       setStep(2);
+      setMaxReachedStep(2);
       return;
     }
 
@@ -205,6 +226,7 @@ export function RegistrationWizard({
     setHouseholdId(result.data.id);
     setHouseholdDefaults(values);
     setStep(2);
+    setMaxReachedStep(2);
   }
 
   async function handleMembersSubmit(values: HouseholdPersonsFormValues) {
@@ -280,77 +302,88 @@ export function RegistrationWizard({
     resetWizard();
   }
 
-  const unregisterSection =
-    mode === "edit" && householdId && lookupEmail ? (
-      <UnregisterHouseholdSection
-        onUnregister={handleUnregister}
-        disabled={isSubmitting}
-      />
-    ) : null;
-
   const stepLookupNotice = getStepLookupNotice(step, mode, lookupNotice, t);
+
+  const bannerMessage: BannerMessage | null = serverError
+    ? { variant: "error", text: serverError }
+    : successMessage
+      ? { variant: "success", text: successMessage }
+      : stepLookupNotice
+        ? { variant: "info", text: stepLookupNotice }
+        : null;
+
+  const showUnregister =
+    mode === "edit" && householdId && lookupEmail && step > 0;
 
   return (
     <div
-      className={`w-full ${step === 2 ? "max-w-3xl" : "max-w-lg"}`}
+      className={cn(
+        "w-full transition-[max-width] duration-200",
+        step === 2 ? "max-w-3xl" : "max-w-2xl",
+      )}
     >
-      <nav aria-label={t("progress")} className="mb-8">
-        <ol className="flex flex-wrap items-center gap-3 text-sm sm:gap-4">
-          {stepLabels.map(({ n, label }, index) => (
-            <li key={n} className="flex items-center gap-3">
-              {index > 0 ? (
-                <span className="text-gray-300" aria-hidden>
-                  →
-                </span>
-              ) : null}
-              <span
-                className={
-                  step === n
-                    ? "font-semibold text-indigo-600"
-                    : "text-gray-500"
-                }
-              >
-                <span
-                  className={`mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs ${
-                    step === n
-                      ? "bg-indigo-600 text-white"
-                      : "bg-gray-200 text-gray-600"
-                  }`}
-                >
-                  {n + 1}
-                </span>
-                {label}
-              </span>
-            </li>
-          ))}
+      <nav aria-label={t("progress")} className="mb-6">
+        <ol className="flex flex-wrap items-center gap-2 text-sm sm:gap-3">
+          {stepLabels.map(({ n, label }, index) => {
+            const isCurrent = step === n;
+            const isCompleted = n < step;
+            const isClickable = n <= maxReachedStep && !isCurrent;
+
+            return (
+              <li key={n} className="flex items-center gap-2 sm:gap-3">
+                {index > 0 ? (
+                  <span className="text-gray-300" aria-hidden>
+                    →
+                  </span>
+                ) : null}
+                {isClickable ? (
+                  <button
+                    type="button"
+                    onClick={() => handleStepClick(n)}
+                    className="flex items-center gap-2 rounded-md text-gray-600 transition-colors hover:text-primary focus-ring"
+                  >
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-xs font-medium text-indigo-700">
+                      {n + 1}
+                    </span>
+                    <span className="font-medium">{label}</span>
+                  </button>
+                ) : (
+                  <span
+                    className={cn(
+                      "flex items-center gap-2",
+                      isCurrent
+                        ? "font-semibold text-primary"
+                        : isCompleted
+                          ? "text-gray-600"
+                          : "text-gray-400",
+                    )}
+                    aria-current={isCurrent ? "step" : undefined}
+                  >
+                    <span
+                      className={cn(
+                        "inline-flex h-7 w-7 items-center justify-center rounded-full text-xs",
+                        isCurrent
+                          ? "bg-primary text-primary-foreground"
+                          : isCompleted
+                            ? "bg-indigo-100 text-indigo-700"
+                            : "bg-gray-200 text-gray-500",
+                      )}
+                    >
+                      {n + 1}
+                    </span>
+                    <span>{label}</span>
+                  </span>
+                )}
+              </li>
+            );
+          })}
         </ol>
       </nav>
 
-      {serverError ? (
-        <div
-          className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-          role="alert"
-        >
-          {serverError}
-        </div>
-      ) : null}
-
-      {stepLookupNotice ? (
-        <div
-          className="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900"
-          role="status"
-        >
-          {stepLookupNotice}
-        </div>
-      ) : null}
-
-      {successMessage ? (
-        <div
-          className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
-          role="status"
-        >
-          {successMessage}
-        </div>
+      {bannerMessage ? (
+        <Alert variant={bannerMessage.variant} className="mb-4">
+          {bannerMessage.text}
+        </Alert>
       ) : null}
 
       {step === 0 ? (
@@ -368,7 +401,6 @@ export function RegistrationWizard({
           onSubmit={handleHouseholdSubmit}
           onBack={handleBackFromHousehold}
           isSubmitting={isSubmitting}
-          afterForm={unregisterSection}
         />
       ) : null}
 
@@ -383,7 +415,14 @@ export function RegistrationWizard({
           onSubmit={handleMembersSubmit}
           onBack={handleBackFromMembers}
           isSubmitting={isSubmitting}
-          afterForm={unregisterSection}
+        />
+      ) : null}
+
+      {showUnregister ? (
+        <UnregisterHouseholdSection
+          variant="link"
+          onUnregister={handleUnregister}
+          disabled={isSubmitting}
         />
       ) : null}
     </div>

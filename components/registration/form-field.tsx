@@ -2,6 +2,8 @@
 
 import { forwardRef, type InputHTMLAttributes } from "react";
 
+import { Input } from "@/components/ui/input";
+import { cn } from "@/components/ui/cn";
 import { useRegistrationSchemas } from "@/lib/i18n/client";
 
 type FormFieldProps = {
@@ -20,24 +22,24 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor={fieldId}
-          className={`text-sm font-medium ${hasError ? "text-red-800" : "text-gray-700"}`}
+          className={cn(
+            "text-sm font-medium",
+            hasError ? "text-status-error" : "text-foreground",
+          )}
         >
           {label}
         </label>
-        <input
+        <Input
           ref={ref}
           id={fieldId}
           name={name}
           aria-invalid={hasError}
-          className={`rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 ${
-            hasError
-              ? "border-red-500 bg-red-50/50 focus:border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-          } ${className ?? ""}`}
+          hasError={hasError}
+          className={className}
           {...props}
         />
         {displayError ? (
-          <p className="text-sm font-medium text-red-600" role="alert">
+          <p className="text-sm font-medium text-status-error" role="alert">
             {displayError}
           </p>
         ) : null}

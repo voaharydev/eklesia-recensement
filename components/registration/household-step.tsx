@@ -2,10 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, type ReactNode } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
 import { FormField } from "@/components/registration/form-field";
+import { WizardActionBar } from "@/components/registration/wizard-action-bar";
 import { useRegistrationSchemas } from "@/lib/i18n/client";
 import type { HouseholdFormValues } from "@/lib/validations/registration";
 
@@ -14,7 +15,6 @@ type HouseholdStepProps = {
   onSubmit: (values: HouseholdFormValues) => Promise<void>;
   onBack: () => void;
   isSubmitting: boolean;
-  afterForm?: ReactNode;
 };
 
 export function HouseholdStep({
@@ -22,7 +22,6 @@ export function HouseholdStep({
   onSubmit,
   onBack,
   isSubmitting,
-  afterForm,
 }: HouseholdStepProps) {
   const tForm = useTranslations("form.household");
   const tWizard = useTranslations("wizard.buttons");
@@ -78,25 +77,13 @@ export function HouseholdStep({
         {...register("arrival_date_fjkm")}
       />
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={isSubmitting}
-          className="rounded-md border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
-        >
-          {tWizard("back")}
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSubmitting ? tWizard("saving") : tWizard("continue")}
-        </button>
-      </div>
-
-      {afterForm}
+      <WizardActionBar
+        onBack={onBack}
+        backLabel={tWizard("back")}
+        submitLabel={tWizard("continue")}
+        submittingLabel={tWizard("saving")}
+        isSubmitting={isSubmitting}
+      />
     </form>
   );
 }

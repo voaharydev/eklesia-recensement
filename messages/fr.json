@@ -9,7 +9,7 @@
       "reference": "Nombres 1:2",
       "text": "Faites le dénombrement de toute l'assemblée des enfants d'Israël, selon leurs familles, selon les maisons de leurs pères, en comptant par tête les noms de tous les mâles."
     },
-    "intro": "Commencez par saisir votre courriel : si votre foyer est déjà enregistré, vos informations seront préremplies. Sinon, complétez l'inscription en trois étapes (membres adultes et enfants du foyer)."
+    "intro": "Commencez par saisir votre courriel : si votre foyer est déjà enregistré, vos informations seront préremplies. Sinon, complétez l'inscription en trois étapes. L'étape Personnes prend environ 5 à 15 minutes selon la taille du foyer."
   },
   "language": {
     "label": "Langue",
@@ -53,13 +53,25 @@
       "saveChanges": "Enregistrer les modifications"
     },
     "shortcuts": {
-      "applyBranches": "Appliquer les branches du 1er membre à tous",
-      "sameLastName": "Même nom de famille que le 1er membre"
+      "applyBranches": "Appliquer les branches du chef à tous les adultes",
+      "sameLastName": "Même nom de famille que le chef"
+    },
+    "householdContext": "{adults} adulte(s), {children} enfant(s)",
+    "editHouseholdSize": "Modifier la taille du foyer",
+    "context": {
+      "householdSize": "{adults} adulte(s), {children} enfant(s)",
+      "editSize": "Modifier la taille du foyer"
+    },
+    "tabs": {
+      "identity": "Identité",
+      "church": "Église"
     },
     "unregister": {
       "title": "Désinscrire le foyer",
       "description": "Retire votre foyer du recensement actif sans supprimer l'historique en base. Vous ne pourrez plus le modifier tant qu'il n'est pas réactivé par l'administration.",
-      "confirm": "Cette action retire votre foyer du recensement actif. Vos données restent archivées en base. Vous pourrez vous réinscrire plus tard avec le même courriel.\n\nContinuer ?",
+      "link": "Désinscrire le foyer",
+      "confirmDescription": "Cette action retire votre foyer du recensement actif. Vos données restent archivées en base. Vous pourrez vous réinscrire plus tard avec le même courriel.",
+      "cancel": "Annuler",
       "button": "Désinscrire ce foyer",
       "buttonLoading": "Désinscription…",
       "error": "Impossible de désinscrire ce foyer."
@@ -83,20 +95,15 @@
       "noOtherAdults": "Aucun autre adulte ajouté.",
       "addOtherAdult": "+ Ajouter un autre adulte",
       "removeOtherAdult": "Retirer cet adulte",
-      "adultsTitle": "Membres adultes",
-      "adultsDescription": "Personnes de plus de 15 ans ({minAge} ans minimum). Une carte à la fois pour faciliter la saisie.",
       "childrenTitle": "Enfants du foyer",
-      "childrenDescription": "Enfants de 15 ans et moins rattachés au foyer (facultatif).",
+      "childrenDescription": "Enfants de 15 ans et moins (≤15) rattachés au foyer (facultatif).",
       "noChildren": "Aucun enfant ajouté.",
-      "addAdult": "+ Ajouter un membre adulte",
       "addChild": "+ Ajouter un enfant",
-      "removeAdult": "Retirer ce membre",
       "removeChild": "Retirer cet enfant",
       "promoteToHead": "Définir comme chef de famille"
     },
     "nav": {
       "quickNav": "Navigation rapide entre les personnes",
-      "adult": "Adulte {n}",
       "otherAdult": "Adulte {n}",
       "child": "Enfant {n}"
     }
@@ -127,6 +134,12 @@
       "emailOptional": "E-mail (optionnel)",
       "phoneOptional": "Téléphone (optionnel)",
       "preferredLanguage": "Langue préférée",
+      "languageFr": "Français",
+      "languageMg": "Malagasy",
+      "tabIdentity": "Identité",
+      "preferredLanguagePlaceholder": "Choisir une langue",
+      "preferredLanguageFr": "Français",
+      "preferredLanguageMg": "Malagasy",
       "age": "Âge",
       "visibleInDirectory": "Visible dans l'annuaire",
       "notProvided": "Non renseigné",
@@ -141,14 +154,18 @@
     },
     "church": {
       "title": "Parcours ecclésial",
+      "tabLabel": "Église",
       "toFixCount": "({count} à corriger)",
       "baptized": "Baptisé(e)",
       "baptizedSince": "Baptisé(e) depuis",
       "mpiandry": "Mpiandry",
+      "mpiandryHint": "Membre engagé dans la vie de l'église (cours biblique, service…).",
       "mpiandrySince": "Mpiandry depuis",
       "mpandray": "Mpandray",
+      "mpandrayHint": "Responsable d'une branche ou d'un ministère.",
       "mpandraySince": "Mpandray depuis",
       "mpamakyTeny": "Souhaite être mpamaky teny",
+      "mpamakyTenyHint": "Lecture publique de la Bible lors des cultes.",
       "assignments": "Affectations dans l'église",
       "assignmentsPlaceholder": "Ex. Chorale, accueil, enseignement…"
     },
@@ -184,7 +201,7 @@
     "householdIdInvalid": "Identifiant de foyer invalide.",
     "minOneAdult": "Ajoutez au moins un membre adulte au foyer.",
     "adultAgeRequired": "L'âge est requis pour un membre adulte.",
-    "adultMinAge": "Un membre doit avoir plus de 15 ans (minimum {min} ans).",
+    "adultMinAge": "Un membre adulte doit avoir 16 ans ou plus (minimum {min} ans).",
     "baptismDateRequired": "Indiquez la date de baptême.",
     "mpiandryDateRequired": "Indiquez depuis quand cette personne est mpiandry.",
     "mpandrayDateRequired": "Indiquez depuis quand cette personne est mpandray.",

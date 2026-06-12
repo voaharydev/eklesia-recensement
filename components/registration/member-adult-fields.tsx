@@ -1,16 +1,17 @@
 "use client";
 
+import { Controller } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import type {
   Control,
   FieldErrors,
   UseFormRegister,
-  UseFormWatch,
 } from "react-hook-form";
 
 import { FieldErrorSummary } from "@/components/registration/field-error-summary";
 import { FormField } from "@/components/registration/form-field";
-import { MemberChurchFields } from "@/components/registration/member-church-fields";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select } from "@/components/ui/select";
 import { MIN_ADULT_AGE } from "@/lib/constants/ages";
 import {
   adultHasErrors,
@@ -24,23 +25,23 @@ type MemberAdultFieldsProps = {
   fieldPrefix: MemberFieldPrefix;
   control: Control<HouseholdPersonsFormValues>;
   register: UseFormRegister<HouseholdPersonsFormValues>;
-  watch: UseFormWatch<HouseholdPersonsFormValues>;
   errors: FieldErrors<HouseholdPersonsFormValues>;
-  onToggleChurch: () => void;
-  isChurchExpanded: boolean;
 };
+
+const LANGUAGE_OPTIONS = [
+  { value: "fr", labelKey: "preferredLanguageFr" as const },
+  { value: "mg", labelKey: "preferredLanguageMg" as const },
+] as const;
 
 export function MemberAdultFields({
   fieldPrefix,
   control,
   register,
-  watch,
   errors,
-  onToggleChurch,
-  isChurchExpanded,
 }: MemberAdultFieldsProps) {
   const tForm = useTranslations("form.person");
   const memberErrors = getMemberFieldErrors(errors, fieldPrefix);
+  const languageError = memberErrors?.preferred_language?.message;
 
   return (
     <div className="flex flex-col gap-4">
@@ -80,11 +81,43 @@ export function MemberAdultFields({
         error={memberErrors?.phone?.message}
         {...register(`${fieldPrefix}.phone`)}
       />
-      <FormField
-        label={tForm("preferredLanguage")}
-        error={memberErrors?.preferred_language?.message}
-        {...register(`${fieldPrefix}.preferred_language`)}
-      />
+
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor={`${fieldPrefix}.preferred_language`}
+          className="text-sm font-medium text-foreground"
+        >
+          {tForm("preferredLanguage")}
+        </label>
+        <Controller
+          name={`${fieldPrefix}.preferred_language`}
+          control={control}
+          render={({ field }) => (
+            <Select
+              id={`${fieldPrefix}.preferred_language`}
+              hasError={Boolean(languageError)}
+              value={field.value ?? ""}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              name={field.name}
+              ref={field.ref}
+            >
+              <option value="">{tForm("preferredLanguagePlaceholder")}</option>
+              {LANGUAGE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {tForm(opt.labelKey)}
+                </option>
+              ))}
+            </Select>
+          )}
+        />
+        {languageError ? (
+          <p className="text-sm font-medium text-status-error" role="alert">
+            {languageError}
+          </p>
+        ) : null}
+      </div>
+
       <FormField
         label={tForm("age")}
         type="number"
@@ -95,24 +128,10 @@ export function MemberAdultFields({
         {...register(`${fieldPrefix}.age`)}
       />
 
-      <label className="flex items-center gap-2 text-sm text-gray-700">
-        <input
-          type="checkbox"
-          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-          {...register(`${fieldPrefix}.is_visible_in_directory`)}
-        />
+      <label className="flex min-h-11 items-center gap-3 text-sm text-foreground">
+        <Checkbox {...register(`${fieldPrefix}.is_visible_in_directory`)} />
         {tForm("visibleInDirectory")}
       </label>
-
-      <MemberChurchFields
-        fieldPrefix={fieldPrefix}
-        control={control}
-        register={register}
-        watch={watch}
-        errors={errors}
-        isExpanded={isChurchExpanded}
-        onToggle={onToggleChurch}
-      />
     </div>
   );
 }

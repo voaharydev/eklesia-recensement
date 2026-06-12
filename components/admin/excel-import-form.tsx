@@ -4,6 +4,10 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { importExcelFromUpload } from "@/app/actions/import-excel";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import type { ImportPersistResult } from "@/lib/import/types";
 
 export function ExcelImportForm() {
@@ -65,11 +69,10 @@ export function ExcelImportForm() {
 
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-gray-800">{t("tokenLabel")}</span>
-        <input
+        <Input
           type="password"
           value={token}
           onChange={(e) => setToken(e.target.value)}
-          className="rounded-md border border-gray-300 px-3 py-2"
           autoComplete="off"
           required
         />
@@ -81,57 +84,45 @@ export function ExcelImportForm() {
           type="file"
           accept=".xlsx,.xls"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="text-sm text-gray-700"
+          className="min-h-[44px] text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground"
           required
         />
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-gray-800">{t("sheetLabel")}</span>
-        <input
+        <Input
           type="text"
           value={sheetName}
           onChange={(e) => setSheetName(e.target.value)}
           placeholder={t("sheetPlaceholder")}
-          className="rounded-md border border-gray-300 px-3 py-2"
         />
       </label>
 
-      <label className="flex items-center gap-2 text-sm text-gray-700">
-        <input
-          type="checkbox"
+      <label className="flex min-h-[44px] items-center gap-3 text-sm text-gray-700">
+        <Checkbox
           checked={dryRun}
           onChange={(e) => setDryRun(e.target.checked)}
-          className="h-4 w-4 rounded border-gray-300 text-indigo-600"
         />
         {t("dryRun")}
       </label>
 
-      <label className="flex items-start gap-2 text-sm text-gray-700">
-        <input
-          type="checkbox"
+      <label className="flex min-h-[44px] items-start gap-3 text-sm text-gray-700">
+        <Checkbox
           checked={confirmReplace}
           onChange={(e) => setConfirmReplace(e.target.checked)}
           disabled={dryRun}
-          className="mt-0.5 h-4 w-4 rounded border-gray-300 text-indigo-600"
+          className="mt-0.5"
         />
         <span>{t("confirmReplace")}</span>
       </label>
 
       {serverError ? (
-        <div
-          className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-          role="alert"
-        >
-          {serverError}
-        </div>
+        <Alert variant="error">{serverError}</Alert>
       ) : null}
 
       {report ? (
-        <div
-          className="rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800"
-          role="status"
-        >
+        <Alert variant="info">
           <p className="font-medium">{t("reportTitle")}</p>
           <ul className="mt-2 list-inside list-disc space-y-1">
             <li>
@@ -164,7 +155,7 @@ export function ExcelImportForm() {
           {report.errors.length > 0 ? (
             <div className="mt-3">
               <p className="font-medium text-red-800">{t("errorsTitle")}</p>
-              <ul className="mt-1 max-h-48 overflow-y-auto list-inside list-disc text-red-900">
+              <ul className="mt-1 max-h-48 list-inside list-disc overflow-y-auto text-red-900">
                 {report.errors.map((e) => (
                   <li key={`${e.excelRowNumber}-${e.message}`}>
                     {t("errorLine", {
@@ -176,16 +167,12 @@ export function ExcelImportForm() {
               </ul>
             </div>
           ) : null}
-        </div>
+        </Alert>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="self-start rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
-      >
+      <Button type="submit" disabled={isSubmitting} className="self-start">
         {isSubmitting ? t("submitting") : t("submit")}
-      </button>
+      </Button>
     </form>
   );
 }
