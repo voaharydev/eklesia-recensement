@@ -9,6 +9,10 @@ import {
   householdToFormValues,
   personsToHouseholdPersonsFormValues,
 } from "@/lib/registration/mappers";
+import {
+  buildPersonTimestampsMap,
+  householdToTimestamps,
+} from "@/lib/registration/person-timestamps";
 
 type AdminHouseholdEditPageProps = {
   params: { id: string };
@@ -50,6 +54,8 @@ export default async function AdminHouseholdEditPage({
         householdId={household.id}
         householdDefaults={householdToFormValues(household)}
         membersDefaults={personsToHouseholdPersonsFormValues(members)}
+        householdTimestamps={householdToTimestamps(household)}
+        personTimestamps={buildPersonTimestampsMap(members)}
       />
     </div>
   );

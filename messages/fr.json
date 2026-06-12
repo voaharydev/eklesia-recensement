@@ -124,7 +124,9 @@
       "landlinePhone": "Téléphone fixe (optionnel)",
       "landlinePhonePlaceholder": "Ex. 418 123-4567",
       "arrivalDateFjkm": "Date d'arrivée à la FJKM Québec (optionnel)",
-      "arrivalDateFjkmPlaceholder": "Ex. Mai 2018"
+      "arrivalDateFjkmPlaceholder": "Ex. Mai 2018",
+      "createdAt": "Créé le",
+      "updatedAt": "Dernière modification"
     },
     "person": {
       "civility": "Civilité (optionnel)",
@@ -150,7 +152,9 @@
       "householdRoleChef": "Chef de famille",
       "householdRoleSpouse": "Conjoint(e)",
       "householdRoleOther": "Autre adulte",
-      "cannotDemoteHead": "Désignez d'abord un autre adulte comme chef de famille."
+      "cannotDemoteHead": "Désignez d'abord un autre adulte comme chef de famille.",
+      "createdAt": "Membre créé le",
+      "updatedAt": "Membre modifié le"
     },
     "church": {
       "title": "Parcours ecclésial",
@@ -311,7 +315,10 @@
         "phone": "Tél.",
         "spiritual": "Parcours",
         "assignments": "Affectations",
-        "householdUpdated": "MAJ foyer"
+        "householdCreated": "Créé foyer",
+        "householdUpdated": "MAJ foyer",
+        "memberCreated": "Créé membre",
+        "memberUpdated": "MAJ membre"
       },
       "spiritual": {
         "baptized": "Baptisé",
@@ -340,6 +347,10 @@
       "address": "Adresse",
       "phone": "Téléphone",
       "arrivalFjkm": "Arrivée FJKM",
+      "createdAt": "Créé le",
+      "updatedAt": "Dernière modification",
+      "memberCreatedAt": "Membre créé le",
+      "memberUpdatedAt": "Membre modifié le",
       "unregisteredAt": "Désinscrit le",
       "membersTitle": "Membres du foyer",
       "membersEmpty": "Aucun membre enregistré.",

@@ -71,6 +71,8 @@ export interface Database {
           church_assignments: string | null;
           civility: string | null;
           role: string;
+          created_at: string;
+          updated_at: string;
         };
         Insert: {
           id?: string;
@@ -94,6 +96,8 @@ export interface Database {
           church_assignments?: string | null;
           civility?: string | null;
           role: string;
+          created_at?: string;
+          updated_at?: string;
         };
         Update: {
           id?: string;
@@ -117,6 +121,8 @@ export interface Database {
           church_assignments?: string | null;
           civility?: string | null;
           role?: string;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [
           {

@@ -3,6 +3,10 @@ import * as XLSX from "xlsx";
 
 import type { HouseholdsExportDataset } from "@/lib/admin/types";
 import { getBranchLabel } from "@/lib/constants/branches";
+import {
+  formatDateShort,
+  formatDateTimeShort,
+} from "@/lib/format/datetime";
 import type { Household, Person } from "@/types/database";
 
 export type HouseholdExportRow = {
@@ -39,6 +43,8 @@ export type MemberExportRow = {
   "Mpamaky teny": string;
   Branches: string;
   Affectations: string;
+  "Créé le": string;
+  "MAJ membre": string;
 };
 
 const YES = "Oui";
@@ -46,23 +52,6 @@ const NO = "Non";
 
 function boolLabel(value: boolean): string {
   return value ? YES : NO;
-}
-
-function formatDate(value: string | null | undefined): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("fr-FR", { dateStyle: "short" }).format(date);
-}
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("fr-FR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(date);
 }
 
 function formatBranches(
@@ -85,11 +74,11 @@ export function householdsToExportRows(
     Nom: household.name,
     Adresse: household.main_address,
     "Tél. fixe": household.landline_phone ?? "",
-    "Arrivée FJKM": formatDate(household.arrival_date_fjkm),
-    "Créé le": formatDateTime(household.created_at),
-    "MAJ foyer": formatDateTime(household.updated_at),
+    "Arrivée FJKM": formatDateShort(household.arrival_date_fjkm),
+    "Créé le": formatDateTimeShort(household.created_at),
+    "MAJ foyer": formatDateTimeShort(household.updated_at),
     Statut: household.unregistered_at ? "Archivé" : "Actif",
-    "Désinscrit le": formatDate(household.unregistered_at),
+    "Désinscrit le": formatDateShort(household.unregistered_at),
   }));
 }
 
@@ -111,14 +100,16 @@ export function membersToExportRows(
     Langue: person.preferred_language,
     "Visible annuaire": boolLabel(person.is_visible_in_directory),
     Baptisé: boolLabel(person.is_baptized),
-    "Baptisé depuis": formatDate(person.baptized_since),
+    "Baptisé depuis": formatDateShort(person.baptized_since),
     Mpiandry: boolLabel(person.is_mpiandry),
-    "Mpiandry depuis": formatDate(person.mpiandry_since),
+    "Mpiandry depuis": formatDateShort(person.mpiandry_since),
     Mpandray: boolLabel(person.is_mpandray),
-    "Mpandray depuis": formatDate(person.mpandray_since),
+    "Mpandray depuis": formatDateShort(person.mpandray_since),
     "Mpamaky teny": boolLabel(person.is_mpamaky_teny),
     Branches: formatBranches(person.branches ?? []),
     Affectations: person.church_assignments ?? "",
+    "Créé le": formatDateTimeShort(person.created_at),
+    "MAJ membre": formatDateTimeShort(person.updated_at),
   }));
 }
 

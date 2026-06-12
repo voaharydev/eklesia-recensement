@@ -735,7 +735,12 @@ export async function adminUpdateHousehold(
 export async function adminUpsertHouseholdPersons(
   householdId: string,
   input: unknown,
-): Promise<ActionResult<Person[]>> {
+): Promise<
+  ActionResult<{
+    persons: Person[];
+    household: Pick<Household, "created_at" | "updated_at">;
+  }>
+> {
   const authError = await requireAdmin();
   if (authError) return authError;
 
@@ -863,9 +868,19 @@ export async function adminUpsertHouseholdPersons(
       }
     }
 
+    const { data: household, error: householdError } = await supabase
+      .from("households")
+      .select("created_at, updated_at")
+      .eq("id", householdId)
+      .single();
+
+    if (householdError) {
+      return failure(mapSupabaseError(householdError, tErrors));
+    }
+
     revalidateHouseholdAdminPaths(householdId);
     revalidatePath("/");
-    return success(results);
+    return success({ persons: results, household });
   } catch (err) {
     const message =
       err instanceof Error ? err.message : tErrors("updateMemberFailed");

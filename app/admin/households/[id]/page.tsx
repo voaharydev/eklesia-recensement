@@ -13,6 +13,7 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { requireAdminPage } from "@/lib/admin/auth-guard";
+import { formatDateTimeShort } from "@/lib/format/datetime";
 
 type AdminHouseholdPageProps = {
   params: { id: string };
@@ -116,6 +117,18 @@ export default async function AdminHouseholdPage({
                 {household.arrival_date_fjkm ?? "—"}
               </dd>
             </div>
+            <div>
+              <dt className="font-medium text-gray-700">{t("createdAt")}</dt>
+              <dd className="text-muted">
+                {formatDateTimeShort(household.created_at)}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-medium text-gray-700">{t("updatedAt")}</dt>
+              <dd className="text-muted">
+                {formatDateTimeShort(household.updated_at)}
+              </dd>
+            </div>
             {isArchived ? (
               <div>
                 <dt className="font-medium text-gray-700">{t("unregisteredAt")}</dt>
@@ -145,6 +158,8 @@ export default async function AdminHouseholdPage({
             phone: t("phone"),
             age: t("age"),
             branches: tBranches("title"),
+            createdAt: t("memberCreatedAt"),
+            updatedAt: t("memberUpdatedAt"),
             spiritualLabels: {
               baptized: t("spiritual.baptized"),
               mpandray: t("spiritual.mpandray"),

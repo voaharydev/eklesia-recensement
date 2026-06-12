@@ -15,6 +15,10 @@ import {
   normalizeEmailForLookup,
   splitPersonsForForm,
 } from "@/lib/registration/mappers";
+import {
+  buildPersonTimestampsMap,
+  type PersonTimestampsMap,
+} from "@/lib/registration/person-timestamps";
 import { createAdminClient } from "@/lib/supabase/supabase";
 import type {
   ChildFormValues,
@@ -30,6 +34,7 @@ export type RegistrationLookupResult =
       spouse: MemberFormValues | null;
       otherAdults: MemberFormValues[];
       children: ChildFormValues[];
+      personTimestamps: PersonTimestampsMap;
     }
   | { found: false };
 
@@ -131,6 +136,7 @@ export async function lookupByEmail(
       spouse,
       otherAdults,
       children,
+      personTimestamps: buildPersonTimestampsMap(members ?? []),
     });
   } catch (err) {
     const message =

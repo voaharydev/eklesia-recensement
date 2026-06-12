@@ -41,7 +41,9 @@ import {
   isMemberComplete,
   type MemberFieldPrefix,
 } from "@/lib/registration/person-form-ui";
+import { formatDateTimeShort } from "@/lib/format/datetime";
 import { useRegistrationSchemas } from "@/lib/i18n/client";
+import type { PersonTimestampsMap } from "@/lib/registration/person-timestamps";
 import {
   defaultChild,
   defaultMember,
@@ -56,6 +58,7 @@ type MembersStepProps = {
   onSubmit: (values: HouseholdPersonsFormValues) => Promise<void>;
   onBack: () => void;
   isSubmitting: boolean;
+  personTimestamps?: PersonTimestampsMap;
 };
 
 function cloneBranches(
@@ -74,9 +77,24 @@ export function MembersStep({
   onSubmit,
   onBack,
   isSubmitting,
+  personTimestamps,
 }: MembersStepProps) {
   const tWizard = useTranslations("wizard");
   const tForm = useTranslations("form.person");
+
+  function renderPersonMeta(personId: string | undefined) {
+    if (!personId || !personTimestamps) return null;
+    const timestamps = personTimestamps[personId];
+    if (!timestamps) return null;
+
+    return (
+      <>
+        {tForm("createdAt")}: {formatDateTimeShort(timestamps.createdAt)}
+        {" · "}
+        {tForm("updatedAt")}: {formatDateTimeShort(timestamps.updatedAt)}
+      </>
+    );
+  }
   const { schemas } = useRegistrationSchemas();
   const resolver = useMemo(
     () => zodResolver(schemas.householdPersonsSchema),
@@ -539,6 +557,7 @@ export function MembersStep({
               hasError={adultHasErrors(errors, "head")}
               isComplete={isMemberComplete(watchedValues.head)}
               variant="adult"
+              meta={renderPersonMeta(watchedValues.head?.id)}
             >
               {watchedValues.head?.id ? (
                 <input type="hidden" {...register("head.id")} />
@@ -593,6 +612,7 @@ export function MembersStep({
                   hasError={adultHasErrors(errors, "spouse")}
                   isComplete={isMemberComplete(watchedValues.spouse)}
                   variant="adult"
+                  meta={renderPersonMeta(watchedValues.spouse?.id)}
                 >
                   {watchedValues.spouse?.id ? (
                     <input type="hidden" {...register("spouse.id")} />
@@ -649,6 +669,7 @@ export function MembersStep({
                       hasError={otherAdultHasErrors(errors.otherAdults, index)}
                       isComplete={isMemberComplete(adult)}
                       variant="adult"
+                      meta={renderPersonMeta(adult?.id)}
                     >
                       {adult?.id ? (
                         <input
@@ -737,6 +758,7 @@ export function MembersStep({
                       hasError={Boolean(errors.children?.[index])}
                       isComplete={isChildComplete(child)}
                       variant="child"
+                      meta={renderPersonMeta(child?.id)}
                     >
                       {child?.id ? (
                         <input

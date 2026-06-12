@@ -14,12 +14,18 @@ import {
 } from "@/app/actions/registration";
 import { EmailStep } from "@/components/registration/email-step";
 import { HouseholdStep } from "@/components/registration/household-step";
+import { HouseholdTimestampsBanner } from "@/components/registration/household-timestamps-banner";
 import { MembersStep } from "@/components/registration/members-step";
 import { UnregisterHouseholdSection } from "@/components/registration/unregister-household-section";
 import { Alert } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/i18n/routing";
 import { householdToFormValues } from "@/lib/registration/mappers";
+import {
+  householdToTimestamps,
+  type HouseholdTimestamps,
+  type PersonTimestampsMap,
+} from "@/lib/registration/person-timestamps";
 import { isSpouseFilled } from "@/lib/registration/spouse";
 import { useSetRegistrationWizardStep } from "@/lib/registration/wizard-state-context";
 import {
@@ -101,6 +107,10 @@ export function RegistrationWizard({
     useState<HouseholdFormValues>(emptyHouseholdDefaults);
   const [membersDefaults, setMembersDefaults] =
     useState<HouseholdPersonsFormValues>(defaultHouseholdPersons);
+  const [householdTimestamps, setHouseholdTimestamps] =
+    useState<HouseholdTimestamps | null>(null);
+  const [personTimestamps, setPersonTimestamps] =
+    useState<PersonTimestampsMap>({});
   const [lookupNotice, setLookupNotice] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -132,6 +142,8 @@ export function RegistrationWizard({
     setHouseholdId(null);
     setHouseholdDefaults(emptyHouseholdDefaults);
     setMembersDefaults(defaultHouseholdPersons);
+    setHouseholdTimestamps(null);
+    setPersonTimestamps({});
     setLookupNotice(null);
     setServerError(null);
   }
@@ -171,11 +183,15 @@ export function RegistrationWizard({
           result.data.children,
         ),
       );
+      setHouseholdTimestamps(householdToTimestamps(result.data.household));
+      setPersonTimestamps(result.data.personTimestamps);
       setLookupNotice(t("notices.householdFound"));
     } else {
       setMode("create");
       setHouseholdId(null);
       setHouseholdDefaults(emptyHouseholdDefaults);
+      setHouseholdTimestamps(null);
+      setPersonTimestamps({});
       setMembersDefaults({
         head: {
           ...defaultMember,
@@ -210,6 +226,7 @@ export function RegistrationWizard({
       }
 
       setHouseholdDefaults(householdToFormValues(result.data));
+      setHouseholdTimestamps(householdToTimestamps(result.data));
       setStep(2);
       setMaxReachedStep(2);
       return;
@@ -395,27 +412,38 @@ export function RegistrationWizard({
       ) : null}
 
       {step === 1 ? (
-        <HouseholdStep
-          key={`household-${householdId ?? "new"}-${mode}`}
-          defaultValues={householdDefaults}
-          onSubmit={handleHouseholdSubmit}
-          onBack={handleBackFromHousehold}
-          isSubmitting={isSubmitting}
-        />
+        <>
+          {mode === "edit" && householdTimestamps ? (
+            <HouseholdTimestampsBanner timestamps={householdTimestamps} />
+          ) : null}
+          <HouseholdStep
+            key={`household-${householdId ?? "new"}-${mode}`}
+            defaultValues={householdDefaults}
+            onSubmit={handleHouseholdSubmit}
+            onBack={handleBackFromHousehold}
+            isSubmitting={isSubmitting}
+          />
+        </>
       ) : null}
 
       {step === 2 ? (
-        <MembersStep
-          key={`members-${householdId ?? "new"}-${mode}`}
-          defaultValues={membersDefaults}
-          isEditMode={mode === "edit"}
-          submitLabel={
-            mode === "edit" ? t("buttons.saveChanges") : undefined
-          }
-          onSubmit={handleMembersSubmit}
-          onBack={handleBackFromMembers}
-          isSubmitting={isSubmitting}
-        />
+        <>
+          {mode === "edit" && householdTimestamps ? (
+            <HouseholdTimestampsBanner timestamps={householdTimestamps} />
+          ) : null}
+          <MembersStep
+            key={`members-${householdId ?? "new"}-${mode}`}
+            defaultValues={membersDefaults}
+            isEditMode={mode === "edit"}
+            submitLabel={
+              mode === "edit" ? t("buttons.saveChanges") : undefined
+            }
+            onSubmit={handleMembersSubmit}
+            onBack={handleBackFromMembers}
+            isSubmitting={isSubmitting}
+            personTimestamps={personTimestamps}
+          />
+        </>
       ) : null}
 
       {showUnregister ? (

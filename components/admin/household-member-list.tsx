@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { getBranchLabel } from "@/lib/constants/branches";
 import type { GroupedHouseholdMembers } from "@/lib/admin/types";
+import { formatDateTimeShort } from "@/lib/format/datetime";
 import type { Person } from "@/types/database";
 
 export type HouseholdMemberListLabels = {
@@ -15,6 +16,8 @@ export type HouseholdMemberListLabels = {
   phone: string;
   age: string;
   branches: string;
+  createdAt: string;
+  updatedAt: string;
   spiritualLabels: {
     baptized: string;
     mpandray: string;
@@ -70,6 +73,12 @@ function MemberRow({
         </p>
         <p>
           {labels.branches}: {formatBranches(person)}
+        </p>
+        <p>
+          {labels.createdAt}: {formatDateTimeShort(person.created_at)}
+        </p>
+        <p>
+          {labels.updatedAt}: {formatDateTimeShort(person.updated_at)}
         </p>
         <div className="sm:flex sm:justify-end">
           <SpiritualBadges person={person} labels={labels.spiritualLabels} />

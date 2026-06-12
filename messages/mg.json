@@ -120,7 +120,9 @@
       "landlinePhone": "Telefaonina finday (tsy voatery)",
       "landlinePhonePlaceholder": "Ohatra : 022 22 123 45",
       "arrivalDateFjkm": "Daty nahatongavanana FJKM Québec (tsy voatery)",
-      "arrivalDateFjkmPlaceholder": "Ohatra : May 2018"
+      "arrivalDateFjkmPlaceholder": "Ohatra : May 2018",
+      "createdAt": "Noforonina tamin'ny",
+      "updatedAt": "Fanavaozana farany"
     },
     "person": {
       "civility": "Fiheverana (tsy voatery)",
@@ -145,7 +147,9 @@
       "householdRoleChef": "Loham-pianakaviana",
       "householdRoleSpouse": "Vady",
       "householdRoleOther": "Olon-dehibe hafa",
-      "cannotDemoteHead": "Mametraho olon-dehibe hafa ho loham-pianakaviana aloha."
+      "cannotDemoteHead": "Mametraho olon-dehibe hafa ho loham-pianakaviana aloha.",
+      "createdAt": "Mpikambana noforonina tamin'ny",
+      "updatedAt": "Mpikambana novaina tamin'ny"
     },
     "church": {
       "title": "Lalana ara-pivavahana",
@@ -278,7 +282,10 @@
         "updatedTo": "Navaozina hatramin'ny"
       },
       "columns": {
-        "householdUpdated": "Fanavaozana tokantrano"
+        "householdCreated": "Tokantrano noforonina",
+        "householdUpdated": "Fanavaozana tokantrano",
+        "memberCreated": "Mpikambana noforonina",
+        "memberUpdated": "Fanavaozana mpikambana"
       },
       "export": {
         "excel": "Hamoaka Excel ({households} tokantrano, {members} olona)",

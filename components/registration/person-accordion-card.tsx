@@ -16,6 +16,7 @@ type PersonAccordionCardProps = {
   isComplete?: boolean;
   variant?: "adult" | "child";
   cardId?: string;
+  meta?: ReactNode;
   children: ReactNode;
 };
 
@@ -28,6 +29,7 @@ export function PersonAccordionCard({
   isComplete = false,
   variant = "adult",
   cardId,
+  meta,
   children,
 }: PersonAccordionCardProps) {
   const t = useTranslations("form.status");
@@ -70,6 +72,7 @@ export function PersonAccordionCard({
             <Badge variant={badgeVariant}>{statusLabel}</Badge>
           </div>
           <p className="mt-1 truncate text-sm text-muted">{summary}</p>
+          {meta ? <div className="mt-1 text-xs text-muted">{meta}</div> : null}
         </div>
         <ChevronIcon expanded={isOpen} className="mt-0.5" />
       </button>

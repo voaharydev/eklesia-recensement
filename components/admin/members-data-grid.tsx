@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getBranchLabel } from "@/lib/constants/branches";
 import type { PaginatedMembers } from "@/lib/admin/types";
+import { formatDateTimeShort } from "@/lib/format/datetime";
 
 type MembersDataGridProps = {
   data: PaginatedMembers;
@@ -20,7 +21,10 @@ type MembersDataGridProps = {
     phone: string;
     spiritual: string;
     assignments: string;
+    householdCreated: string;
     householdUpdated: string;
+    memberCreated: string;
+    memberUpdated: string;
     noResults: string;
     previous: string;
     next: string;
@@ -43,14 +47,6 @@ function truncateText(value: string | null, max = 40): string {
   if (!value?.trim()) return "—";
   const trimmed = value.trim();
   return trimmed.length > max ? `${trimmed.slice(0, max)}…` : trimmed;
-}
-
-function formatHouseholdUpdated(value: string | undefined): string {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat("fr-FR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(value));
 }
 
 function formatBranches(
@@ -140,7 +136,16 @@ export function MembersDataGrid({
                   {labels.household}
                 </th>
                 <th className="px-4 py-3 text-left font-medium text-muted">
+                  {labels.householdCreated}
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-muted">
                   {labels.householdUpdated}
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-muted">
+                  {labels.memberCreated}
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-muted">
+                  {labels.memberUpdated}
                 </th>
                 <th className="px-4 py-3 text-left font-medium text-muted">
                   {labels.role}
@@ -165,7 +170,7 @@ export function MembersDataGrid({
             <tbody className="divide-y divide-border">
               {data.rows.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={11} className="px-4 py-8 text-center text-muted">
                     {labels.noResults}
                   </td>
                 </tr>
@@ -194,7 +199,16 @@ export function MembersDataGrid({
                       </div>
                     </td>
                     <td className="px-4 py-3 text-muted">
-                      {formatHouseholdUpdated(person.household.updated_at)}
+                      {formatDateTimeShort(person.household.created_at)}
+                    </td>
+                    <td className="px-4 py-3 text-muted">
+                      {formatDateTimeShort(person.household.updated_at)}
+                    </td>
+                    <td className="px-4 py-3 text-muted">
+                      {formatDateTimeShort(person.created_at)}
+                    </td>
+                    <td className="px-4 py-3 text-muted">
+                      {formatDateTimeShort(person.updated_at)}
                     </td>
                     <td className="px-4 py-3">
                       <Badge>
