@@ -50,3 +50,13 @@ export type GroupedHouseholdMembers = {
   otherAdults: Person[];
   children: Person[];
 };
+
+export type HouseholdsExportDataset = {
+  households: Household[];
+  members: Person[];
+};
+
+export type ExportScopeCounts = {
+  householdCount: number;
+  memberCount: number;
+};

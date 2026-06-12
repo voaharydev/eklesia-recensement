@@ -9,6 +9,7 @@ import type { PaginatedMembers } from "@/lib/admin/types";
 
 type MembersDataGridProps = {
   data: PaginatedMembers;
+  exportMemberCount: number;
   searchParams: Record<string, string | undefined>;
   labels: {
     name: string;
@@ -24,6 +25,9 @@ type MembersDataGridProps = {
     previous: string;
     next: string;
     pageInfo: string;
+    exportExcel: string;
+    exportCsv: string;
+    exportHint: string;
     roleLabels: Record<string, string>;
     spiritualLabels: {
       baptized: string;
@@ -62,6 +66,7 @@ function formatBranches(
 
 export function MembersDataGrid({
   data,
+  exportMemberCount,
   searchParams,
   labels,
 }: MembersDataGridProps) {
@@ -80,8 +85,48 @@ export function MembersDataGrid({
     return `/admin/members?${params.toString()}`;
   }
 
+  function exportHref(format: "xlsx" | "csv"): string {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(searchParams)) {
+      if (value && key !== "page") {
+        params.set(key, value);
+      }
+    }
+    params.set("format", format);
+    return `/admin/members/export?${params.toString()}`;
+  }
+
+  const canExport = exportMemberCount > 0;
+
   return (
     <div className="space-y-4">
+      <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-end">
+        <p className="text-sm text-muted sm:mr-auto">{labels.exportHint}</p>
+        {canExport ? (
+          <>
+            <Link href={exportHref("xlsx")}>
+              <Button variant="secondary" size="sm">
+                {labels.exportExcel}
+              </Button>
+            </Link>
+            <Link href={exportHref("csv")}>
+              <Button variant="secondary" size="sm">
+                {labels.exportCsv}
+              </Button>
+            </Link>
+          </>
+        ) : (
+          <>
+            <Button variant="secondary" size="sm" disabled>
+              {labels.exportExcel}
+            </Button>
+            <Button variant="secondary" size="sm" disabled>
+              {labels.exportCsv}
+            </Button>
+          </>
+        )}
+      </div>
+
       <Card>
         <CardContent className="overflow-x-auto p-0">
           <table className="min-w-full divide-y divide-border text-sm">

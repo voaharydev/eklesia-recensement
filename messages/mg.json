@@ -279,6 +279,13 @@
       },
       "columns": {
         "householdUpdated": "Fanavaozana tokantrano"
+      },
+      "export": {
+        "excel": "Hamoaka Excel ({households} tokantrano, {members} olona)",
+        "csv": "Hamoaka CSV ({households} tokantrano, {members} olona)",
+        "hint": "Mamoaka ny tokantrano rehetra mifanaraka amin'ny sivana.",
+        "tooMany": "Voafetra amin'ny 10 000 ny famoahana. Manampy sivana.",
+        "error": "Tsy afaka namoaka ny lisitra."
       }
     }
   }

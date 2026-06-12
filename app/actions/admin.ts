@@ -13,12 +13,15 @@ import {
 import { groupPersonsForAdmin } from "@/lib/admin/person-sort";
 import type {
   DashboardMetrics,
+  ExportScopeCounts,
   GroupedHouseholdMembers,
   HouseholdDetail,
+  HouseholdsExportDataset,
   MembersFilters,
   PaginatedMembers,
   PersonWithHousehold,
 } from "@/lib/admin/types";
+import { MAX_MEMBERS_EXPORT } from "@/lib/admin/export-limits";
 import { resolveUpdatedFilter } from "@/lib/admin/updated-filter";
 import {
   failure,
@@ -31,6 +34,17 @@ import type { Household, Person } from "@/types/database";
 
 const ACTIVE_PERSON_SELECT =
   "*, household:households!inner(id, name, unregistered_at, updated_at, created_at)";
+
+const FILTERED_HOUSEHOLD_ID_SELECT =
+  "household_id, household:households!inner(unregistered_at, updated_at, created_at)";
+
+const EXPORT_BATCH_SIZE = 1000;
+const HOUSEHOLD_ID_CHUNK_SIZE = 200;
+
+type MembersFilterOptions = {
+  searchHouseholdIds?: string[];
+  neverUpdatedHouseholdIds?: string[];
+};
 
 function escapeIlike(value: string): string {
   return value.replace(/[%_\\]/g, (char) => `\\${char}`);
@@ -173,6 +187,244 @@ async function resolveNeverUpdatedHouseholdIds(
     .map((row) => row.id);
 }
 
+async function prepareMembersFilterOptions(
+  supabase: ReturnType<typeof createAdminClient>,
+  filters: MembersFilters,
+): Promise<MembersFilterOptions> {
+  const options: MembersFilterOptions = {};
+
+  const searchTerm = filters.search?.trim();
+  if (searchTerm) {
+    options.searchHouseholdIds = await resolveSearchHouseholdIds(
+      supabase,
+      searchTerm,
+      filters.status,
+    );
+  }
+
+  const updatedFilter = resolveUpdatedFilter(filters);
+  if (updatedFilter?.mode === "never") {
+    options.neverUpdatedHouseholdIds = await resolveNeverUpdatedHouseholdIds(
+      supabase,
+      filters.status,
+    );
+  }
+
+  return options;
+}
+
+function buildFilteredMembersQuery(
+  supabase: ReturnType<typeof createAdminClient>,
+  filters: MembersFilters,
+  options: MembersFilterOptions,
+  personSelect: string = ACTIVE_PERSON_SELECT,
+  selectOptions?: { count?: "exact"; head?: boolean },
+) {
+  let query = supabase.from("persons").select(personSelect, selectOptions);
+
+  query = applyMembersFilters(query, filters, options);
+
+  return query
+    .order("last_name", { ascending: true })
+    .order("first_name", { ascending: true });
+}
+
+async function resolveFilteredHouseholdIds(
+  supabase: ReturnType<typeof createAdminClient>,
+  filters: MembersFilters,
+  options: MembersFilterOptions,
+): Promise<string[]> {
+  const ids = new Set<string>();
+  let offset = 0;
+
+  while (true) {
+    const { data, error } = await buildFilteredMembersQuery(
+      supabase,
+      filters,
+      options,
+      FILTERED_HOUSEHOLD_ID_SELECT,
+    ).range(offset, offset + EXPORT_BATCH_SIZE - 1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const rows = data ?? [];
+    if (rows.length === 0) {
+      break;
+    }
+
+    for (const row of rows as unknown as { household_id: string }[]) {
+      ids.add(row.household_id);
+    }
+
+    if (rows.length < EXPORT_BATCH_SIZE) {
+      break;
+    }
+
+    offset += EXPORT_BATCH_SIZE;
+  }
+
+  return Array.from(ids);
+}
+
+async function fetchHouseholdsByIds(
+  supabase: ReturnType<typeof createAdminClient>,
+  householdIds: string[],
+): Promise<Household[]> {
+  const households: Household[] = [];
+
+  for (let i = 0; i < householdIds.length; i += HOUSEHOLD_ID_CHUNK_SIZE) {
+    const chunk = householdIds.slice(i, i + HOUSEHOLD_ID_CHUNK_SIZE);
+    const { data, error } = await supabase
+      .from("households")
+      .select("*")
+      .in("id", chunk)
+      .order("name", { ascending: true });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    households.push(...((data ?? []) as Household[]));
+  }
+
+  return households.sort((a, b) => a.name.localeCompare(b.name, "fr"));
+}
+
+async function countMembersInHouseholds(
+  supabase: ReturnType<typeof createAdminClient>,
+  householdIds: string[],
+): Promise<number> {
+  let total = 0;
+
+  for (let i = 0; i < householdIds.length; i += HOUSEHOLD_ID_CHUNK_SIZE) {
+    const chunk = householdIds.slice(i, i + HOUSEHOLD_ID_CHUNK_SIZE);
+    const { count, error } = await supabase
+      .from("persons")
+      .select("*", { count: "exact", head: true })
+      .in("household_id", chunk);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    total += count ?? 0;
+  }
+
+  return total;
+}
+
+async function fetchMembersInHouseholds(
+  supabase: ReturnType<typeof createAdminClient>,
+  householdIds: string[],
+): Promise<Person[]> {
+  const members: Person[] = [];
+  let offset = 0;
+  const memberCount = await countMembersInHouseholds(supabase, householdIds);
+
+  while (offset < memberCount) {
+    const to = Math.min(offset + EXPORT_BATCH_SIZE - 1, memberCount - 1);
+    const { data, error } = await supabase
+      .from("persons")
+      .select("*")
+      .in("household_id", householdIds)
+      .order("last_name", { ascending: true })
+      .order("first_name", { ascending: true })
+      .range(offset, to);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    members.push(...((data ?? []) as Person[]));
+    offset += EXPORT_BATCH_SIZE;
+  }
+
+  return members;
+}
+
+async function resolveExportScope(
+  supabase: ReturnType<typeof createAdminClient>,
+  filters: MembersFilters,
+): Promise<{ householdIds: string[]; counts: ExportScopeCounts }> {
+  const filterOptions = await prepareMembersFilterOptions(supabase, filters);
+  const householdIds = await resolveFilteredHouseholdIds(
+    supabase,
+    filters,
+    filterOptions,
+  );
+
+  if (householdIds.length === 0) {
+    return {
+      householdIds,
+      counts: { householdCount: 0, memberCount: 0 },
+    };
+  }
+
+  const memberCount = await countMembersInHouseholds(supabase, householdIds);
+
+  return {
+    householdIds,
+    counts: {
+      householdCount: householdIds.length,
+      memberCount,
+    },
+  };
+}
+
+export async function getExportScopeCounts(
+  filters: MembersFilters = {},
+): Promise<ActionResult<ExportScopeCounts>> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  try {
+    const supabase = createAdminClient();
+    const { counts } = await resolveExportScope(supabase, filters);
+    return success(counts);
+  } catch (err) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : "Impossible de calculer le périmètre d'export.";
+    return failure(message);
+  }
+}
+
+export async function getHouseholdsExportDataset(
+  filters: MembersFilters = {},
+): Promise<ActionResult<HouseholdsExportDataset>> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  try {
+    const supabase = createAdminClient();
+    const { householdIds, counts } = await resolveExportScope(supabase, filters);
+
+    if (counts.memberCount === 0) {
+      return success({ households: [], members: [] });
+    }
+
+    if (counts.memberCount > MAX_MEMBERS_EXPORT) {
+      return failure(
+        `Export limité à ${MAX_MEMBERS_EXPORT} membres (${counts.memberCount} dans les foyers filtrés). Affinez les filtres.`,
+      );
+    }
+
+    const [households, members] = await Promise.all([
+      fetchHouseholdsByIds(supabase, householdIds),
+      fetchMembersInHouseholds(supabase, householdIds),
+    ]);
+
+    return success({ households, members });
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Impossible d'exporter les familles.";
+    return failure(message);
+  }
+}
+
 export async function loginAdminAction(
   formData: FormData,
 ): Promise<void> {
@@ -271,46 +523,22 @@ export async function getPaginatedMembers(
 
   try {
     const supabase = createAdminClient();
+    const filterOptions = await prepareMembersFilterOptions(supabase, filters);
 
-    let searchHouseholdIds: string[] | undefined;
-    const searchTerm = filters.search?.trim();
-    if (searchTerm) {
-      searchHouseholdIds = await resolveSearchHouseholdIds(
-        supabase,
-        searchTerm,
-        filters.status,
-      );
-    }
-
-    let neverUpdatedHouseholdIds: string[] | undefined;
-    const updatedFilter = resolveUpdatedFilter(filters);
-    if (updatedFilter?.mode === "never") {
-      neverUpdatedHouseholdIds = await resolveNeverUpdatedHouseholdIds(
-        supabase,
-        filters.status,
-      );
-    }
-
-    let query = supabase
-      .from("persons")
-      .select(ACTIVE_PERSON_SELECT, { count: "exact" });
-
-    query = applyMembersFilters(query, filters, {
-      searchHouseholdIds,
-      neverUpdatedHouseholdIds,
-    });
-
-    const { data, count, error } = await query
-      .order("last_name", { ascending: true })
-      .order("first_name", { ascending: true })
-      .range(from, to);
+    const { data, count, error } = await buildFilteredMembersQuery(
+      supabase,
+      filters,
+      filterOptions,
+      ACTIVE_PERSON_SELECT,
+      { count: "exact" },
+    ).range(from, to);
 
     if (error) {
       return failure(error.message);
     }
 
     return success({
-      rows: (data ?? []) as PersonWithHousehold[],
+      rows: (data ?? []) as unknown as PersonWithHousehold[],
       total: count ?? 0,
       page: safePage,
       pageSize,
