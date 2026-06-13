@@ -9,6 +9,7 @@ type AdminNavProps = {
     title: string;
     dashboard: string;
     members: string;
+    cultes: string;
     importExcel: string;
     logout: string;
   };
@@ -17,6 +18,7 @@ type AdminNavProps = {
 const navLinks = [
   { href: "/admin", labelKey: "dashboard" as const },
   { href: "/admin/members", labelKey: "members" as const },
+  { href: "/admin/cultes", labelKey: "cultes" as const },
   { href: "/fr/admin/import", labelKey: "importExcel" as const },
 ];
 

@@ -38,6 +38,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
                 title: t("title"),
                 dashboard: t("dashboard"),
                 members: t("members"),
+                cultes: t("cultes"),
                 importExcel: t("importExcel"),
                 logout: t("logout"),
               }}

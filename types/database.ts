@@ -12,6 +12,19 @@ export type PersonBranchAssignment = {
   role: string | null;
 };
 
+export type ServiceRoleCode =
+  | "powerpoint"
+  | "priere"
+  | "lecture_1"
+  | "lecture_2"
+  | "lecture_3";
+
+export type ServiceAssignmentStatus =
+  | "draft"
+  | "pending"
+  | "accepted"
+  | "declined";
+
 export interface Database {
   public: {
     Tables: {
@@ -133,6 +146,73 @@ export interface Database {
           },
         ];
       };
+      services: {
+        Row: {
+          id: string;
+          service_date: string;
+          title: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          service_date: string;
+          title?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          service_date?: string;
+          title?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      service_assignments: {
+        Row: {
+          id: string;
+          service_id: string;
+          person_id: string;
+          role_code: ServiceRoleCode;
+          status: ServiceAssignmentStatus;
+          decline_reason: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          service_id: string;
+          person_id: string;
+          role_code: ServiceRoleCode;
+          status?: ServiceAssignmentStatus;
+          decline_reason?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          service_id?: string;
+          person_id?: string;
+          role_code?: ServiceRoleCode;
+          status?: ServiceAssignmentStatus;
+          decline_reason?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "service_assignments_service_id_fkey";
+            columns: ["service_id"];
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "service_assignments_person_id_fkey";
+            columns: ["person_id"];
+            referencedRelation: "persons";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -151,5 +231,9 @@ export type TablesUpdate<T extends keyof Database["public"]["Tables"]> =
 
 export type Household = Tables<"households">;
 export type Person = Tables<"persons">;
+export type Service = Tables<"services">;
+export type ServiceAssignment = Tables<"service_assignments">;
 export type HouseholdInsert = TablesInsert<"households">;
 export type PersonInsert = TablesInsert<"persons">;
+export type ServiceInsert = TablesInsert<"services">;
+export type ServiceAssignmentInsert = TablesInsert<"service_assignments">;

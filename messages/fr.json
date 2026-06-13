@@ -252,6 +252,7 @@
       "title": "Gestion du recensement",
       "dashboard": "Tableau de bord",
       "members": "Membres",
+      "cultes": "Cultes",
       "importExcel": "Import Excel",
       "logout": "Déconnexion"
     },
@@ -400,6 +401,45 @@
       "autre": "Autre",
       "enfant": "Enfant"
     },
+    "cultes": {
+      "title": "Planification des cultes",
+      "description": "Générez le planning annuel et suivez les réponses des volontaires.",
+      "backToDashboard": "Retour au tableau de bord",
+      "backToList": "Retour à la liste",
+      "detailDescription": "Affectations et statuts de réponse pour ce culte.",
+      "generateYear": "Générer l'année {year}",
+      "generating": "Génération…",
+      "generateSuccess": "Planning généré",
+      "empty": "Aucun culte à venir. Générez le planning annuel pour commencer.",
+      "viewDetail": "Voir",
+      "sendInvitations": "Envoyer les invitations",
+      "sending": "Envoi…",
+      "replace": "Remplacer",
+      "replacing": "Remplacement…",
+      "selectVolunteer": "Choisir un volontaire",
+      "noVolunteers": "Aucun volontaire disponible",
+      "declineReason": "Motif du refus",
+      "columns": {
+        "date": "Date",
+        "title": "Titre",
+        "person": "Personne",
+        "role": "Rôle",
+        "status": "Statut"
+      },
+      "status": {
+        "draft": "Brouillon",
+        "pending": "En attente",
+        "accepted": "Accepté",
+        "declined": "Refusé"
+      },
+      "roles": {
+        "powerpoint": "PowerPoint",
+        "priere": "Prière",
+        "lecture1": "Lecture 1",
+        "lecture2": "Lecture 2",
+        "lecture3": "Lecture 3"
+      }
+    },
     "import": {
       "title": "Import Excel",
       "backToRegistration": "Retour au recensement",
@@ -426,6 +466,48 @@
       "errors": {
         "noFile": "Choisissez un fichier Excel.",
         "unexpected": "Une erreur inattendue s’est produite."
+      }
+    }
+  },
+  "scheduling": {
+    "login": {
+      "title": "Mon planning de culte",
+      "description": "Connectez-vous avec votre courriel pour consulter vos affectations et répondre aux invitations.",
+      "emailLabel": "Courriel",
+      "emailPlaceholder": "votre.email@exemple.com",
+      "submit": "Recevoir le lien magique",
+      "submitting": "Envoi…",
+      "success": "Si votre courriel est enregistré, un lien de connexion vient d'être envoyé.",
+      "authError": "La connexion a échoué. Réessayez ou demandez un nouveau lien.",
+      "genericError": "Impossible d'envoyer le lien. Réessayez plus tard."
+    },
+    "planning": {
+      "title": "Mon planning",
+      "greeting": "Bonjour {name}",
+      "signOut": "Déconnexion",
+      "empty": "Aucune affectation à venir.",
+      "accept": "J'accepte",
+      "decline": "Je refuse",
+      "accepting": "Acceptation…",
+      "declining": "Refus…",
+      "declineTitle": "Refuser cette affectation",
+      "declineDescription": "Vous pouvez indiquer un motif (optionnel).",
+      "declineReasonLabel": "Motif du refus",
+      "declineConfirm": "Confirmer le refus",
+      "cancel": "Annuler",
+      "error": "Impossible d'enregistrer votre réponse.",
+      "status": {
+        "draft": "Brouillon",
+        "pending": "En attente",
+        "accepted": "Accepté",
+        "declined": "Refusé"
+      },
+      "roles": {
+        "powerpoint": "PowerPoint",
+        "priere": "Prière",
+        "lecture1": "Lecture 1",
+        "lecture2": "Lecture 2",
+        "lecture3": "Lecture 3"
       }
     }
   }

@@ -295,5 +295,47 @@
         "error": "Tsy afaka namoaka ny lisitra."
       }
     }
+  },
+  "scheduling": {
+    "login": {
+      "title": "Ny fandaharam-potoana momba ny fivavahana",
+      "description": "Midira amin'ny mailakao mba hijerena ny andraikitra sy hamaly ny fangatahana.",
+      "emailLabel": "Mailaka",
+      "emailPlaceholder": "mailaka@ohatra.com",
+      "submit": "Handray rohy magic",
+      "submitting": "Mandefa…",
+      "success": "Raha voarakitra ny mailakao, nalefa ny rohy fidirana.",
+      "authError": "Tsy nahomby ny fidirana. Andramo indray na mangataha rohy vaovao.",
+      "genericError": "Tsy afaka nandefa ny rohy. Andramo indray avy eo."
+    },
+    "planning": {
+      "title": "Ny fandaharam-potoana",
+      "greeting": "Salama {name}",
+      "signOut": "Hivoaka",
+      "empty": "Tsy misy andraikitra ho avy.",
+      "accept": "Manaiky aho",
+      "decline": "Mandà aho",
+      "accepting": "Manaiky…",
+      "declining": "Mandà…",
+      "declineTitle": "Mandà ity andraikitra ity",
+      "declineDescription": "Afaka manoratra antony ianao (tsy voatery).",
+      "declineReasonLabel": "Antony fandavana",
+      "declineConfirm": "Hamafy ny fandavana",
+      "cancel": "Ajanona",
+      "error": "Tsy afaka nitahiry ny valin-teninao.",
+      "status": {
+        "draft": "Tahiry",
+        "pending": "Miandry",
+        "accepted": "Nekena",
+        "declined": "Nolavina"
+      },
+      "roles": {
+        "powerpoint": "PowerPoint",
+        "priere": "Vavaka",
+        "lecture1": "Famakiana 1",
+        "lecture2": "Famakiana 2",
+        "lecture3": "Famakiana 3"
+      }
+    }
   }
 }
