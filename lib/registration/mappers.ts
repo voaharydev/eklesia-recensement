@@ -1,4 +1,8 @@
 import { resolveBranchCode } from "@/lib/constants/branches";
+import {
+  matchRoleToForm,
+  resolveRoleForDb,
+} from "@/lib/constants/branch-roles";
 import type { FormHouseholdRole, HouseholdRole } from "@/lib/constants/person-roles";
 import {
   adultRoleFromPersonRole,
@@ -35,10 +39,17 @@ function dateFromFormValue(value: string | undefined): string | null {
 function normalizeBranchesForDb(
   branches: MemberFormValues["branches"],
 ): PersonBranchAssignment[] {
-  return branches.map((entry) => ({
-    branch_code: entry.branch_code,
-    role: entry.role?.trim() ? entry.role.trim() : null,
-  }));
+  return branches.map((entry) => {
+    const role = resolveRoleForDb(entry.branch_code, {
+      role_mode: entry.role_mode,
+      role_preset: entry.role_preset ?? "",
+      role_custom: entry.role_custom ?? "",
+    });
+    return {
+      branch_code: entry.branch_code,
+      role: role || null,
+    };
+  });
 }
 
 function parseBranchesFromPerson(
@@ -48,10 +59,11 @@ function parseBranchesFromPerson(
   return branches.flatMap((entry) => {
     const branchCode = resolveBranchCode(entry.branch_code);
     if (!branchCode) return [];
+    const roleForm = matchRoleToForm(branchCode, entry.role);
     return [
       {
         branch_code: branchCode,
-        role: entry.role ?? "",
+        ...roleForm,
       },
     ];
   });

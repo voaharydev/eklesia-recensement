@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { BRANCH_CODES } from "@/lib/constants/branches";
+import { isValidPresetForBranch } from "@/lib/constants/branch-roles";
 import { ADULT_FORM_HOUSEHOLD_ROLES } from "@/lib/constants/person-roles";
 import { validateHouseholdRoles } from "@/lib/registration/household-role";
 import { isSpouseFilled } from "@/lib/registration/spouse";
@@ -34,10 +35,41 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
 
   const optionalDate = z.string().optional().or(z.literal(""));
 
-  const branchAssignmentSchema = z.object({
-    branch_code: z.enum(BRANCH_CODES, { error: t("branchInvalid") }),
-    role: z.string().optional(),
-  });
+  const branchAssignmentSchema = z
+    .object({
+      branch_code: z.enum(BRANCH_CODES, { error: t("branchInvalid") }),
+      role_mode: z.enum(["preset", "other"]),
+      role_preset: z.string().optional(),
+      role_custom: z.string().optional(),
+    })
+    .superRefine((item, ctx) => {
+      if (item.role_mode === "preset") {
+        if (!item.role_preset?.trim()) {
+          ctx.addIssue({
+            code: "custom",
+            message: t("branchRoleRequired"),
+            path: ["role_preset"],
+          });
+          return;
+        }
+        if (!isValidPresetForBranch(item.branch_code, item.role_preset)) {
+          ctx.addIssue({
+            code: "custom",
+            message: t("branchRoleInvalid"),
+            path: ["role_preset"],
+          });
+        }
+        return;
+      }
+
+      if (!item.role_custom?.trim()) {
+        ctx.addIssue({
+          code: "custom",
+          message: t("branchRoleCustomRequired"),
+          path: ["role_custom"],
+        });
+      }
+    });
 
   const branchesSchema = z
     .array(branchAssignmentSchema)

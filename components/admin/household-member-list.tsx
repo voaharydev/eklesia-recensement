@@ -1,7 +1,7 @@
 import { SpiritualBadges } from "@/components/admin/spiritual-badges";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { getBranchLabel } from "@/lib/constants/branches";
+import { formatBranchAssignmentDisplay } from "@/lib/branches/format-branch-role";
 import type { GroupedHouseholdMembers } from "@/lib/admin/types";
 import { formatDateTimeShort } from "@/lib/format/datetime";
 import type { Person } from "@/types/database";
@@ -35,10 +35,7 @@ type HouseholdMemberListProps = {
 function formatBranches(person: Person): string {
   if (!person.branches?.length) return "—";
   return person.branches
-    .map((b) => {
-      const label = getBranchLabel(b.branch_code);
-      return b.role ? `${label} (${b.role})` : label;
-    })
+    .map((b) => formatBranchAssignmentDisplay(b.branch_code, b.role))
     .join(", ");
 }
 

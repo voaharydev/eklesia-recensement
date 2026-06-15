@@ -172,8 +172,16 @@
       "hint": "Tsy voatery. Ampio sampana iray na maromaro sy ny anjara asanao amin'ny tsirairay.",
       "none": "Tsy misy sampana voafidy.",
       "branchLabel": "Sampana",
-      "roleOptional": "Anjara asa ao amin'ity sampana ity (tsy voatery)",
-      "rolePlaceholder": "Ohatra : mpitantana koraly",
+      "roleLabel": "Anjara asa ao amin'ity sampana ity",
+      "roleOther": "Hafa",
+      "roleCustomLabel": "Hazavao ny anjara asa",
+      "roleCustomPlaceholder": "Ohatra : mpanampy mpitantana",
+      "roleOptions": {
+        "powerpoint": "PowerPoint",
+        "sonorisation": "Sonorisation",
+        "responsable": "Mpitantana",
+        "membre_actif": "Mpikambana mavitrika"
+      },
       "remove": "Esorina",
       "add": "+ Hanampy sampana"
     },
@@ -195,6 +203,9 @@
     "languageRequired": "Ilaina ny fiteny.",
     "branchInvalid": "Sampana tsy manan-kery.",
     "branchDuplicate": "Efa voafidy ity sampana ity.",
+    "branchRoleRequired": "Ilaina ny anjara asa ho an'ity sampana ity.",
+    "branchRoleCustomRequired": "Hazavao ny anjara asa rehefa misafidy « Hafa ».",
+    "branchRoleInvalid": "Anjara asa tsy manan-kery ho an'ity sampana ity.",
     "personIdInvalid": "ID olona tsy manan-kery.",
     "householdIdInvalid": "ID tokantrano tsy manan-kery.",
     "minOneAdult": "Ampio farafahakeliny mpikambana olon-dehibe iray.",

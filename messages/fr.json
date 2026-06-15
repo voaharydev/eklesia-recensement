@@ -175,11 +175,19 @@
     },
     "branches": {
       "title": "Branches",
-      "hint": "Facultatif. Ajoutez une ou plusieurs branches et votre rôle dans chacune.",
+      "hint": "Facultatif. Ajoutez une ou plusieurs branches et indiquez votre rôle dans chacune.",
       "none": "Aucune branche sélectionnée.",
       "branchLabel": "Branche",
-      "roleOptional": "Rôle dans cette branche (optionnel)",
-      "rolePlaceholder": "Ex. responsable chorale",
+      "roleLabel": "Rôle dans cette branche",
+      "roleOther": "Autre",
+      "roleCustomLabel": "Précisez le rôle",
+      "roleCustomPlaceholder": "Ex. coordinateur adjoint",
+      "roleOptions": {
+        "powerpoint": "PowerPoint",
+        "sonorisation": "Sonorisation",
+        "responsable": "Responsable",
+        "membre_actif": "Membre actif"
+      },
       "remove": "Retirer",
       "add": "+ Ajouter une branche"
     },
@@ -201,6 +209,9 @@
     "languageRequired": "La langue est requise.",
     "branchInvalid": "Branche invalide.",
     "branchDuplicate": "Cette branche est déjà sélectionnée.",
+    "branchRoleRequired": "Le rôle est requis pour cette branche.",
+    "branchRoleCustomRequired": "Précisez le rôle lorsque vous choisissez « Autre ».",
+    "branchRoleInvalid": "Rôle invalide pour cette branche.",
     "personIdInvalid": "Identifiant de personne invalide.",
     "householdIdInvalid": "Identifiant de foyer invalide.",
     "minOneAdult": "Ajoutez au moins un membre adulte au foyer.",

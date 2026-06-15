@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { resolveBranchCode } from "@/lib/constants/branches";
+import { matchRoleToForm } from "@/lib/constants/branch-roles";
 import type { FormHouseholdRole } from "@/lib/constants/person-roles";
 import { groupDraftsByHousehold } from "@/lib/import/group-households";
 import {
@@ -58,7 +59,7 @@ function draftToMemberFormValues(draft: ImportPersonDraft): MemberFormValues {
     branches: draft.branches.flatMap((b) => {
       const code = resolveBranchCode(b.branch_code);
       if (!code) return [];
-      return [{ branch_code: code, role: b.role ?? "" }];
+      return [{ branch_code: code, ...matchRoleToForm(code, b.role) }];
     }),
     church_assignments: draft.churchAssignments ?? "",
   };

@@ -5,6 +5,7 @@ import type {
   Control,
   FieldErrors,
   UseFormRegister,
+  UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
 
@@ -26,6 +27,7 @@ type MemberChurchFieldsProps = {
   fieldPrefix: MemberFieldPrefix;
   control: Control<HouseholdPersonsFormValues>;
   register: UseFormRegister<HouseholdPersonsFormValues>;
+  setValue: UseFormSetValue<HouseholdPersonsFormValues>;
   watch: UseFormWatch<HouseholdPersonsFormValues>;
   errors: FieldErrors<HouseholdPersonsFormValues>;
 };
@@ -87,6 +89,7 @@ export function MemberChurchFields({
   fieldPrefix,
   control,
   register,
+  setValue,
   watch,
   errors,
 }: MemberChurchFieldsProps) {
@@ -159,6 +162,7 @@ export function MemberChurchFields({
         fieldPrefix={fieldPrefix}
         control={control}
         register={register}
+        setValue={setValue}
         errors={errors}
       />
 

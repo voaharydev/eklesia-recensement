@@ -1,22 +1,11 @@
+import { isPowerPointBranchRole } from "@/lib/constants/branch-roles";
 import type { Person, ServiceRoleCode } from "@/types/database";
 
-const VAOMIERA_TECHNIKA = "vaomiera_technika";
-
-function normalizeRoleText(role: string | null | undefined): string {
-  return (role ?? "")
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
-
-/** Volontaire PowerPoint : branche vaomiera_technika avec rôle contenant "powerpoint". */
+/** Volontaire PowerPoint : branche vaomiera_technika avec rôle PowerPoint (preset ou texte). */
 export function isPowerPointVolunteer(person: Person): boolean {
   if (person.is_child) return false;
-  return person.branches.some(
-    (branch) =>
-      branch.branch_code === VAOMIERA_TECHNIKA &&
-      normalizeRoleText(branch.role).includes("powerpoint"),
+  return person.branches.some((branch) =>
+    isPowerPointBranchRole(branch.branch_code, branch.role),
   );
 }
 

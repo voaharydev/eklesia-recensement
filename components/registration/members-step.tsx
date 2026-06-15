@@ -66,7 +66,9 @@ function cloneBranches(
 ): BranchAssignmentFormValues[] {
   return (branches ?? []).map((b) => ({
     branch_code: b.branch_code,
-    role: b.role ?? "",
+    role_mode: b.role_mode,
+    role_preset: b.role_preset ?? "",
+    role_custom: b.role_custom ?? "",
   }));
 }
 
@@ -487,6 +489,7 @@ export function MembersStep({
               fieldPrefix={fieldPrefix}
               control={control}
               register={register}
+              setValue={setValue}
               watch={watch}
               errors={errors}
             />

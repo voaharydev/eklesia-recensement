@@ -2,7 +2,7 @@ import JSZip from "jszip";
 import * as XLSX from "xlsx";
 
 import type { HouseholdsExportDataset } from "@/lib/admin/types";
-import { getBranchLabel } from "@/lib/constants/branches";
+import { formatBranchAssignmentDisplay } from "@/lib/branches/format-branch-role";
 import {
   formatDateShort,
   formatDateTimeShort,
@@ -59,10 +59,7 @@ function formatBranches(
 ): string {
   if (!branches.length) return "";
   return branches
-    .map((b) => {
-      const label = getBranchLabel(b.branch_code);
-      return b.role ? `${label} (${b.role})` : label;
-    })
+    .map((b) => formatBranchAssignmentDisplay(b.branch_code, b.role))
     .join(", ");
 }
 

@@ -4,7 +4,7 @@ import { SpiritualBadges } from "@/components/admin/spiritual-badges";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getBranchLabel } from "@/lib/constants/branches";
+import { formatBranchAssignmentDisplay } from "@/lib/branches/format-branch-role";
 import type { PaginatedMembers } from "@/lib/admin/types";
 import { formatDateTimeShort } from "@/lib/format/datetime";
 
@@ -54,10 +54,7 @@ function formatBranches(
 ): string {
   if (!branches.length) return "—";
   return branches
-    .map((b) => {
-      const label = getBranchLabel(b.branch_code);
-      return b.role ? `${label} (${b.role})` : label;
-    })
+    .map((b) => formatBranchAssignmentDisplay(b.branch_code, b.role))
     .join(", ");
 }
 
