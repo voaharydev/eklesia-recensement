@@ -48,6 +48,11 @@ export type RecalculateSingleServiceResult = {
   updatedAssignments: number;
 };
 
+export type AddServiceDateRangeResult = {
+  created: number;
+  skipped: number;
+};
+
 export const RSVP_STATUSES = ["accepted", "declined"] as const satisfies readonly ServiceAssignmentStatus[];
 
 export type RsvpStatus = (typeof RSVP_STATUSES)[number];

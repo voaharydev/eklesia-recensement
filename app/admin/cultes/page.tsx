@@ -3,18 +3,27 @@ import Link from "next/link";
 import { getUpcomingServices } from "@/app/actions/scheduling";
 import { CultesDataGrid } from "@/components/admin/cultes-data-grid";
 import { GenerateScheduleButton } from "@/components/admin/generate-schedule-button";
+import { ManageCultesDatesForm } from "@/components/admin/manage-cultes-dates-form";
 import { RecalculateDraftScheduleButton } from "@/components/admin/recalculate-draft-schedule-button";
+import { ShowCancelledFilter } from "@/components/admin/show-cancelled-filter";
 import { Alert } from "@/components/ui/alert";
 import { requireAdminPage } from "@/lib/admin/auth-guard";
 import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminCultesPage() {
+type AdminCultesPageProps = {
+  searchParams: { showCancelled?: string };
+};
+
+export default async function AdminCultesPage({
+  searchParams,
+}: AdminCultesPageProps) {
   await requireAdminPage();
   const t = await getTranslations({ locale: "fr", namespace: "admin.cultes" });
   const currentYear = new Date().getFullYear();
-  const result = await getUpcomingServices();
+  const showCancelled = searchParams.showCancelled === "1";
+  const result = await getUpcomingServices({ includeCancelled: showCancelled });
 
   const gridLabels = {
     date: t("columns.date"),
@@ -23,8 +32,26 @@ export default async function AdminCultesPage() {
     pending: t("status.pending"),
     accepted: t("status.accepted"),
     declined: t("status.declined"),
+    cancelled: t("cancelled"),
     view: t("viewDetail"),
     empty: t("empty"),
+  };
+
+  const manageDatesLabels = {
+    title: t("manageDatesTitle"),
+    singleTitle: t("addDateSingleTitle"),
+    rangeTitle: t("addDateRangeTitle"),
+    serviceDate: t("columns.date"),
+    dateFrom: t("dateFrom"),
+    dateTo: t("dateTo"),
+    titleOptional: t("titleOptional"),
+    addDate: t("addDate"),
+    addDateRange: t("addDateRange"),
+    adding: t("addingDate"),
+    addDateSuccess: t("addDateSuccess"),
+    addRangeSuccess: t("addRangeSuccess"),
+    rangeConfirm: t("rangeConfirm"),
+    error: t("addDateError"),
   };
 
   return (
@@ -53,6 +80,15 @@ export default async function AdminCultesPage() {
             }}
           />
         </div>
+      </div>
+
+      <ManageCultesDatesForm labels={manageDatesLabels} />
+
+      <div className="flex justify-end">
+        <ShowCancelledFilter
+          showCancelled={showCancelled}
+          label={t("showCancelled")}
+        />
       </div>
 
       {result.error ? (

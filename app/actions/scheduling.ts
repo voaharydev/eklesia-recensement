@@ -14,8 +14,9 @@ import { localeSchema } from "@/lib/i18n/locale";
 import { normalizeEmailForLookup } from "@/lib/registration/mappers";
 import {
   buildWeekAssignments,
+  enumerateDatesInRange,
+  getRotationWeekIndex,
   getSundaysOfYear,
-  getWeekNumberForSunday,
 } from "@/lib/scheduling/rotation";
 import {
   getCooldownStartDate,
@@ -26,6 +27,7 @@ import {
 import { getAuthenticatedPerson } from "@/lib/scheduling/member-auth";
 import { countByStatus } from "@/lib/scheduling/status-ui";
 import type {
+  AddServiceDateRangeResult,
   GenerateScheduleResult,
   MemberAssignmentRow,
   RecalculateDraftResult,
@@ -81,6 +83,27 @@ const loginOtpSchema = z.object({
   locale: localeSchema,
   email: z.string().email(),
 });
+
+const isoDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide.");
+
+const addServiceDateSchema = z.object({
+  serviceDate: isoDateSchema,
+  title: z.string().max(200).optional(),
+});
+
+const addServiceDateRangeSchema = z.object({
+  fromDate: isoDateSchema,
+  toDate: isoDateSchema,
+  title: z.string().max(200).optional(),
+});
+
+const getUpcomingServicesSchema = z
+  .object({
+    includeCancelled: z.boolean().optional(),
+  })
+  .optional();
 
 function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);
@@ -143,6 +166,7 @@ async function fetchAssignmentHistory(
   const { data: services, error: servicesError } = await supabase
     .from("services")
     .select("id, service_date")
+    .is("cancelled_at", null)
     .gte("service_date", fromDate)
     .lte("service_date", toDate);
 
@@ -251,7 +275,7 @@ async function applyDraftRecalculationForService(
   }
 
   const supabase = createAdminClient();
-  const weekNumber = getWeekNumberForSunday(service.service_date);
+  const weekNumber = getRotationWeekIndex(service.service_date);
   const newRows = buildAssignmentsForService(
     service.service_date,
     weekNumber,
@@ -309,6 +333,76 @@ async function loadSchedulingPools(): Promise<
   return success({ powerpointPool, mpamakyPool });
 }
 
+type CreateServiceResult =
+  | { created: true; serviceId: string }
+  | { created: false; reason: "exists" };
+
+async function createServiceWithAssignments(
+  serviceDate: string,
+  title: string,
+  powerpointPool: Person[],
+  mpamakyPool: Person[],
+  history: AssignmentHistoryEntry[],
+): Promise<CreateServiceResult> {
+  const supabase = createAdminClient();
+
+  const { data: existing, error: existingError } = await supabase
+    .from("services")
+    .select("id")
+    .eq("service_date", serviceDate)
+    .maybeSingle();
+
+  if (existingError) {
+    throw new Error(mapSupabaseError(existingError, () => "Erreur inattendue."));
+  }
+  if (existing) {
+    return { created: false, reason: "exists" };
+  }
+
+  const { data: service, error: serviceError } = await supabase
+    .from("services")
+    .insert({ service_date: serviceDate, title })
+    .select("id")
+    .single();
+
+  if (serviceError || !service) {
+    throw new Error(
+      mapSupabaseError(serviceError ?? { message: "Erreur culte." }, () =>
+        "Erreur inattendue.",
+      ),
+    );
+  }
+
+  const weekNumber = getRotationWeekIndex(serviceDate);
+  const assignments = buildAssignmentsForService(
+    serviceDate,
+    weekNumber,
+    powerpointPool,
+    mpamakyPool,
+    history,
+  ).map((row) => ({
+    ...row,
+    service_id: service.id,
+  }));
+
+  const { error: assignmentError } = await supabase
+    .from("service_assignments")
+    .insert(assignments);
+
+  if (assignmentError) {
+    throw new Error(mapSupabaseError(assignmentError, () => "Erreur inattendue."));
+  }
+
+  return { created: true, serviceId: service.id };
+}
+
+function revalidateCultesPaths(serviceId?: string) {
+  revalidatePath("/admin/cultes");
+  if (serviceId) {
+    revalidatePath(`/admin/cultes/${serviceId}`);
+  }
+}
+
 export async function generateYearlySchedule(
   input: unknown,
 ): Promise<ActionResult<GenerateScheduleResult>> {
@@ -355,49 +449,27 @@ export async function generateYearlySchedule(
     let skippedServices = 0;
     let createdAssignments = 0;
 
-    for (let weekNumber = 0; weekNumber < sundays.length; weekNumber += 1) {
-      const serviceDate = sundays[weekNumber];
+    for (const serviceDate of sundays) {
       if (existingDates.has(serviceDate)) {
         skippedServices += 1;
         continue;
       }
 
-      const { data: service, error: serviceError } = await supabase
-        .from("services")
-        .insert({ service_date: serviceDate })
-        .select("id")
-        .single();
-
-      if (serviceError || !service) {
-        return failure(
-          mapSupabaseError(serviceError ?? { message: "Erreur culte." }, () =>
-            "Erreur inattendue.",
-          ),
-        );
-      }
-
-      createdServices += 1;
-
-      const assignments = buildAssignmentsForService(
+      const result = await createServiceWithAssignments(
         serviceDate,
-        weekNumber,
+        "Culte dominical",
         powerpointPool,
         mpamakyPool,
         batchHistory,
-      ).map((row) => ({
-        ...row,
-        service_id: service.id,
-      }));
+      );
 
-      const { error: assignmentError } = await supabase
-        .from("service_assignments")
-        .insert(assignments);
-
-      if (assignmentError) {
-        return failure(mapSupabaseError(assignmentError, () => "Erreur inattendue."));
+      if (!result.created) {
+        skippedServices += 1;
+        continue;
       }
 
-      createdAssignments += assignments.length;
+      createdServices += 1;
+      createdAssignments += 5;
     }
 
     revalidatePath("/admin/cultes");
@@ -534,7 +606,7 @@ export async function recalculateDraftService(
 
     const { data: service, error: serviceError } = await supabase
       .from("services")
-      .select("id, service_date")
+      .select("id, service_date, cancelled_at")
       .eq("id", serviceId)
       .maybeSingle();
 
@@ -543,6 +615,9 @@ export async function recalculateDraftService(
     }
     if (!service) {
       return failure("Culte introuvable.");
+    }
+    if (service.cancelled_at) {
+      return failure("Ce culte est désactivé.");
     }
     if (service.service_date < today) {
       return failure("Les cultes passés ne peuvent pas être recalculés.");
@@ -587,20 +662,280 @@ export async function recalculateDraftService(
   }
 }
 
-export async function getUpcomingServices(): Promise<
+export async function addServiceDate(
+  input: unknown,
+): Promise<ActionResult<{ serviceId: string }>> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const parsed = addServiceDateSchema.safeParse(input);
+  if (!parsed.success) {
+    return failure("Date de culte invalide.");
+  }
+
+  try {
+    const poolsResult = await loadSchedulingPools();
+    if (poolsResult.error || !poolsResult.data) {
+      return failure(poolsResult.error ?? "Erreur inattendue.");
+    }
+    const { powerpointPool, mpamakyPool } = poolsResult.data;
+    const { serviceDate, title } = parsed.data;
+    const history = await fetchAssignmentHistory(
+      getCooldownStartDate(serviceDate),
+      serviceDate,
+    );
+
+    const result = await createServiceWithAssignments(
+      serviceDate,
+      title?.trim() || "Culte dominical",
+      powerpointPool,
+      mpamakyPool,
+      history,
+    );
+
+    if (!result.created) {
+      return failure("Un culte existe déjà à cette date.");
+    }
+
+    revalidateCultesPaths(result.serviceId);
+    return success({ serviceId: result.serviceId });
+  } catch (error) {
+    return failure(
+      error instanceof Error ? error.message : "Erreur lors de la création.",
+    );
+  }
+}
+
+export async function addServiceDateRange(
+  input: unknown,
+): Promise<ActionResult<AddServiceDateRangeResult>> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const parsed = addServiceDateRangeSchema.safeParse(input);
+  if (!parsed.success) {
+    return failure("Période invalide.");
+  }
+
+  try {
+    const poolsResult = await loadSchedulingPools();
+    if (poolsResult.error || !poolsResult.data) {
+      return failure(poolsResult.error ?? "Erreur inattendue.");
+    }
+    const { powerpointPool, mpamakyPool } = poolsResult.data;
+    const { fromDate, toDate, title } = parsed.data;
+    const dates = enumerateDatesInRange(fromDate, toDate);
+    const defaultTitle = title?.trim() || "Culte dominical";
+    const history = await fetchAssignmentHistory(
+      getCooldownStartDate(fromDate),
+      toDate,
+    );
+
+    let created = 0;
+    let skipped = 0;
+
+    for (const serviceDate of dates) {
+      const result = await createServiceWithAssignments(
+        serviceDate,
+        defaultTitle,
+        powerpointPool,
+        mpamakyPool,
+        history,
+      );
+
+      if (result.created) {
+        created += 1;
+      } else {
+        skipped += 1;
+      }
+    }
+
+    revalidateCultesPaths();
+    return success({ created, skipped });
+  } catch (error) {
+    return failure(
+      error instanceof Error ? error.message : "Erreur lors de la création.",
+    );
+  }
+}
+
+export async function cancelService(
+  input: unknown,
+): Promise<ActionResult<{ id: string }>> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const parsed = serviceIdSchema.safeParse(input);
+  if (!parsed.success) {
+    return failure("Identifiant de culte invalide.");
+  }
+
+  const supabase = createAdminClient();
+  const { data: service, error: fetchError } = await supabase
+    .from("services")
+    .select("id, cancelled_at")
+    .eq("id", parsed.data.serviceId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return failure(mapSupabaseError(fetchError, () => "Erreur inattendue."));
+  }
+  if (!service) {
+    return failure("Culte introuvable.");
+  }
+  if (service.cancelled_at) {
+    return failure("Ce culte est déjà désactivé.");
+  }
+
+  const { data: updated, error: updateError } = await supabase
+    .from("services")
+    .update({ cancelled_at: new Date().toISOString() })
+    .eq("id", service.id)
+    .select("id")
+    .single();
+
+  if (updateError || !updated) {
+    return failure(mapSupabaseError(updateError ?? { message: "Erreur." }, () =>
+      "Erreur inattendue.",
+    ));
+  }
+
+  revalidateCultesPaths(service.id);
+  revalidatePath("/fr/mon-planning");
+  revalidatePath("/mg/mon-planning");
+
+  return success({ id: updated.id });
+}
+
+export async function reactivateService(
+  input: unknown,
+): Promise<ActionResult<{ id: string }>> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const parsed = serviceIdSchema.safeParse(input);
+  if (!parsed.success) {
+    return failure("Identifiant de culte invalide.");
+  }
+
+  const supabase = createAdminClient();
+  const { data: service, error: fetchError } = await supabase
+    .from("services")
+    .select("id, cancelled_at")
+    .eq("id", parsed.data.serviceId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return failure(mapSupabaseError(fetchError, () => "Erreur inattendue."));
+  }
+  if (!service) {
+    return failure("Culte introuvable.");
+  }
+  if (!service.cancelled_at) {
+    return failure("Ce culte est déjà actif.");
+  }
+
+  const { data: updated, error: updateError } = await supabase
+    .from("services")
+    .update({ cancelled_at: null })
+    .eq("id", service.id)
+    .select("id")
+    .single();
+
+  if (updateError || !updated) {
+    return failure(mapSupabaseError(updateError ?? { message: "Erreur." }, () =>
+      "Erreur inattendue.",
+    ));
+  }
+
+  revalidateCultesPaths(service.id);
+
+  return success({ id: updated.id });
+}
+
+export async function deleteService(
+  input: unknown,
+): Promise<ActionResult<{ id: string }>> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const parsed = serviceIdSchema.safeParse(input);
+  if (!parsed.success) {
+    return failure("Identifiant de culte invalide.");
+  }
+
+  const supabase = createAdminClient();
+  const { data: service, error: fetchError } = await supabase
+    .from("services")
+    .select("id, cancelled_at")
+    .eq("id", parsed.data.serviceId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return failure(mapSupabaseError(fetchError, () => "Erreur inattendue."));
+  }
+  if (!service) {
+    return failure("Culte introuvable.");
+  }
+
+  const { data: assignments, error: assignmentsError } = await supabase
+    .from("service_assignments")
+    .select("status")
+    .eq("service_id", service.id);
+
+  if (assignmentsError) {
+    return failure(mapSupabaseError(assignmentsError, () => "Erreur inattendue."));
+  }
+
+  const allDraft = (assignments ?? []).every(
+    (assignment) => assignment.status === "draft",
+  );
+
+  if (!service.cancelled_at && !allDraft) {
+    return failure(
+      "Impossible de supprimer un culte avec des invitations envoyées. Désactivez-le d'abord.",
+    );
+  }
+
+  const { error: deleteError } = await supabase
+    .from("services")
+    .delete()
+    .eq("id", service.id);
+
+  if (deleteError) {
+    return failure(mapSupabaseError(deleteError, () => "Erreur inattendue."));
+  }
+
+  revalidateCultesPaths();
+
+  return success({ id: service.id });
+}
+
+export async function getUpcomingServices(
+  input?: unknown,
+): Promise<
   ActionResult<ServiceWithStatusCounts[]>
 > {
   const authError = await requireAdmin();
   if (authError) return authError;
 
+  const parsed = getUpcomingServicesSchema.safeParse(input);
+  const includeCancelled = parsed.success ? parsed.data?.includeCancelled : false;
+
   const supabase = createAdminClient();
   const today = todayIsoDate();
 
-  const { data: services, error: servicesError } = await supabase
+  let query = supabase
     .from("services")
     .select("*")
     .gte("service_date", today)
     .order("service_date", { ascending: true });
+
+  if (!includeCancelled) {
+    query = query.is("cancelled_at", null);
+  }
+
+  const { data: services, error: servicesError } = await query;
 
   if (servicesError) {
     return failure(mapSupabaseError(servicesError, () => "Erreur inattendue."));
@@ -691,6 +1026,22 @@ export async function sendInvitations(
   }
 
   const supabase = createAdminClient();
+  const { data: service, error: serviceError } = await supabase
+    .from("services")
+    .select("id, cancelled_at")
+    .eq("id", parsed.data.serviceId)
+    .maybeSingle();
+
+  if (serviceError) {
+    return failure(mapSupabaseError(serviceError, () => "Erreur inattendue."));
+  }
+  if (!service) {
+    return failure("Culte introuvable.");
+  }
+  if (service.cancelled_at) {
+    return failure("Ce culte est désactivé.");
+  }
+
   const { data, error } = await supabase
     .from("service_assignments")
     .update({ status: "pending", decline_reason: null })
@@ -848,8 +1199,9 @@ export async function getMemberAssignments(): Promise<
 
   const { data, error } = await supabase
     .from("service_assignments")
-    .select("*, service:services!inner(id, service_date, title)")
+    .select("*, service:services!inner(id, service_date, title, cancelled_at)")
     .eq("person_id", person.id)
+    .is("service.cancelled_at", null)
     .gte("service.service_date", today);
 
   if (error) {

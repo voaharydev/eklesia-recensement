@@ -23,6 +23,7 @@ import type { ServiceAssignmentStatus } from "@/types/database";
 type CulteAssignmentsTableProps = {
   detail: ServiceDetail;
   canRecalculate: boolean;
+  isCancelled: boolean;
   labels: {
     person: string;
     role: string;
@@ -46,6 +47,7 @@ type CulteAssignmentsTableProps = {
 export function CulteAssignmentsTable({
   detail,
   canRecalculate,
+  isCancelled,
   labels,
 }: CulteAssignmentsTableProps) {
   const router = useRouter();
@@ -124,7 +126,7 @@ export function CulteAssignmentsTable({
 
   return (
     <div className="space-y-4">
-      {allDraft ? (
+      {allDraft && !isCancelled ? (
         <div className="flex flex-col items-end gap-2">
           <div className="flex flex-wrap justify-end gap-2">
             {canRecalculate ? (

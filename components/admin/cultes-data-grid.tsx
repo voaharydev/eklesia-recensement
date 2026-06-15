@@ -14,6 +14,7 @@ type CultesDataGridProps = {
     pending: string;
     accepted: string;
     declined: string;
+    cancelled: string;
     view: string;
     empty: string;
   };
@@ -55,9 +56,17 @@ export function CultesDataGrid({ services, labels }: CultesDataGridProps) {
           </thead>
           <tbody className="divide-y divide-border bg-surface">
             {services.map((service) => (
-              <tr key={service.id}>
+              <tr
+                key={service.id}
+                className={service.cancelled_at ? "bg-surface-muted/60" : undefined}
+              >
                 <td className="px-4 py-3 font-medium text-foreground">
-                  {formatDateShort(service.service_date)}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {formatDateShort(service.service_date)}
+                    {service.cancelled_at ? (
+                      <Badge variant="default">{labels.cancelled}</Badge>
+                    ) : null}
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-muted">{service.title}</td>
                 <td className="px-4 py-3">

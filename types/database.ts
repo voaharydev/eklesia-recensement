@@ -152,18 +152,21 @@ export interface Database {
           service_date: string;
           title: string;
           created_at: string;
+          cancelled_at: string | null;
         };
         Insert: {
           id?: string;
           service_date: string;
           title?: string;
           created_at?: string;
+          cancelled_at?: string | null;
         };
         Update: {
           id?: string;
           service_date?: string;
           title?: string;
           created_at?: string;
+          cancelled_at?: string | null;
         };
         Relationships: [];
       };

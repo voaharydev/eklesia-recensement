@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 
 import { getServiceDetail } from "@/app/actions/scheduling";
 import { CulteAssignmentsTable } from "@/components/admin/culte-assignments-table";
+import { CulteServiceActions } from "@/components/admin/culte-service-actions";
 import { Alert } from "@/components/ui/alert";
 import { requireAdminPage } from "@/lib/admin/auth-guard";
 import { formatDateShort } from "@/lib/format/datetime";
@@ -49,7 +50,9 @@ export default async function AdminCulteDetailPage({
   const allDraft = detail.assignments.every(
     (assignment) => assignment.status === "draft",
   );
-  const canRecalculate = allDraft && detail.service_date >= today;
+  const canRecalculate =
+    allDraft && detail.service_date >= today && !detail.cancelled_at;
+  const isCancelled = Boolean(detail.cancelled_at);
 
   return (
     <div className="space-y-6">
@@ -65,9 +68,26 @@ export default async function AdminCulteDetailPage({
         <p className="mt-1 text-sm text-muted">{t("detailDescription")}</p>
       </div>
 
+      <CulteServiceActions
+        serviceId={detail.id}
+        isCancelled={isCancelled}
+        labels={{
+          cancelService: t("cancelService"),
+          reactivateService: t("reactivateService"),
+          deleteService: t("deleteService"),
+          cancelling: t("cancelling"),
+          reactivating: t("reactivating"),
+          deleting: t("deleting"),
+          cancelConfirm: t("cancelConfirm"),
+          deleteConfirm: t("deleteConfirm"),
+          cancelledBanner: t("cancelledBanner"),
+        }}
+      />
+
       <CulteAssignmentsTable
         detail={detail}
         canRecalculate={canRecalculate}
+        isCancelled={isCancelled}
         labels={{
           person: t("columns.person"),
           role: t("columns.role"),

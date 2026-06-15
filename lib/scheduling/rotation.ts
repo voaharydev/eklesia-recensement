@@ -7,6 +7,52 @@ export type WeekAssignmentSlot = {
   personIndex: number;
 };
 
+export const MAX_DATE_RANGE_DAYS = 366;
+
+export function enumerateDatesInRange(
+  fromDate: string,
+  toDate: string,
+): string[] {
+  if (fromDate > toDate) {
+    throw new Error("La date de début doit être antérieure ou égale à la date de fin.");
+  }
+
+  const dates: string[] = [];
+  const cursor = new Date(`${fromDate}T00:00:00.000Z`);
+  const end = new Date(`${toDate}T00:00:00.000Z`);
+
+  while (cursor <= end) {
+    dates.push(cursor.toISOString().slice(0, 10));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  if (dates.length > MAX_DATE_RANGE_DAYS) {
+    throw new Error(
+      `La période ne peut pas dépasser ${MAX_DATE_RANGE_DAYS} jours.`,
+    );
+  }
+
+  return dates;
+}
+
+export function getRotationWeekIndex(serviceDate: string): number {
+  const year = Number.parseInt(serviceDate.slice(0, 4), 10);
+  const sundayIndex = getSundaysOfYear(year).indexOf(serviceDate);
+
+  if (sundayIndex >= 0) {
+    return sundayIndex;
+  }
+
+  const start = new Date(Date.UTC(year, 0, 1));
+  const date = new Date(`${serviceDate}T00:00:00.000Z`);
+  const dayOfYear = Math.floor(
+    (date.getTime() - start.getTime()) / (24 * 60 * 60 * 1000),
+  );
+
+  return Math.floor(dayOfYear / 7);
+}
+
+/** @deprecated Préférer getRotationWeekIndex */
 export function getWeekNumberForSunday(serviceDate: string): number {
   const year = Number.parseInt(serviceDate.slice(0, 4), 10);
   const weekNumber = getSundaysOfYear(year).indexOf(serviceDate);
