@@ -9,6 +9,25 @@ export type PersonWithHousehold = Person & {
 
 export type UpdatedPreset = "7d" | "30d" | "90d" | "never";
 
+export type DashboardMonthBucket = {
+  monthKey: string;
+  label: string;
+  householdsCreated: number;
+  membersCreated: number;
+  householdsUpdated: number;
+  householdsArchived: number;
+  activeHouseholds: number;
+  activeMembers: number;
+};
+
+export type DashboardSpiritualCounts = {
+  baptized: number;
+  mpiandry: number;
+  mpandray: number;
+  sefala: number;
+  mpamakyTeny: number;
+};
+
 export type DashboardMetrics = {
   activeHouseholds: number;
   totalMembers: number;
@@ -17,8 +36,11 @@ export type DashboardMetrics = {
   baptizedCount: number;
   mpandrayCount: number;
   mpiandryCount: number;
+  sefalaCount: number;
   mpamakyTenyCount: number;
   branchCounts: Record<string, number>;
+  monthly: DashboardMonthBucket[];
+  spiritualCounts: DashboardSpiritualCounts;
 };
 
 export type MembersFilters = {

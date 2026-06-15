@@ -11,6 +11,7 @@ type DashboardKpiGridProps = {
     baptizedCount: string;
     mpandrayCount: string;
     mpiandryCount: string;
+    sefalaCount: string;
     mpamakyTenyCount: string;
   };
 };
@@ -23,6 +24,7 @@ const kpiKeys = [
   "baptizedCount",
   "mpandrayCount",
   "mpiandryCount",
+  "sefalaCount",
   "mpamakyTenyCount",
 ] as const;
 

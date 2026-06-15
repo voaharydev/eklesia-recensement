@@ -12,6 +12,7 @@ import {
   verifyAdminToken,
 } from "@/lib/admin/auth";
 import { groupPersonsForAdmin } from "@/lib/admin/person-sort";
+import { buildDashboardMonthly } from "@/lib/admin/dashboard-monthly";
 import type {
   DashboardMetrics,
   ExportScopeCounts,
@@ -478,22 +479,46 @@ export async function getDashboardMetrics(): Promise<
   try {
     const supabase = createAdminClient();
 
-    const { count: activeHouseholds, error: householdsError } = await supabase
-      .from("households")
-      .select("*", { count: "exact", head: true })
-      .is("unregistered_at", null);
+    const [
+      { count: activeHouseholds, error: householdsError },
+      { data: allHouseholds, error: allHouseholdsError },
+      { data: activePersons, error: personsError },
+      { data: allPersons, error: allPersonsError },
+    ] = await Promise.all([
+      supabase
+        .from("households")
+        .select("*", { count: "exact", head: true })
+        .is("unregistered_at", null),
+      supabase
+        .from("households")
+        .select("id, created_at, updated_at, unregistered_at"),
+      supabase
+        .from("persons")
+        .select(
+          "is_child, is_baptized, is_mpandray, is_mpiandry, is_sefala, is_mpamaky_teny, branches, household:households!inner(unregistered_at)",
+        )
+        .is("household.unregistered_at", null),
+      supabase
+        .from("persons")
+        .select(
+          "id, created_at, household_id, household:households!inner(created_at, unregistered_at)",
+        ),
+    ]);
 
     if (householdsError) {
       return failure(householdsError.message);
     }
 
-    const { data: activePersons, error: personsError } = await supabase
-      .from("persons")
-      .select("is_child, is_baptized, is_mpandray, is_mpiandry, is_mpamaky_teny, branches, household:households!inner(unregistered_at)")
-      .is("household.unregistered_at", null);
+    if (allHouseholdsError) {
+      return failure(allHouseholdsError.message);
+    }
 
     if (personsError) {
       return failure(personsError.message);
+    }
+
+    if (allPersonsError) {
+      return failure(allPersonsError.message);
     }
 
     const persons = activePersons ?? [];
@@ -518,8 +543,17 @@ export async function getDashboardMetrics(): Promise<
       baptizedCount: persons.filter((p) => p.is_baptized).length,
       mpandrayCount: persons.filter((p) => p.is_mpandray).length,
       mpiandryCount: persons.filter((p) => p.is_mpiandry).length,
+      sefalaCount: persons.filter((p) => p.is_sefala).length,
       mpamakyTenyCount: persons.filter((p) => p.is_mpamaky_teny).length,
       branchCounts,
+      monthly: buildDashboardMonthly(allHouseholds ?? [], allPersons ?? []),
+      spiritualCounts: {
+        baptized: persons.filter((p) => p.is_baptized).length,
+        mpiandry: persons.filter((p) => p.is_mpiandry).length,
+        mpandray: persons.filter((p) => p.is_mpandray).length,
+        sefala: persons.filter((p) => p.is_sefala).length,
+        mpamakyTeny: persons.filter((p) => p.is_mpamaky_teny).length,
+      },
     };
 
     return success(metrics);

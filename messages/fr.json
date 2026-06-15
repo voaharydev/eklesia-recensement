@@ -296,9 +296,30 @@
       "baptizedCount": "Baptisés",
       "mpandrayCount": "Mpandray",
       "mpiandryCount": "Mpiandry",
+      "sefalaCount": "SEFALA",
       "mpamakyTenyCount": "Mpamaky teny",
       "branchDistribution": "Répartition par branche",
-      "noBranches": "Aucune affectation enregistrée."
+      "noBranches": "Aucune affectation enregistrée.",
+      "charts": {
+        "activityTitle": "Activité du recensement (6 derniers mois)",
+        "archivesTitle": "Archivages mensuels",
+        "stockTitle": "Évolution des effectifs actifs",
+        "spiritualTitle": "Parcours spirituel (actuel)",
+        "householdsCreated": "Foyers créés",
+        "membersCreated": "Membres ajoutés",
+        "householdsUpdated": "Foyers mis à jour",
+        "householdsArchived": "Foyers archivés",
+        "activeHouseholds": "Foyers actifs",
+        "activeMembers": "Membres actifs",
+        "noData": "Aucune donnée sur cette période.",
+        "spiritual": {
+          "baptized": "Baptisés",
+          "mpiandry": "Mpiandry",
+          "mpandray": "Mpandray",
+          "sefala": "SEFALA",
+          "mpamakyTeny": "Mpamaky teny"
+        }
+      }
     },
     "members": {
       "title": "Membres",

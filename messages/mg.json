@@ -271,6 +271,42 @@
       "importExcel": "Import Excel",
       "logout": "Hivoaka"
     },
+    "dashboard": {
+      "title": "Tabilao",
+      "subtitle": "Topimaso ankapobeny amin'ny fanisana mavitrika.",
+      "loadError": "Tsy afaka mampiditra ny antontan'isa.",
+      "activeHouseholds": "Tokantrano mavitrika",
+      "totalMembers": "Mpikambana totaliny",
+      "adultCount": "Lehibe",
+      "childCount": "Ankizy",
+      "baptizedCount": "Voabatisa",
+      "mpandrayCount": "Mpandray",
+      "mpiandryCount": "Mpiandry",
+      "sefalaCount": "SEFALA",
+      "mpamakyTenyCount": "Mpamaky teny",
+      "branchDistribution": "Fizarana araka ny sampana",
+      "noBranches": "Tsy misy andraikitra voarakitra.",
+      "charts": {
+        "activityTitle": "Hetsika fanisana (6 volana farany)",
+        "archivesTitle": "Fampidirana isam-bolana",
+        "stockTitle": "Fiovan'ny isan'ny mavitrika",
+        "spiritualTitle": "Lalana ara-panahy (amin'izao)",
+        "householdsCreated": "Tokantrano noforonina",
+        "membersCreated": "Mpikambana nampiana",
+        "householdsUpdated": "Tokantrano novaina",
+        "householdsArchived": "Tokantrano voatahiry",
+        "activeHouseholds": "Tokantrano mavitrika",
+        "activeMembers": "Mpikambana mavitrika",
+        "noData": "Tsy misy angona amin'ity fotoana ity.",
+        "spiritual": {
+          "baptized": "Voabatisa",
+          "mpiandry": "Mpiandry",
+          "mpandray": "Mpandray",
+          "sefala": "SEFALA",
+          "mpamakyTeny": "Mpamaky teny"
+        }
+      }
+    },
     "doublons": {
       "title": "Profil mitovy",
       "description": "Mahita sy mampifangaro ny olona voarakitra indroa (mailaka, anarana, na telefaona mitovy).",
