@@ -1,19 +1,26 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { getUpcomingServices } from "@/app/actions/scheduling";
 import { CultesDataGrid } from "@/components/admin/cultes-data-grid";
+import { CultesFilters } from "@/components/admin/cultes-filters";
 import { GenerateScheduleButton } from "@/components/admin/generate-schedule-button";
 import { ManageCultesDatesForm } from "@/components/admin/manage-cultes-dates-form";
 import { RecalculateDraftScheduleButton } from "@/components/admin/recalculate-draft-schedule-button";
-import { ShowCancelledFilter } from "@/components/admin/show-cancelled-filter";
 import { Alert } from "@/components/ui/alert";
 import { requireAdminPage } from "@/lib/admin/auth-guard";
+import {
+  cultesFiltersToSearchParams,
+  hasActiveCultesFilters,
+  parseCultesSearchParams,
+  type CultesSearchParams,
+} from "@/lib/scheduling/parse-cultes-search-params";
 import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 type AdminCultesPageProps = {
-  searchParams: { showCancelled?: string };
+  searchParams: CultesSearchParams;
 };
 
 export default async function AdminCultesPage({
@@ -22,8 +29,26 @@ export default async function AdminCultesPage({
   await requireAdminPage();
   const t = await getTranslations({ locale: "fr", namespace: "admin.cultes" });
   const currentYear = new Date().getFullYear();
-  const showCancelled = searchParams.showCancelled === "1";
-  const result = await getUpcomingServices({ includeCancelled: showCancelled });
+  const filters = parseCultesSearchParams(searchParams);
+  const result = await getUpcomingServices(filters);
+
+  const filterLabels = {
+    search: t("filters.search"),
+    searchPlaceholder: t("filters.searchPlaceholder"),
+    dateFrom: t("filters.dateFrom"),
+    dateTo: t("filters.dateTo"),
+    progress: t("filters.progress"),
+    progressAll: t("filters.progressAll"),
+    progressDraft: t("filters.progressDraft"),
+    progressPending: t("filters.progressPending"),
+    progressDeclined: t("filters.progressDeclined"),
+    sort: t("filters.sort"),
+    sortDateAsc: t("filters.sortDateAsc"),
+    sortDateDesc: t("filters.sortDateDesc"),
+    sortTitleAsc: t("filters.sortTitleAsc"),
+    sortTitleDesc: t("filters.sortTitleDesc"),
+    showCancelled: t("filters.showCancelled"),
+  };
 
   const gridLabels = {
     date: t("columns.date"),
@@ -35,6 +60,8 @@ export default async function AdminCultesPage({
     cancelled: t("cancelled"),
     view: t("viewDetail"),
     empty: t("empty"),
+    emptyFiltered: t("emptyFiltered"),
+    resultCount: t("filters.resultCount"),
   };
 
   const manageDatesLabels = {
@@ -53,6 +80,8 @@ export default async function AdminCultesPage({
     rangeConfirm: t("rangeConfirm"),
     error: t("addDateError"),
   };
+
+  const gridSearchParams = cultesFiltersToSearchParams(filters);
 
   return (
     <div className="space-y-6">
@@ -84,17 +113,19 @@ export default async function AdminCultesPage({
 
       <ManageCultesDatesForm labels={manageDatesLabels} className="mt-2" />
 
-      <div className="flex justify-end">
-        <ShowCancelledFilter
-          showCancelled={showCancelled}
-          label={t("showCancelled")}
-        />
-      </div>
+      <Suspense fallback={null}>
+        <CultesFilters labels={filterLabels} />
+      </Suspense>
 
       {result.error ? (
         <Alert variant="error">{result.error}</Alert>
       ) : (
-        <CultesDataGrid services={result.data ?? []} labels={gridLabels} />
+        <CultesDataGrid
+          services={result.data ?? []}
+          hasActiveFilters={hasActiveCultesFilters(filters)}
+          searchParams={gridSearchParams}
+          labels={gridLabels}
+        />
       )}
 
       <p className="text-sm text-muted">

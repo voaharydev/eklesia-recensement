@@ -28,6 +28,12 @@ import {
   type AssignmentHistoryEntry,
 } from "@/lib/scheduling/cooldown";
 import { getAuthenticatedPerson } from "@/lib/scheduling/member-auth";
+import { filterServicesByProgress } from "@/lib/scheduling/filter-services";
+import {
+  CULTES_PROGRESS_OPTIONS,
+  CULTES_SORT_OPTIONS,
+  type CultesSort,
+} from "@/lib/scheduling/parse-cultes-search-params";
 import { countByStatus } from "@/lib/scheduling/status-ui";
 import type {
   AddServiceDateRangeResult,
@@ -102,11 +108,34 @@ const addServiceDateRangeSchema = z.object({
   title: z.string().max(200).optional(),
 });
 
-const getUpcomingServicesSchema = z
-  .object({
-    includeCancelled: z.boolean().optional(),
-  })
-  .optional();
+const getUpcomingServicesSchema = z.object({
+  search: z.string().max(200).optional(),
+  dateFrom: isoDateSchema.optional(),
+  dateTo: isoDateSchema.optional(),
+  sort: z.enum(CULTES_SORT_OPTIONS).optional().default("date_asc"),
+  progress: z.enum(CULTES_PROGRESS_OPTIONS).optional().default("all"),
+  includeCancelled: z.boolean().optional().default(false),
+});
+
+function escapeIlikePattern(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
+}
+
+function getSortConfig(sort: CultesSort): {
+  column: "service_date" | "title";
+  ascending: boolean;
+} {
+  switch (sort) {
+    case "date_desc":
+      return { column: "service_date", ascending: false };
+    case "title_asc":
+      return { column: "title", ascending: true };
+    case "title_desc":
+      return { column: "title", ascending: false };
+    default:
+      return { column: "service_date", ascending: true };
+  }
+}
 
 function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);
@@ -921,17 +950,40 @@ export async function getUpcomingServices(
   const authError = await requireAdmin();
   if (authError) return authError;
 
-  const parsed = getUpcomingServicesSchema.safeParse(input);
-  const includeCancelled = parsed.success ? parsed.data?.includeCancelled : false;
+  const parsed = getUpcomingServicesSchema.safeParse(input ?? {});
+  const {
+    search,
+    dateFrom,
+    dateTo,
+    sort,
+    progress,
+    includeCancelled,
+  } = parsed.success
+    ? parsed.data
+    : {
+        sort: "date_asc" as const,
+        progress: "all" as const,
+        includeCancelled: false,
+      };
 
   const supabase = createAdminClient();
   const today = todayIsoDate();
+  const dateFromBound = dateFrom ?? today;
+  const { column, ascending } = getSortConfig(sort);
 
   let query = supabase
     .from("services")
     .select("*")
-    .gte("service_date", today)
-    .order("service_date", { ascending: true });
+    .gte("service_date", dateFromBound)
+    .order(column, { ascending });
+
+  if (dateTo) {
+    query = query.lte("service_date", dateTo);
+  }
+
+  if (search?.trim()) {
+    query = query.ilike("title", `%${escapeIlikePattern(search.trim())}%`);
+  }
 
   if (!includeCancelled) {
     query = query.is("cancelled_at", null);
@@ -969,7 +1021,7 @@ export async function getUpcomingServices(
     statusCounts: countByStatus(statusesByService.get(service.id) ?? []),
   }));
 
-  return success(result);
+  return success(filterServicesByProgress(result, progress));
 }
 
 export async function getServiceDetail(
