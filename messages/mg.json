@@ -231,7 +231,51 @@
     "invalidInputRequired": "Ilaina ity saha ity.",
     "invalidInputGeneric": "Sandan'ny tsy manan-kery. Hamarino ity saha ity.",
     "singleHeadRequired": "Tokony hisy loham-pianakaviana iray ihany ao amin'ny tokantrano.",
-    "singleSpouseMax": "Vady iray ihany no azo atao isaky ny tokantrano."
+    "singleSpouseMax": "Vady iray ihany no azo atao isaky ny tokantrano.",
+    "announcements": {
+      "branchRequired": "Ilaina ny sampana.",
+      "branchInvalid": "Sampana tsy manan-kery.",
+      "subjectRequired": "Ilaina ny lohateny.",
+      "eventDateInvalid": "Daty tsy manan-kery (endrika AAAA-MM-JJ).",
+      "eventDatesTooMany": "Farafahakeliny {max} daty.",
+      "eventDatesDuplicate": "Efa voasoratra ity daty ity.",
+      "bodyRequired": "Ilaina ny votoatin'ny filazana.",
+      "invalidData": "Angona tsy manan-kery.",
+      "attachmentInvalidType": "Karazana taratasy tsy ekena (Word, JPEG, PNG na PDF ihany).",
+      "attachmentTooLarge": "Lehibe loatra ny taratasy (farafahakeliny {maxMb} Mo).",
+      "attachmentTooMany": "Be loatra ny taratasy (farafahakeliny {max})."
+    }
+  },
+  "announcements": {
+    "submit": {
+      "title": "Handefa filazana",
+      "description": "Fenoy ity taratasy ity mba hanolorana filazana avy amin'ny sampanareo. Havoaka aorian'ny fanamarinana ataon'ny sekreteria.",
+      "branchLabel": "Sampana",
+      "branchPlaceholder": "Misafidiana sampana…",
+      "verseLabel": "Soratra Masina (tsy voatery)",
+      "versePlaceholder": "Ohatra Jean 3:16",
+      "subjectLabel": "Lohateny",
+      "subjectPlaceholder": "Lohatenin'ny filazana",
+      "eventDateLabel": "Daty (tsy voatery)",
+      "eventTimeLabel": "Ora (tsy voatery)",
+      "eventDatesLabel": "Daty kendrena (tsy voatery)",
+      "addEventDate": "Ampiana daty",
+      "removeEventDate": "Esorina",
+      "eventDatesEmpty": "Tsy misy daty voampiana.",
+      "locationLabel": "Toerana (tsy voatery)",
+      "locationPlaceholder": "Ohatra efitrano lehibe",
+      "bodyLabel": "Votoatin'ny filazana",
+      "bodyPlaceholder": "Soratra feno…",
+      "submit": "Handefa ho fanamarinana",
+      "submitting": "Mandefa…",
+      "success": "Misaotra! Voaray ny filazana ho fanamarinana.",
+      "errorGeneric": "Tsy afaka nandefa ny filazana. Andramo indray.",
+      "attachmentsLabel": "Taratasy ampiarahina (tsy voatery)",
+      "attachmentsHint": "Word, JPEG, PNG na PDF — {max} taratasy farafahakeliny, {maxMb} Mo isaky ny iray.",
+      "attachmentsAdd": "Ampiana taratasy",
+      "attachmentsRemove": "Esorina",
+      "attachmentsEmpty": "Tsy misy taratasy voafidy."
+    }
   },
   "errors": {
     "householdNotFound": "Tsy hita ny tokantrano.",
@@ -258,6 +302,7 @@
     "invalidMembers": "Ampio farafahakeliny mpikambana iray manan-kery.",
     "fkInvalid": "Fanondroana tsy manan-kery : tsy misy ny tokantrano mifandray.",
     "duplicate": "Efa misy ity firaketana ity.",
+    "announcementAttachmentUploadFailed": "Tsy afaka nitahiry ny taratasy ampiarahina.",
     "unexpected": "Nisy hadisoana tsy nampoizina."
   },
   "admin": {
@@ -267,6 +312,7 @@
       "members": "Mpikambana",
       "cultes": "Fivavahana",
       "communication": "Fifandraisana",
+      "announcements": "Filazana",
       "doublons": "Dingana",
       "importExcel": "Import Excel",
       "logout": "Hivoaka"
@@ -539,6 +585,29 @@
         "copySuccessPhones": "Voatahiry ny laharana.",
         "copyError": "Tsy afaka mandika."
       }
+    },
+    "announcements": {
+      "title": "Filazan-draharaha",
+      "description": "Filazana avy amin'ny sampana miandry fanamarinana.",
+      "empty": "Tsy misy filazana miandry.",
+      "branch": "Sampana",
+      "verse": "Andininy",
+      "subject": "Lohateny",
+      "eventDate": "Daty",
+      "eventDates": "Daty kendrena",
+      "location": "Toerana",
+      "body": "Votoaty",
+      "submittedAt": "Nalefa ny",
+      "approve": "Ekena",
+      "reject": "Lavina",
+      "approving": "Mankasitraka…",
+      "rejecting": "Manolana…",
+      "actionError": "Tsy afaka nanavao ny satany.",
+      "attachments": "Taratasy ampiarahina",
+      "downloadAttachment": "Alaivo",
+      "downloadingAttachment": "Manomana…",
+      "downloadAttachmentError": "Tsy afaka naka ny taratasy.",
+      "noAttachments": "Tsy misy taratasy ampiarahina."
     },
     "members": {
       "filters": {

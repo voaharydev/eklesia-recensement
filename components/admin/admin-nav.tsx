@@ -11,6 +11,7 @@ type AdminNavProps = {
     members: string;
     cultes: string;
     communication: string;
+    announcements: string;
     doublons: string;
     importExcel: string;
     logout: string;
@@ -22,6 +23,7 @@ const navLinks = [
   { href: "/admin/members", labelKey: "members" as const },
   { href: "/admin/cultes", labelKey: "cultes" as const },
   { href: "/admin/communication", labelKey: "communication" as const },
+  { href: "/admin/annonces", labelKey: "announcements" as const },
   { href: "/admin/doublons", labelKey: "doublons" as const },
   { href: "/fr/admin/import", labelKey: "importExcel" as const },
 ];

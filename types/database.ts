@@ -25,9 +25,85 @@ export type ServiceAssignmentStatus =
   | "accepted"
   | "declined";
 
+export type AnnouncementStatus = "pending" | "approved" | "rejected";
+
 export interface Database {
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          id: string;
+          branch_code: string;
+          verse: string | null;
+          subject: string;
+          event_dates: string[];
+          location: string | null;
+          body: string;
+          status: AnnouncementStatus;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          branch_code: string;
+          verse?: string | null;
+          subject: string;
+          event_dates?: string[];
+          location?: string | null;
+          body: string;
+          status?: AnnouncementStatus;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          branch_code?: string;
+          verse?: string | null;
+          subject?: string;
+          event_dates?: string[];
+          location?: string | null;
+          body?: string;
+          status?: AnnouncementStatus;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      announcement_attachments: {
+        Row: {
+          id: string;
+          announcement_id: string;
+          storage_path: string;
+          file_name: string;
+          mime_type: string;
+          file_size: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          announcement_id: string;
+          storage_path: string;
+          file_name: string;
+          mime_type: string;
+          file_size: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          announcement_id?: string;
+          storage_path?: string;
+          file_name?: string;
+          mime_type?: string;
+          file_size?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "announcement_attachments_announcement_id_fkey";
+            columns: ["announcement_id"];
+            isOneToOne: false;
+            referencedRelation: "announcements";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       households: {
         Row: {
           id: string;
@@ -259,7 +335,15 @@ export type Household = Tables<"households">;
 export type Person = Tables<"persons">;
 export type Service = Tables<"services">;
 export type ServiceAssignment = Tables<"service_assignments">;
+export type Announcement = Tables<"announcements">;
+export type AnnouncementAttachment = Tables<"announcement_attachments">;
 export type HouseholdInsert = TablesInsert<"households">;
 export type PersonInsert = TablesInsert<"persons">;
 export type ServiceInsert = TablesInsert<"services">;
 export type ServiceAssignmentInsert = TablesInsert<"service_assignments">;
+export type AnnouncementInsert = TablesInsert<"announcements">;
+export type AnnouncementAttachmentInsert = TablesInsert<"announcement_attachments">;
+
+export type AnnouncementWithAttachments = Announcement & {
+  attachments: AnnouncementAttachment[];
+};

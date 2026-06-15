@@ -237,7 +237,51 @@
     "invalidInputRequired": "Ce champ est requis.",
     "invalidInputGeneric": "Valeur invalide. Vérifiez ce champ.",
     "singleHeadRequired": "Le foyer doit compter exactement un chef de famille.",
-    "singleSpouseMax": "Un seul conjoint est autorisé par foyer."
+    "singleSpouseMax": "Un seul conjoint est autorisé par foyer.",
+    "announcements": {
+      "branchRequired": "La branche est requise.",
+      "branchInvalid": "Branche invalide.",
+      "subjectRequired": "Le sujet est requis.",
+      "eventDateInvalid": "Date invalide (format AAAA-MM-JJ).",
+      "eventDatesTooMany": "Maximum {max} dates.",
+      "eventDatesDuplicate": "Cette date est déjà saisie.",
+      "bodyRequired": "Le corps de l'annonce est requis.",
+      "invalidData": "Données invalides.",
+      "attachmentInvalidType": "Type de fichier non autorisé (Word, JPEG, PNG ou PDF uniquement).",
+      "attachmentTooLarge": "Fichier trop volumineux (maximum {maxMb} Mo).",
+      "attachmentTooMany": "Trop de fichiers (maximum {max})."
+    }
+  },
+  "announcements": {
+    "submit": {
+      "title": "Soumettre une annonce",
+      "description": "Remplissez ce formulaire pour proposer une annonce de votre branche (Sampana). Elle sera publiée après validation par le secrétariat.",
+      "branchLabel": "Branche",
+      "branchPlaceholder": "Choisir une branche…",
+      "verseLabel": "Verset biblique (optionnel)",
+      "versePlaceholder": "Ex. Jean 3:16",
+      "subjectLabel": "Sujet",
+      "subjectPlaceholder": "Titre de l'annonce",
+      "eventDateLabel": "Date (optionnel)",
+      "eventTimeLabel": "Heure (optionnel)",
+      "eventDatesLabel": "Dates cibles (optionnel)",
+      "addEventDate": "Ajouter une date",
+      "removeEventDate": "Retirer",
+      "eventDatesEmpty": "Aucune date ajoutée.",
+      "locationLabel": "Lieu (optionnel)",
+      "locationPlaceholder": "Ex. Salle principale",
+      "bodyLabel": "Corps de l'annonce",
+      "bodyPlaceholder": "Texte complet de l'annonce…",
+      "submit": "Soumettre pour validation",
+      "submitting": "Envoi…",
+      "success": "Misaotra! L'annonce a été soumise pour validation.",
+      "errorGeneric": "Impossible d'envoyer l'annonce. Réessayez.",
+      "attachmentsLabel": "Pièces jointes (optionnel)",
+      "attachmentsHint": "Word, JPEG, PNG ou PDF — {max} fichiers max., {maxMb} Mo par fichier.",
+      "attachmentsAdd": "Ajouter des fichiers",
+      "attachmentsRemove": "Retirer",
+      "attachmentsEmpty": "Aucune pièce jointe sélectionnée."
+    }
   },
   "errors": {
     "householdNotFound": "Foyer introuvable.",
@@ -264,6 +308,7 @@
     "invalidMembers": "Ajoutez au moins un membre valide.",
     "fkInvalid": "Référence invalide : le foyer associé n'existe pas.",
     "duplicate": "Cet enregistrement existe déjà.",
+    "announcementAttachmentUploadFailed": "Impossible d'enregistrer les pièces jointes.",
     "unexpected": "Une erreur inattendue s'est produite."
   },
   "admin": {
@@ -273,6 +318,7 @@
       "members": "Membres",
       "cultes": "Cultes",
       "communication": "Communication",
+      "announcements": "Annonces",
       "doublons": "Doublons",
       "importExcel": "Import Excel",
       "logout": "Déconnexion"
@@ -648,6 +694,40 @@
         "copySuccessEmails": "Courriels copiés dans le presse-papier.",
         "copySuccessPhones": "Numéros copiés dans le presse-papier.",
         "copyError": "Impossible de copier dans le presse-papier."
+      }
+    },
+    "announcements": {
+      "title": "Filazan-draharaha",
+      "description": "Annonces soumises par les branches en attente de validation.",
+      "pendingTab": "En attente",
+      "publishedTab": "Publiées",
+      "empty": "Aucune annonce en attente.",
+      "branch": "Branche",
+      "verse": "Verset",
+      "subject": "Sujet",
+      "eventDate": "Date",
+      "eventDates": "Dates cibles",
+      "location": "Lieu",
+      "body": "Corps",
+      "submittedAt": "Soumis le",
+      "approve": "Approuver",
+      "reject": "Refuser",
+      "approving": "Approbation…",
+      "rejecting": "Refus…",
+      "actionError": "Impossible de mettre à jour le statut.",
+      "attachments": "Pièces jointes",
+      "downloadAttachment": "Télécharger",
+      "downloadingAttachment": "Préparation…",
+      "downloadAttachmentError": "Impossible de télécharger la pièce jointe.",
+      "noAttachments": "Aucune pièce jointe.",
+      "published": {
+        "description": "Annonces validées, regroupées par date cible.",
+        "dateLabel": "Date cible",
+        "filterSubmit": "Afficher",
+        "allDates": "Toutes les dates",
+        "resultCount": "{count, plural, =0 {Aucune annonce} =1 {1 annonce} other {# annonces}} pour le {date}",
+        "empty": "Aucune annonce publiée pour le moment.",
+        "emptyForDate": "Aucune annonce pour le {date}."
       }
     },
     "import": {

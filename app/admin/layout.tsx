@@ -40,6 +40,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
                 members: t("members"),
                 cultes: t("cultes"),
                 communication: t("communication"),
+                announcements: t("announcements"),
                 doublons: t("doublons"),
                 importExcel: t("importExcel"),
                 logout: t("logout"),
