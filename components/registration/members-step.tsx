@@ -298,7 +298,7 @@ export function MembersStep({
   function handleApplyHouseholdSize(withSpouse: boolean, childCount: number) {
     setHasSpouse(withSpouse);
     if (!withSpouse) {
-      setValue("spouse", { ...defaultMember, email: "", phone: "" });
+      setValue("spouse", { ...defaultMember, emails: [""], phones: [""] });
     }
 
     for (let i = childFields.length; i < childCount; i++) {
@@ -373,8 +373,8 @@ export function MembersStep({
       setValue("spouse", {
         ...defaultMember,
         last_name: watchedValues.head?.last_name ?? "",
-        email: "",
-        phone: "",
+        emails: [""],
+        phones: [""],
         household_role: "conjoint",
       });
     }
@@ -383,7 +383,7 @@ export function MembersStep({
 
   function disableSpouse() {
     setHasSpouse(false);
-    setValue("spouse", { ...defaultMember, email: "", phone: "" });
+    setValue("spouse", { ...defaultMember, emails: [""], phones: [""] });
     if (openSection === "spouse") {
       setOpenSection("head");
     }
@@ -714,8 +714,8 @@ export function MembersStep({
               onClick={() => {
                 appendOtherAdult({
                   ...defaultMember,
-                  email: "",
-                  phone: "",
+                  emails: [""],
+                  phones: [""],
                   household_role: "autre",
                 });
                 setOpenSection("otherAdult");

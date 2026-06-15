@@ -10,7 +10,7 @@ export function createHumanizeZodFieldMessage(t: ValidationTranslator) {
 
     const path = fieldPath ?? "";
 
-    if (path.endsWith("email") || path.includes(".email")) {
+    if (path.endsWith("email") || path.includes(".email") || path.endsWith("emails") || path.includes(".emails")) {
       if (message.includes("undefined") || message.includes("null")) {
         return t("invalidInputEmailRequired");
       }

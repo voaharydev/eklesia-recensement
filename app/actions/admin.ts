@@ -39,6 +39,7 @@ import {
   memberFormValuesToPersonInsert,
 } from "@/lib/registration/mappers";
 import { optionalTextToNull } from "@/lib/registration/spouse";
+import { normalizeEmailForLookup } from "@/lib/registration/mappers";
 import { resolveBranchCode } from "@/lib/constants/branches";
 import { createAdminClient } from "@/lib/supabase/supabase";
 import type { Household, Person } from "@/types/database";
@@ -138,8 +139,13 @@ function applyMembersFilters(
     const orParts = [
       `first_name.ilike.${pattern}`,
       `last_name.ilike.${pattern}`,
-      `email.ilike.${pattern}`,
     ];
+    if (search.includes("@")) {
+      const normalizedEmail = normalizeEmailForLookup(search);
+      orParts.push(`emails.cs.{${quotePostgrestValue(normalizedEmail)}}`);
+    } else if (/^[\d\s+\-().]+$/.test(search) && search.replace(/\D/g, "").length >= 6) {
+      orParts.push(`phones.cs.{${quotePostgrestValue(search.trim())}}`);
+    }
     if (searchHouseholdIds && searchHouseholdIds.length > 0) {
       const inList = searchHouseholdIds
         .map((id) => quotePostgrestValue(id))

@@ -1,3 +1,7 @@
+import {
+  getPrimaryEmail,
+  personEmailKeys,
+} from "@/lib/contacts/person-contacts";
 import { normalizeEmailForLookup } from "@/lib/registration/mappers";
 import { pickFromPool } from "@/lib/scheduling/rotation";
 import type { Person, ServiceRoleCode } from "@/types/database";
@@ -32,12 +36,14 @@ export function getRecentAssigneeEmails(
   return recent;
 }
 
-function personEmailKey(person: Person): string {
-  const email = person.email?.trim();
-  if (!email) {
-    throw new Error("Volontaire sans courriel.");
+function personOverlapsEmailSet(
+  person: Person,
+  emails: Set<string>,
+): boolean {
+  for (const key of Array.from(personEmailKeys(person))) {
+    if (emails.has(key)) return true;
   }
-  return normalizeEmailForLookup(email);
+  return false;
 }
 
 export function pickVolunteerForSlot(
@@ -53,9 +59,9 @@ export function pickVolunteerForSlot(
   const tryPick = (skipRecent: boolean): Person | null => {
     for (let offset = 0; offset < pool.length; offset += 1) {
       const person = pickFromPool(pool, preferredIndex + offset);
-      const email = personEmailKey(person);
-      if (alreadyPickedThisService.has(email)) continue;
-      if (skipRecent && recentEmails.has(email)) continue;
+      if (personEmailKeys(person).size === 0) continue;
+      if (personOverlapsEmailSet(person, alreadyPickedThisService)) continue;
+      if (skipRecent && personOverlapsEmailSet(person, recentEmails)) continue;
       return person;
     }
     return null;
@@ -68,4 +74,21 @@ export function pickVolunteerForSlot(
   if (withoutCooldown) return withoutCooldown;
 
   return pickFromPool(pool, preferredIndex);
+}
+
+export function markPersonEmailsPicked(
+  person: Person,
+  alreadyPickedThisService: Set<string>,
+): void {
+  for (const key of Array.from(personEmailKeys(person))) {
+    alreadyPickedThisService.add(key);
+  }
+}
+
+export function getPersonInvitationEmail(person: Person): string {
+  const email = getPrimaryEmail(person);
+  if (!email) {
+    throw new Error("Volontaire sans courriel.");
+  }
+  return email;
 }

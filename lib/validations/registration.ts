@@ -42,8 +42,8 @@ export const defaultMember: MemberFormValues = {
   first_name: "",
   last_name: "",
   age: "",
-  email: "",
-  phone: "",
+  emails: [""],
+  phones: [""],
   preferred_language: "fr",
   is_visible_in_directory: true,
   is_baptized: false,
@@ -68,7 +68,7 @@ export const defaultChild: ChildFormValues = {
 
 export const defaultHouseholdPersons: HouseholdPersonsFormValues = {
   head: { ...defaultMember, household_role: "chef_de_famille" },
-  spouse: { ...defaultMember, email: "", phone: "", household_role: "conjoint" },
+  spouse: { ...defaultMember, emails: [""], phones: [""], household_role: "conjoint" },
   otherAdults: [],
   children: [],
 };

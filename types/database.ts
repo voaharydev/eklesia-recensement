@@ -67,8 +67,8 @@ export interface Database {
           household_id: string;
           first_name: string;
           last_name: string;
-          email: string | null;
-          phone: string | null;
+          emails: string[];
+          phones: string[];
           preferred_language: string;
           is_visible_in_directory: boolean;
           is_baptized: boolean;
@@ -92,8 +92,8 @@ export interface Database {
           household_id: string;
           first_name: string;
           last_name: string;
-          email?: string | null;
-          phone?: string | null;
+          emails?: string[];
+          phones?: string[];
           preferred_language?: string;
           is_visible_in_directory?: boolean;
           is_baptized?: boolean;
@@ -117,8 +117,8 @@ export interface Database {
           household_id?: string;
           first_name?: string;
           last_name?: string;
-          email?: string | null;
-          phone?: string | null;
+          emails?: string[];
+          phones?: string[];
           preferred_language?: string;
           is_visible_in_directory?: boolean;
           is_baptized?: boolean;
@@ -218,7 +218,24 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      find_person_duplicate_buckets: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          match_type: string;
+          match_key: string;
+          person_ids: string[];
+        }[];
+      };
+      merge_persons: {
+        Args: {
+          p_master: string;
+          p_duplicate: string;
+          p_patch?: Json | null;
+        };
+        Returns: undefined;
+      };
+    };
     Enums: Record<string, never>;
   };
 }

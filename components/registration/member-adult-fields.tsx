@@ -10,6 +10,7 @@ import type {
 
 import { FieldErrorSummary } from "@/components/registration/field-error-summary";
 import { FormField } from "@/components/registration/form-field";
+import { ContactListField } from "@/components/shared/contact-list-field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select } from "@/components/ui/select";
 import { MIN_ADULT_AGE } from "@/lib/constants/ages";
@@ -69,17 +70,36 @@ export function MemberAdultFields({
         />
       </div>
 
-      <FormField
-        label={tForm("emailOptional")}
-        type="email"
-        error={memberErrors?.email?.message}
-        {...register(`${fieldPrefix}.email`)}
+      <Controller
+        name={`${fieldPrefix}.emails`}
+        control={control}
+        render={({ field }) => (
+          <ContactListField
+            label={tForm("emailOptional")}
+            type="email"
+            values={field.value}
+            onChange={field.onChange}
+            addLabel={tForm("addEmail")}
+            removeLabel={tForm("removeEmail")}
+            error={memberErrors?.emails?.message}
+          />
+        )}
       />
-      <FormField
-        label={tForm("phoneOptional")}
-        type="tel"
-        error={memberErrors?.phone?.message}
-        {...register(`${fieldPrefix}.phone`)}
+
+      <Controller
+        name={`${fieldPrefix}.phones`}
+        control={control}
+        render={({ field }) => (
+          <ContactListField
+            label={tForm("phoneOptional")}
+            type="tel"
+            values={field.value}
+            onChange={field.onChange}
+            addLabel={tForm("addPhone")}
+            removeLabel={tForm("removePhone")}
+            error={memberErrors?.phones?.message}
+          />
+        )}
       />
 
       <div className="flex flex-col gap-1.5">

@@ -1,3 +1,10 @@
+import {
+  emailsForForm,
+  normalizeEmails,
+  normalizePhones,
+  personHasEmail,
+  phonesForForm,
+} from "@/lib/contacts/person-contacts";
 import { resolveBranchCode } from "@/lib/constants/branches";
 import {
   matchRoleToForm,
@@ -92,8 +99,8 @@ export function memberFormValuesToPersonInsert(
     household_role: householdRoleField,
     first_name,
     last_name,
-    email,
-    phone,
+    emails,
+    phones,
     preferred_language,
     is_visible_in_directory,
     is_baptized,
@@ -114,8 +121,8 @@ export function memberFormValuesToPersonInsert(
   return {
     first_name,
     last_name,
-    email: email?.trim() ? email.trim() : null,
-    phone: phone?.trim() ? phone.trim() : null,
+    emails: normalizeEmails(emails),
+    phones: normalizePhones(phones),
     preferred_language,
     is_visible_in_directory,
     is_baptized,
@@ -151,8 +158,8 @@ export function childFormValuesToPersonInsert(
   return {
     first_name,
     last_name,
-    email: null,
-    phone: null,
+    emails: [],
+    phones: [],
     preferred_language: "fr",
     is_visible_in_directory: false,
     is_baptized,
@@ -179,8 +186,8 @@ export function personToMemberFormValues(person: Person): MemberFormValues {
     first_name: person.first_name,
     last_name: person.last_name,
     age: person.age != null ? String(person.age) : "",
-    email: person.email ?? "",
-    phone: person.phone ?? "",
+    emails: emailsForForm(person),
+    phones: phonesForForm(person),
     preferred_language: person.preferred_language,
     is_visible_in_directory: person.is_visible_in_directory,
     is_baptized: person.is_baptized,
@@ -284,8 +291,8 @@ export function personsToHouseholdPersonsFormValues(
     head,
     spouse: spouse ?? {
       ...defaultMember,
-      email: "",
-      phone: "",
+      emails: [""],
+      phones: [""],
       household_role: "conjoint",
     },
     otherAdults,
@@ -327,6 +334,11 @@ export function flattenHouseholdPersonsForm(
   return entries;
 }
 
-export function normalizeEmailForLookup(email: string): string {
-  return email.trim().toLowerCase();
+export { normalizeEmailForLookup } from "@/lib/contacts/person-contacts";
+
+export function findPersonByNormalizedEmail(
+  persons: Person[],
+  normalizedEmail: string,
+): Person | undefined {
+  return persons.find((person) => personHasEmail(person, normalizedEmail));
 }

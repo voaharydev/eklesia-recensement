@@ -7,6 +7,7 @@ import {
   formatDateShort,
   formatDateTimeShort,
 } from "@/lib/format/datetime";
+import { getPrimaryEmail, getPrimaryPhone } from "@/lib/contacts/person-contacts";
 import type { Household, Person } from "@/types/database";
 
 export type HouseholdExportRow = {
@@ -92,8 +93,8 @@ export function membersToExportRows(
     Rôle: roleLabels[person.role] ?? person.role,
     Enfant: boolLabel(person.is_child),
     Âge: person.age != null ? String(person.age) : "",
-    Courriel: person.email ?? "",
-    Téléphone: person.phone ?? "",
+    Courriel: getPrimaryEmail(person) ?? "",
+    Téléphone: getPrimaryPhone(person) ?? "",
     Langue: person.preferred_language,
     "Visible annuaire": boolLabel(person.is_visible_in_directory),
     Baptisé: boolLabel(person.is_baptized),

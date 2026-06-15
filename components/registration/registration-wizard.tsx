@@ -53,7 +53,7 @@ function membersDefaultsFromLookup(
 ): HouseholdPersonsFormValues {
   return {
     head,
-    spouse: spouse ?? { ...defaultMember, email: "", phone: "" },
+    spouse: spouse ?? { ...defaultMember, emails: [""], phones: [""] },
     otherAdults,
     children,
   };
@@ -195,10 +195,10 @@ export function RegistrationWizard({
       setMembersDefaults({
         head: {
           ...defaultMember,
-          email,
+          emails: email ? [email] : [""],
           household_role: "chef_de_famille",
         },
-        spouse: { ...defaultMember, email: "", phone: "" },
+        spouse: { ...defaultMember, emails: [""], phones: [""] },
         otherAdults: [],
         children: [],
       });

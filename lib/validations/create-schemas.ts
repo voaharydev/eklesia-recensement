@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+import {
+  normalizeEmails,
+  normalizePhones,
+} from "@/lib/contacts/person-contacts";
 import { BRANCH_CODES } from "@/lib/constants/branches";
 import { isValidPresetForBranch } from "@/lib/constants/branch-roles";
 import { ADULT_FORM_HOUSEHOLD_ROLES } from "@/lib/constants/person-roles";
@@ -32,6 +36,14 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
         z.email({ error: t("emailInvalid") }),
       ]),
     );
+
+  const emailsSchema = z
+    .array(optionalEmail)
+    .transform((values) => normalizeEmails(values));
+
+  const phonesSchema = z
+    .array(z.string())
+    .transform((values) => normalizePhones(values));
 
   const optionalDate = z.string().optional().or(z.literal(""));
 
@@ -121,8 +133,8 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
     first_name: z.string().min(1, t("firstNameRequired")),
     last_name: z.string().min(1, t("lastNameRequired")),
     age: z.string().min(1, t("ageRequired")),
-    email: optionalEmail,
-    phone: z.string().optional(),
+    emails: emailsSchema,
+    phones: phonesSchema,
     preferred_language: z.string().min(1, t("languageRequired")),
     is_visible_in_directory: z.boolean(),
     is_baptized: z.boolean(),
@@ -147,8 +159,8 @@ export function createRegistrationSchemas(t: ValidationTranslator) {
     first_name: z.string().optional().or(z.literal("")),
     last_name: z.string().optional().or(z.literal("")),
     age: z.string().optional().or(z.literal("")),
-    email: optionalEmail,
-    phone: z.string().optional(),
+    emails: emailsSchema,
+    phones: phonesSchema,
     preferred_language: z.string().optional().or(z.literal("")),
     is_visible_in_directory: z.boolean(),
     is_baptized: z.boolean(),

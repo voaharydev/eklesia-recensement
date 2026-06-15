@@ -1,5 +1,6 @@
 import { isPowerPointBranchRole } from "@/lib/constants/branch-roles";
 import { isMpamakyRole } from "@/lib/constants/service-roles";
+import { getPrimaryEmail } from "@/lib/contacts/person-contacts";
 import { normalizeEmailForLookup } from "@/lib/registration/mappers";
 import type { Person, ServiceRoleCode } from "@/types/database";
 
@@ -17,7 +18,7 @@ export function isMpamakyTenyVolunteer(person: Person): boolean {
 }
 
 export function hasEmailForScheduling(person: Person): boolean {
-  return Boolean(person.email?.trim());
+  return person.emails.length > 0;
 }
 
 export function sortVolunteersByName(persons: Person[]): Person[] {
@@ -28,13 +29,13 @@ export function sortVolunteersByName(persons: Person[]): Person[] {
   });
 }
 
-/** Une fiche par courriel (ordre stable par nom) pour éviter les doublons multi-foyers. */
+/** Une fiche par courriel principal (ordre stable par nom) pour éviter les doublons multi-foyers. */
 export function dedupeSchedulingPoolByEmail(persons: Person[]): Person[] {
   const seen = new Set<string>();
   const deduped: Person[] = [];
 
   for (const person of sortVolunteersByName(persons)) {
-    const email = person.email?.trim();
+    const email = getPrimaryEmail(person);
     if (!email) continue;
 
     const key = normalizeEmailForLookup(email);

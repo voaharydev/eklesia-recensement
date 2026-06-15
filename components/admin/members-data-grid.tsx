@@ -4,6 +4,7 @@ import { SpiritualBadges } from "@/components/admin/spiritual-badges";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatEmailsDisplay, formatPhonesDisplay } from "@/lib/contacts/person-contacts";
 import { formatBranchAssignmentDisplay } from "@/lib/branches/format-branch-role";
 import type { PaginatedMembers } from "@/lib/admin/types";
 import { formatDateTimeShort } from "@/lib/format/datetime";
@@ -216,10 +217,10 @@ export function MembersDataGrid({
                       {person.age ?? "—"}
                     </td>
                     <td className="px-4 py-3 text-muted">
-                      {truncateText(person.email, 30)}
+                      {truncateText(formatEmailsDisplay(person.emails, ""), 30)}
                     </td>
                     <td className="px-4 py-3 text-muted">
-                      {truncateText(person.phone, 20)}
+                      {truncateText(formatPhonesDisplay(person.phones, ""), 20)}
                     </td>
                     <td className="px-4 py-3">
                       <SpiritualBadges

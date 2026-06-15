@@ -11,6 +11,7 @@ import {
 } from "@/lib/actions/types";
 import { assertAdminSession } from "@/lib/admin/auth";
 import { localeSchema } from "@/lib/i18n/locale";
+import { getPrimaryEmail, personHasEmail } from "@/lib/contacts/person-contacts";
 import { normalizeEmailForLookup } from "@/lib/registration/mappers";
 import {
   buildWeekAssignments,
@@ -20,7 +21,9 @@ import {
 } from "@/lib/scheduling/rotation";
 import {
   getCooldownStartDate,
+  getPersonInvitationEmail,
   getRecentAssigneeEmails,
+  markPersonEmailsPicked,
   pickVolunteerForSlot,
   type AssignmentHistoryEntry,
 } from "@/lib/scheduling/cooldown";
@@ -115,8 +118,7 @@ async function fetchActiveAdultsWithEmail(): Promise<Person[]> {
     .from("persons")
     .select("*, household:households!inner(unregistered_at)")
     .is("household.unregistered_at", null)
-    .eq("is_child", false)
-    .not("email", "is", null);
+    .eq("is_child", false);
 
   if (error) {
     throw new Error(mapSupabaseError(error, () => "Erreur inattendue."));
@@ -132,8 +134,7 @@ async function fetchMpamakyTenyPersons(): Promise<Person[]> {
     .select("*, household:households!inner(unregistered_at)")
     .is("household.unregistered_at", null)
     .eq("is_mpamaky_teny", true)
-    .eq("is_child", false)
-    .not("email", "is", null);
+    .eq("is_child", false);
 
   if (error) {
     throw new Error(mapSupabaseError(error, () => "Erreur inattendue."));
@@ -185,7 +186,7 @@ async function fetchAssignmentHistory(
 
   const { data: assignments, error: assignmentsError } = await supabase
     .from("service_assignments")
-    .select("service_id, role_code, person:persons(email)")
+    .select("service_id, role_code, person:persons(emails)")
     .in("service_id", serviceIds);
 
   if (assignmentsError) {
@@ -198,8 +199,8 @@ async function fetchAssignmentHistory(
 
   for (const assignment of assignments ?? []) {
     const serviceDate = serviceDateById.get(assignment.service_id);
-    const person = assignment.person as { email: string | null } | null;
-    const email = person?.email?.trim();
+    const person = assignment.person as { emails: string[] } | null;
+    const email = person ? getPrimaryEmail(person) : null;
     if (!serviceDate || !email) continue;
 
     history.push({
@@ -236,10 +237,11 @@ function buildAssignmentsForService(
       recentEmails,
       alreadyPickedThisService,
     );
-    alreadyPickedThisService.add(normalizeEmailForLookup(person.email!));
+    markPersonEmailsPicked(person, alreadyPickedThisService);
+    const invitationEmail = getPersonInvitationEmail(person);
     history.push({
       serviceDate,
-      email: person.email!,
+      email: invitationEmail,
       roleCode: slot.roleCode,
     });
     rows.push({
@@ -1289,16 +1291,16 @@ export async function sendMagicLinkLogin(
 
   const { data: candidates, error: lookupError } = await supabaseAdmin
     .from("persons")
-    .select("email")
-    .ilike("email", normalizedEmail)
+    .select("emails")
+    .contains("emails", [normalizedEmail])
     .limit(5);
 
   if (lookupError) {
     return failure(mapSupabaseError(lookupError, () => "Erreur inattendue."));
   }
 
-  const hasMatch = (candidates ?? []).some(
-    (person) => person.email?.trim().toLowerCase() === normalizedEmail,
+  const hasMatch = (candidates ?? []).some((person) =>
+    personHasEmail(person, normalizedEmail),
   );
 
   if (!hasMatch) {

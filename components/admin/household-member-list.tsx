@@ -1,6 +1,7 @@
 import { SpiritualBadges } from "@/components/admin/spiritual-badges";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { formatEmailsDisplay, formatPhonesDisplay } from "@/lib/contacts/person-contacts";
 import { formatBranchAssignmentDisplay } from "@/lib/branches/format-branch-role";
 import type { GroupedHouseholdMembers } from "@/lib/admin/types";
 import { formatDateTimeShort } from "@/lib/format/datetime";
@@ -60,10 +61,10 @@ function MemberRow({
       </div>
       <div className="grid gap-1 text-sm text-muted sm:text-right">
         <p>
-          {labels.email}: {person.email?.trim() || "—"}
+          {labels.email}: {formatEmailsDisplay(person.emails)}
         </p>
         <p>
-          {labels.phone}: {person.phone?.trim() || "—"}
+          {labels.phone}: {formatPhonesDisplay(person.phones)}
         </p>
         <p>
           {labels.age}: {person.age ?? "—"}

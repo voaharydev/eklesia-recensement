@@ -11,7 +11,9 @@ import {
 } from "@/lib/actions/types";
 import { getServerI18n } from "@/lib/i18n/server";
 import { localeSchema } from "@/lib/i18n/locale";
+import { personHasEmail } from "@/lib/contacts/person-contacts";
 import {
+  findPersonByNormalizedEmail,
   normalizeEmailForLookup,
   splitPersonsForForm,
 } from "@/lib/registration/mappers";
@@ -24,7 +26,7 @@ import type {
   ChildFormValues,
   MemberFormValues,
 } from "@/lib/validations/registration";
-import type { Household, Person } from "@/types/database";
+import type { Household } from "@/types/database";
 
 export type RegistrationLookupResult =
   | {
@@ -39,22 +41,6 @@ export type RegistrationLookupResult =
   | { found: false };
 
 export type LookupByEmailResult = ActionResult<RegistrationLookupResult>;
-
-function personEmailMatches(
-  email: string | null,
-  normalizedEmail: string,
-): boolean {
-  return (
-    email != null && email.trim().toLowerCase() === normalizedEmail
-  );
-}
-
-function findPersonByNormalizedEmail(
-  persons: Person[],
-  normalizedEmail: string,
-): Person | undefined {
-  return persons.find((p) => personEmailMatches(p.email, normalizedEmail));
-}
 
 const lookupByEmailInputSchema = z.object({
   locale: localeSchema,
@@ -85,7 +71,7 @@ export async function lookupByEmail(
     const { data: candidates, error: lookupError } = await supabase
       .from("persons")
       .select("*")
-      .ilike("email", normalizedEmail)
+      .contains("emails", [normalizedEmail])
       .limit(20);
 
     if (lookupError) {
@@ -195,7 +181,7 @@ export async function unregisterHousehold(
 
     const { data: persons, error: personsError } = await supabase
       .from("persons")
-      .select("id, email")
+      .select("id, emails, phones")
       .eq("household_id", householdId);
 
     if (personsError) {
@@ -203,7 +189,7 @@ export async function unregisterHousehold(
     }
 
     const emailMatchesHousehold = (persons ?? []).some((p) =>
-      personEmailMatches(p.email, normalizedEmail),
+      personHasEmail(p, normalizedEmail),
     );
 
     if (!emailMatchesHousehold) {

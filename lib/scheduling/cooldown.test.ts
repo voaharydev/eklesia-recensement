@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { getPrimaryEmail } from "@/lib/contacts/person-contacts";
 import {
   getRecentAssigneeEmails,
   pickVolunteerForSlot,
@@ -8,19 +9,24 @@ import {
 } from "@/lib/scheduling/cooldown";
 import type { Person } from "@/types/database";
 
-function person(id: string, email: string, first = "A", last = "B"): Person {
+function person(
+  id: string,
+  emails: string[],
+  first = "A",
+  last = "B",
+): Person {
   return {
     id,
     household_id: "h1",
     first_name: first,
     last_name: last,
-    email,
+    emails,
+    phones: [],
     is_child: false,
     is_mpamaky_teny: true,
     branches: [],
     created_at: "",
     updated_at: "",
-    phone: null,
     preferred_language: "fr",
     is_visible_in_directory: true,
     is_baptized: false,
@@ -58,24 +64,27 @@ describe("getRecentAssigneeEmails", () => {
 
 describe("pickVolunteerForSlot", () => {
   const pool = [
-    person("1", "alice@example.com", "Alice", "A"),
-    person("2", "bob@example.com", "Bob", "B"),
-    person("3", "carol@example.com", "Carol", "C"),
+    person("1", ["alice@example.com"], "Alice", "A"),
+    person("2", ["bob@example.com"], "Bob", "B"),
+    person("3", ["carol@example.com"], "Carol", "C"),
   ];
 
   it("picks an alternative when the preferred volunteer is in cooldown", () => {
     const recent = new Set(["alice@example.com"]);
     const picked = pickVolunteerForSlot(pool, 0, recent, new Set());
 
-    assert.equal(picked.email, "bob@example.com");
+    assert.equal(getPrimaryEmail(picked), "bob@example.com");
   });
 
   it("falls back to cooldown when no alternative exists", () => {
-    const smallPool = [person("1", "alice@example.com"), person("2", "bob@example.com")];
+    const smallPool = [
+      person("1", ["alice@example.com"]),
+      person("2", ["bob@example.com"]),
+    ];
     const recent = new Set(["alice@example.com", "bob@example.com"]);
     const picked = pickVolunteerForSlot(smallPool, 0, recent, new Set());
 
-    assert.equal(picked.email, "alice@example.com");
+    assert.equal(getPrimaryEmail(picked), "alice@example.com");
   });
 
   it("never assigns the same email twice on the same service", () => {
@@ -83,18 +92,29 @@ describe("pickVolunteerForSlot", () => {
     const alreadyPicked = new Set(["alice@example.com"]);
     const picked = pickVolunteerForSlot(pool, 0, recent, alreadyPicked);
 
-    assert.equal(picked.email, "bob@example.com");
+    assert.equal(getPrimaryEmail(picked), "bob@example.com");
   });
 
   it("treats duplicate emails across person records as the same volunteer", () => {
     const duplicatePool = [
-      person("1", "alice@example.com", "Alice", "Dup"),
-      person("2", "alice@example.com", "Alice", "Other"),
-      person("3", "bob@example.com", "Bob", "B"),
+      person("1", ["alice@example.com"], "Alice", "Dup"),
+      person("2", ["alice@example.com"], "Alice", "Other"),
+      person("3", ["bob@example.com"], "Bob", "B"),
     ];
     const alreadyPicked = new Set(["alice@example.com"]);
     const picked = pickVolunteerForSlot(duplicatePool, 0, new Set(), alreadyPicked);
 
-    assert.equal(picked.email, "bob@example.com");
+    assert.equal(getPrimaryEmail(picked), "bob@example.com");
+  });
+
+  it("excludes a volunteer when any of their emails is in cooldown", () => {
+    const multiEmailPool = [
+      person("1", ["alice@example.com", "alice.alt@example.com"], "Alice", "A"),
+      person("2", ["bob@example.com"], "Bob", "B"),
+    ];
+    const recent = new Set(["alice.alt@example.com"]);
+    const picked = pickVolunteerForSlot(multiEmailPool, 0, recent, new Set());
+
+    assert.equal(getPrimaryEmail(picked), "bob@example.com");
   });
 });
