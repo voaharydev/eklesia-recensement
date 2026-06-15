@@ -272,6 +272,7 @@
       "dashboard": "Tableau de bord",
       "members": "Membres",
       "cultes": "Cultes",
+      "communication": "Communication",
       "doublons": "Doublons",
       "importExcel": "Import Excel",
       "logout": "Déconnexion"
@@ -568,6 +569,64 @@
         "lecture1": "Lecture 1",
         "lecture2": "Lecture 2",
         "lecture3": "Lecture 3"
+      }
+    },
+    "communication": {
+      "title": "Communication ciblée",
+      "description": "Filtrez les membres et préparez une liste de diffusion par courriel ou SMS.",
+      "loading": "Chargement…",
+      "filters": {
+        "title": "Critères",
+        "cardTitle": "Filtres",
+        "ageMin": "Âge minimum",
+        "ageMax": "Âge maximum",
+        "branch": "Branche",
+        "branchAll": "Toutes les branches",
+        "profile": "Parcours / rôle",
+        "profileAll": "Tous",
+        "spiritualGroup": "Parcours spirituel",
+        "roleGroup": "Rôle dans une branche",
+        "spiritual": {
+          "mpandray": "Mpandray",
+          "mpiandry": "Mpiandry",
+          "sefala": "SEFALA",
+          "baptized": "Baptisé",
+          "mpamakyTeny": "Mpamaky teny"
+        },
+        "branchRoles": {
+          "powerpoint": "PowerPoint",
+          "sonorisation": "Sonorisation",
+          "responsable": "Responsable",
+          "membreActif": "Membre actif"
+        },
+        "channel": "Canal",
+        "channelEmail": "Courriel",
+        "channelSms": "SMS",
+        "household": "Foyer",
+        "householdPlaceholder": "Rechercher un foyer…",
+        "householdClear": "Effacer",
+        "householdLoading": "Recherche…",
+        "householdNoResults": "Aucun foyer trouvé"
+      },
+      "results": {
+        "title": "Résultats",
+        "count": "{count} membres trouvés",
+        "empty": "Aucun membre ne correspond aux filtres pour ce canal."
+      },
+      "columns": {
+        "lastName": "Nom",
+        "firstName": "Prénom",
+        "email": "Courriel",
+        "phone": "Téléphone",
+        "household": "Foyer"
+      },
+      "actions": {
+        "copyEmails": "Copier les courriels",
+        "copyPhones": "Copier les numéros",
+        "sendEmail": "Envoyer un courriel global",
+        "copySuccessEmails": "Courriels copiés dans le presse-papier.",
+        "copySuccessPhones": "Numéros copiés dans le presse-papier.",
+        "copyError": "Impossible de copier dans le presse-papier."
       }
     },
     "import": {

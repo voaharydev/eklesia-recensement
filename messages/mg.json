@@ -266,6 +266,7 @@
       "dashboard": "Tabilao",
       "members": "Mpikambana",
       "cultes": "Fivavahana",
+      "communication": "Fifandraisana",
       "doublons": "Dingana",
       "importExcel": "Import Excel",
       "logout": "Hivoaka"
@@ -443,6 +444,64 @@
         "lecture1": "Famakiana 1",
         "lecture2": "Famakiana 2",
         "lecture3": "Famakiana 3"
+      }
+    },
+    "communication": {
+      "title": "Fifandraisana voafantina",
+      "description": "Sivano ny mpikambana ary amboary ny lisitry ny fandefasana mailaka na SMS.",
+      "loading": "Mampiditra…",
+      "filters": {
+        "title": "Criteria",
+        "cardTitle": "Sivana",
+        "ageMin": "Taona farany ambany",
+        "ageMax": "Taona farany ambony",
+        "branch": "Sampana",
+        "branchAll": "Sampana rehetra",
+        "profile": "Lalana / andraikitra",
+        "profileAll": "Rehetra",
+        "spiritualGroup": "Lalana ara-panahy",
+        "roleGroup": "Andraikitra amin'ny sampana",
+        "spiritual": {
+          "mpandray": "Mpandray",
+          "mpiandry": "Mpiandry",
+          "sefala": "SEFALA",
+          "baptized": "Voabatisa",
+          "mpamakyTeny": "Mpamaky teny"
+        },
+        "branchRoles": {
+          "powerpoint": "PowerPoint",
+          "sonorisation": "Sonorisation",
+          "responsable": "Mpitandro",
+          "membreActif": "Mpikambana mavitrika"
+        },
+        "channel": "Fantsona",
+        "channelEmail": "Mailaka",
+        "channelSms": "SMS",
+        "household": "Tokantrano",
+        "householdPlaceholder": "Mitadiava tokantrano…",
+        "householdClear": "Fafao",
+        "householdLoading": "Mitady…",
+        "householdNoResults": "Tsy misy tokantrano hita"
+      },
+      "results": {
+        "title": "Valiny",
+        "count": "{count} mpikambana hita",
+        "empty": "Tsy misy mpikambana mifanaraka amin'ny sivana ho an'ity fantsona ity."
+      },
+      "columns": {
+        "lastName": "Anarana",
+        "firstName": "Fanampiny",
+        "email": "Mailaka",
+        "phone": "Telefaona",
+        "household": "Tokantrano"
+      },
+      "actions": {
+        "copyEmails": "Adikao ny mailaka",
+        "copyPhones": "Adikao ny laharana",
+        "sendEmail": "Handefa mailaka iraisana",
+        "copySuccessEmails": "Voatahiry ny mailaka.",
+        "copySuccessPhones": "Voatahiry ny laharana.",
+        "copyError": "Tsy afaka mandika."
       }
     },
     "members": {
