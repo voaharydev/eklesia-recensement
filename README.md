@@ -69,7 +69,70 @@ npm install
 npm run dev
 ```
 
-Ouvrir [http://localhost:3000](http://localhost:3000).
+Ouvrir [http://localhost:3000](http://localhost:3000) (redirige vers `/mg`). Voir la section [Routes](#routes) pour la liste complète des URLs.
+
+## Routes
+
+Locales disponibles : `mg` (par défaut), `fr`. Les routes publiques sont préfixées par `/{locale}` ([`i18n/routing.ts`](i18n/routing.ts)).
+
+### Routes publiques
+
+| Route | Description | Auth |
+|-------|-------------|------|
+| `/` | Redirige vers `/mg` | — |
+| `/{locale}` | Recensement (wizard courriel → foyer → membres) | — |
+| `/{locale}/login` | Connexion membre (magic link Supabase) | — |
+| `/{locale}/mon-planning` | Planning personnel du membre | Session Supabase ([`middleware.ts`](middleware.ts)) |
+| `/{locale}/annonces/soumettre` | Soumission d'annonce de branche | — |
+| `/{locale}/admin/import` | Import Excel (jeton `IMPORT_ADMIN_TOKEN`) | Jeton dans le formulaire |
+
+Exemples en local :
+
+- Recensement : [http://localhost:3000/mg](http://localhost:3000/mg)
+- Soumission d'annonce : [http://localhost:3000/mg/annonces/soumettre](http://localhost:3000/mg/annonces/soumettre)
+
+### Redirections sans locale
+
+Configurées dans [`next.config.mjs`](next.config.mjs) :
+
+| Source | Destination |
+|--------|-------------|
+| `/annonces` | `/mg/annonces/soumettre` |
+| `/annonces/soumettre` | `/mg/annonces/soumettre` |
+
+### Routes admin
+
+Sous `/admin/*`, interface en français uniquement ([`app/admin/layout.tsx`](app/admin/layout.tsx)). Protégées par cookie de session admin sauf `/admin/login` ([`middleware.ts`](middleware.ts)).
+
+| Route | Description |
+|-------|-------------|
+| `/admin/login` | Connexion admin (jeton) |
+| `/admin` | Tableau de bord |
+| `/admin/members` | Liste des membres |
+| `/admin/households/[id]` | Détail d'un foyer |
+| `/admin/households/[id]/edit` | Édition d'un foyer |
+| `/admin/cultes` | Liste des cultes |
+| `/admin/cultes/[id]` | Détail d'un culte |
+| `/admin/communication` | Communication |
+| `/admin/annonces` | Annonces en attente de validation |
+| `/admin/annonces/publiees` | Annonces publiées (filtre par date cible) |
+| `/admin/doublons` | Détection de doublons |
+
+Navigation : [`components/admin/admin-nav.tsx`](components/admin/admin-nav.tsx).
+
+Exemples en local :
+
+- Tableau de bord : [http://localhost:3000/admin](http://localhost:3000/admin)
+- Annonces publiées : [http://localhost:3000/admin/annonces/publiees](http://localhost:3000/admin/annonces/publiees)
+
+> Les pages admin ne sont pas localisées (`/admin/...`, pas `/fr/admin/...`), sauf l'import Excel qui vit sous `/{locale}/admin/import`.
+
+### Routes API et callbacks
+
+| Route | Méthode | Description | Auth |
+|-------|---------|-------------|------|
+| `/auth/callback` | GET | Callback OAuth Supabase → redirige vers `/{locale}/mon-planning` | Code OAuth |
+| `/admin/members/export` | GET | Export CSV/XLSX des membres (filtres en query string) | Session admin |
 
 ## Architecture
 
