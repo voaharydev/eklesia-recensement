@@ -21,6 +21,7 @@ export type MergeProfileDraft = {
   isBaptized: boolean;
   isMpandray: boolean;
   isMpiandry: boolean;
+  isSefala: boolean;
   isMpamakyTeny: boolean;
 };
 
@@ -34,6 +35,7 @@ export type MergeDraftScalarField =
   | "isBaptized"
   | "isMpandray"
   | "isMpiandry"
+  | "isSefala"
   | "isMpamakyTeny";
 
 export type BranchDraftOption = {
@@ -61,6 +63,7 @@ export function buildDefaultMergeDraft(
     isBaptized: master.isBaptized || duplicate.isBaptized,
     isMpandray: master.isMpandray || duplicate.isMpandray,
     isMpiandry: master.isMpiandry || duplicate.isMpiandry,
+    isSefala: master.isSefala || duplicate.isSefala,
     isMpamakyTeny: master.isMpamakyTeny || duplicate.isMpamakyTeny,
   };
 }
@@ -121,6 +124,8 @@ export function applySourceField(
       return { ...draft, isMpandray: person.isMpandray };
     case "isMpiandry":
       return { ...draft, isMpiandry: person.isMpiandry };
+    case "isSefala":
+      return { ...draft, isSefala: person.isSefala };
     case "isMpamakyTeny":
       return { ...draft, isMpamakyTeny: person.isMpamakyTeny };
     default:
@@ -196,6 +201,7 @@ export function mergeDraftToPatch(draft: MergeProfileDraft): Json {
     is_baptized: draft.isBaptized,
     is_mpandray: draft.isMpandray,
     is_mpiandry: draft.isMpiandry,
+    is_sefala: draft.isSefala,
     is_mpamaky_teny: draft.isMpamakyTeny,
   };
 }

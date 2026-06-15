@@ -53,6 +53,7 @@ export type DuplicateGroupCardLabels = {
     baptized: string;
     mpandray: string;
     mpiandry: string;
+    sefala: string;
     mpamakyTeny: string;
   };
   roleLabels: Record<string, string>;
@@ -320,6 +321,7 @@ export function DuplicateGroupCard({ group, labels, groupProgress }: DuplicateGr
                       person.isBaptized !== master.isBaptized ||
                         person.isMpandray !== master.isMpandray ||
                         person.isMpiandry !== master.isMpiandry ||
+                        person.isSefala !== master.isSefala ||
                         person.isMpamakyTeny !== master.isMpamakyTeny
                         ? "border-amber-300 bg-amber-50"
                         : "border-border bg-surface-muted/40",
@@ -334,6 +336,7 @@ export function DuplicateGroupCard({ group, labels, groupProgress }: DuplicateGr
                           is_baptized: person.isBaptized,
                           is_mpandray: person.isMpandray,
                           is_mpiandry: person.isMpiandry,
+                          is_sefala: person.isSefala,
                           is_mpamaky_teny: person.isMpamakyTeny,
                         }}
                         labels={labels.spiritual}

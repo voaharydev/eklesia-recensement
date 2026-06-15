@@ -58,6 +58,7 @@ export type DuplicateMergeEditorLabels = {
     baptized: string;
     mpandray: string;
     mpiandry: string;
+    sefala: string;
     mpamakyTeny: string;
   };
   roleLabels: Record<string, string>;
@@ -342,6 +343,7 @@ export function DuplicateMergeEditor({
               ["isBaptized", labels.spiritual.baptized],
               ["isMpandray", labels.spiritual.mpandray],
               ["isMpiandry", labels.spiritual.mpiandry],
+              ["isSefala", labels.spiritual.sefala],
               ["isMpamakyTeny", labels.spiritual.mpamakyTeny],
             ] as const
           ).map(([field, fieldLabel]) => (

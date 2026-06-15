@@ -99,6 +99,7 @@ export function MemberChurchFields({
   const isBaptized = watch(`${fieldPrefix}.is_baptized`);
   const isMpiandry = watch(`${fieldPrefix}.is_mpiandry`);
   const isMpandray = watch(`${fieldPrefix}.is_mpandray`);
+  const isSefala = watch(`${fieldPrefix}.is_sefala`);
 
   const branchMessages = collectFieldErrorMessages(
     memberErrors?.branches as Record<string, unknown> | undefined,
@@ -108,6 +109,7 @@ export function MemberChurchFields({
     memberErrors?.baptized_since?.message,
     memberErrors?.mpiandry_since?.message,
     memberErrors?.mpandray_since?.message,
+    memberErrors?.sefala_since?.message,
     ...branchMessages,
   ]
     .filter((m): m is string => Boolean(m))
@@ -146,6 +148,16 @@ export function MemberChurchFields({
         dateError={memberErrors?.mpandray_since?.message}
         flagRegister={register(`${fieldPrefix}.is_mpandray`)}
         dateRegister={register(`${fieldPrefix}.mpandray_since`)}
+      />
+
+      <CheckboxWithDate
+        enabled={isSefala}
+        flagLabel={t("sefala")}
+        hint={t("sefalaHint")}
+        dateLabel={t("sefalaSince")}
+        dateError={memberErrors?.sefala_since?.message}
+        flagRegister={register(`${fieldPrefix}.is_sefala`)}
+        dateRegister={register(`${fieldPrefix}.sefala_since`)}
       />
 
       <div className="rounded-md border border-border bg-surface-muted p-3">

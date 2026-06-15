@@ -78,6 +78,7 @@ type PersonRow = {
   is_mpandray: boolean;
   is_mpiandry: boolean;
   is_mpamaky_teny: boolean;
+  is_sefala: boolean;
   created_at: string;
   updated_at: string;
   household: { id: string; name: string } | null;
@@ -131,6 +132,7 @@ function toDuplicatePersonSummary(
     isMpandray: person.is_mpandray,
     isMpiandry: person.is_mpiandry,
     isMpamakyTeny: person.is_mpamaky_teny,
+    isSefala: person.is_sefala,
     assignmentCount,
     createdAt: person.created_at,
     updatedAt: person.updated_at,
@@ -171,7 +173,7 @@ export async function getPotentialDuplicates(): Promise<
     const { data: persons, error: personsError } = await supabase
       .from("persons")
       .select(
-        "id, first_name, last_name, emails, phones, role, age, household_id, branches, is_baptized, is_mpandray, is_mpiandry, is_mpamaky_teny, created_at, updated_at, household:households(id, name)",
+        "id, first_name, last_name, emails, phones, role, age, household_id, branches, is_baptized, is_mpandray, is_mpiandry, is_mpamaky_teny, is_sefala, created_at, updated_at, household:households(id, name)",
       )
       .in("id", personIds);
 
@@ -245,6 +247,7 @@ const mergeProfileDraftSchema = z.object({
   isBaptized: z.boolean(),
   isMpandray: z.boolean(),
   isMpiandry: z.boolean(),
+  isSefala: z.boolean(),
   isMpamakyTeny: z.boolean(),
 });
 

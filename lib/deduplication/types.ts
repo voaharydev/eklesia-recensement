@@ -22,6 +22,7 @@ export type DuplicatePersonSummary = {
   isBaptized: boolean;
   isMpandray: boolean;
   isMpiandry: boolean;
+  isSefala: boolean;
   isMpamakyTeny: boolean;
   assignmentCount: number;
   createdAt: string;

@@ -4,12 +4,17 @@ import type { Person } from "@/types/database";
 type SpiritualBadgesProps = {
   person: Pick<
     Person,
-    "is_baptized" | "is_mpandray" | "is_mpiandry" | "is_mpamaky_teny"
+    | "is_baptized"
+    | "is_mpandray"
+    | "is_mpiandry"
+    | "is_sefala"
+    | "is_mpamaky_teny"
   >;
   labels: {
     baptized: string;
     mpandray: string;
     mpiandry: string;
+    sefala: string;
     mpamakyTeny: string;
   };
 };
@@ -19,6 +24,7 @@ export function SpiritualBadges({ person, labels }: SpiritualBadgesProps) {
     { key: "baptized", label: labels.baptized, show: person.is_baptized },
     { key: "mpandray", label: labels.mpandray, show: person.is_mpandray },
     { key: "mpiandry", label: labels.mpiandry, show: person.is_mpiandry },
+    { key: "sefala", label: labels.sefala, show: person.is_sefala },
     {
       key: "mpamakyTeny",
       label: labels.mpamakyTeny,

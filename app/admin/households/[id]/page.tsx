@@ -164,6 +164,7 @@ export default async function AdminHouseholdPage({
               baptized: t("spiritual.baptized"),
               mpandray: t("spiritual.mpandray"),
               mpiandry: t("spiritual.mpiandry"),
+              sefala: t("spiritual.sefala"),
               mpamakyTeny: t("spiritual.mpamakyTeny"),
             },
           }}

@@ -141,6 +141,7 @@ const MEMBER_CHURCH_ERROR_KEYS = [
   "baptized_since",
   "mpiandry_since",
   "mpandray_since",
+  "sefala_since",
   "branches",
 ] as const;
 
@@ -231,6 +232,7 @@ export function adultHasChurchData(
         is_baptized?: boolean;
         is_mpiandry?: boolean;
         is_mpandray?: boolean;
+        is_sefala?: boolean;
         is_mpamaky_teny?: boolean;
         branches?: { branch_code: string }[];
         church_assignments?: string;
@@ -242,6 +244,7 @@ export function adultHasChurchData(
     member.is_baptized ||
       member.is_mpiandry ||
       member.is_mpandray ||
+      member.is_sefala ||
       member.is_mpamaky_teny ||
       (member.branches?.length ?? 0) > 0 ||
       member.church_assignments?.trim(),

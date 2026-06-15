@@ -52,6 +52,8 @@ export const defaultMember: MemberFormValues = {
   mpiandry_since: "",
   is_mpandray: false,
   mpandray_since: "",
+  is_sefala: false,
+  sefala_since: "",
   is_mpamaky_teny: false,
   branches: [],
   church_assignments: "",

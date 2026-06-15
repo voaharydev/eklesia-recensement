@@ -39,6 +39,7 @@ type MembersDataGridProps = {
       baptized: string;
       mpandray: string;
       mpiandry: string;
+      sefala: string;
       mpamakyTeny: string;
     };
   };

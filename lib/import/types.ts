@@ -21,6 +21,8 @@ export type ImportInternalField =
   | "mpiandry_since"
   | "is_mpandray"
   | "mpandray_since"
+  | "is_sefala"
+  | "sefala_since"
   | "church_assignments"
   | "branches";
 
@@ -50,6 +52,8 @@ export type ImportPersonDraft = {
   mpiandrySince: string | null;
   isMpandray: boolean;
   mpandraySince: string | null;
+  isSefala: boolean;
+  sefalaSince: string | null;
   age: number;
   isChild: boolean;
   branches: PersonBranchAssignment[];

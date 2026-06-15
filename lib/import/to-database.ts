@@ -55,6 +55,8 @@ function draftToMemberFormValues(draft: ImportPersonDraft): MemberFormValues {
     mpiandry_since: draft.mpiandrySince ?? "",
     is_mpandray: draft.isMpandray,
     mpandray_since: draft.mpandraySince ?? "",
+    is_sefala: draft.isSefala,
+    sefala_since: draft.sefalaSince ?? "",
     is_mpamaky_teny: false,
     branches: draft.branches.flatMap((b) => {
       const code = resolveBranchCode(b.branch_code);

@@ -164,6 +164,9 @@
       "mpiandrySince": "Mpiandry hatramin'ny",
       "mpandray": "Mpandray",
       "mpandraySince": "Mpandray hatramin'ny",
+      "sefala": "SEFALA",
+      "sefalaHint": "Fampianarana ho mpiara-miasa sy mpitondra ao amin'ny fiangonana.",
+      "sefalaSince": "SEFALA hatramin'ny",
       "mpamakyTeny": "Te ho mpamaky teny",
       "mpiandryHint": "Olona mbola mianatra ho mpitondra fiangonana.",
       "mpandrayHint": "Olona efa nahazo ny asa pastora.",
@@ -218,6 +221,7 @@
     "baptismDateRequired": "Lazao ny datin'ny batisa.",
     "mpiandryDateRequired": "Lazao hatramin'iza ny mpiandry.",
     "mpandrayDateRequired": "Lazao hatramin'iza ny mpandray.",
+    "sefalaDateRequired": "Lazao hatramin'iza ny SEFALA.",
     "childAgeRequired": "Ilaina ny taonan'ny ankizy.",
     "childAgeRange": "Ny taonan'ny ankizy dia eo anelanelan'ny 0 sy {max} taona.",
     "invalidData": "Angona tsy manan-kery.",
@@ -445,6 +449,13 @@
         "hint": "Mamoaka ny tokantrano rehetra mifanaraka amin'ny sivana.",
         "tooMany": "Voafetra amin'ny 10 000 ny famoahana. Manampy sivana.",
         "error": "Tsy afaka namoaka ny lisitra."
+      },
+      "spiritual": {
+        "baptized": "Vita batisa",
+        "mpandray": "Mpandray",
+        "mpiandry": "Mpiandry",
+        "sefala": "SEFALA",
+        "mpamakyTeny": "Mpamaky teny"
       }
     }
   },

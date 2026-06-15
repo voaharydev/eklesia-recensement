@@ -77,6 +77,8 @@ export interface Database {
           mpiandry_since: string | null;
           is_mpandray: boolean;
           mpandray_since: string | null;
+          is_sefala: boolean;
+          sefala_since: string | null;
           is_mpamaky_teny: boolean;
           is_child: boolean;
           age: number | null;
@@ -102,6 +104,8 @@ export interface Database {
           mpiandry_since?: string | null;
           is_mpandray?: boolean;
           mpandray_since?: string | null;
+          is_sefala?: boolean;
+          sefala_since?: string | null;
           is_mpamaky_teny?: boolean;
           is_child?: boolean;
           age?: number | null;
@@ -127,6 +131,8 @@ export interface Database {
           mpiandry_since?: string | null;
           is_mpandray?: boolean;
           mpandray_since?: string | null;
+          is_sefala?: boolean;
+          sefala_since?: string | null;
           is_mpamaky_teny?: boolean;
           is_child?: boolean;
           age?: number | null;

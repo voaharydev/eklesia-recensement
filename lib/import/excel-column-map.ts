@@ -66,6 +66,8 @@ export const EXCEL_HEADER_ALIASES: Record<ImportInternalField, string[]> = {
   mpiandry_since: ["Date mpiandry", "Date confirmation", "Mpiandry depuis"],
   is_mpandray: ["Mpandray", "Serviteur", "Ministère"],
   mpandray_since: ["Date mpandray", "Mpandray depuis"],
+  is_sefala: ["SEFALA", "Sefala"],
+  sefala_since: ["Date SEFALA", "SEFALA depuis"],
   church_assignments: [
     "Affectations église",
     "Affectations dans l'église",

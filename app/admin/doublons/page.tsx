@@ -76,6 +76,7 @@ export default async function AdminDoublonsPage({
         baptized: tSpiritual("baptized"),
         mpandray: tSpiritual("mpandray"),
         mpiandry: tSpiritual("mpiandry"),
+        sefala: tSpiritual("sefala"),
         mpamakyTeny: tSpiritual("mpamakyTeny"),
       },
       roleLabels: {
@@ -102,6 +103,7 @@ export default async function AdminDoublonsPage({
       baptized: tSpiritual("baptized"),
       mpandray: tSpiritual("mpandray"),
       mpiandry: tSpiritual("mpiandry"),
+      sefala: tSpiritual("sefala"),
       mpamakyTeny: tSpiritual("mpamakyTeny"),
     },
     roleLabels: {

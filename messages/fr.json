@@ -172,6 +172,9 @@
       "mpandray": "Mpandray",
       "mpandrayHint": "Responsable d'une branche ou d'un ministère.",
       "mpandraySince": "Mpandray depuis",
+      "sefala": "SEFALA",
+      "sefalaHint": "Formation des affiliés et leaders en assemblée.",
+      "sefalaSince": "SEFALA depuis",
       "mpamakyTeny": "Souhaite être mpamaky teny",
       "mpamakyTenyHint": "Lecture publique de la Bible lors des cultes.",
       "assignments": "Affectations dans l'église",
@@ -224,6 +227,7 @@
     "baptismDateRequired": "Indiquez la date de baptême.",
     "mpiandryDateRequired": "Indiquez depuis quand cette personne est mpiandry.",
     "mpandrayDateRequired": "Indiquez depuis quand cette personne est mpandray.",
+    "sefalaDateRequired": "Indiquez depuis quand cette personne a suivi le SEFALA.",
     "childAgeRequired": "L'âge de l'enfant est requis.",
     "childAgeRange": "L'âge d'un enfant doit être entre 0 et {max} ans.",
     "invalidData": "Données invalides.",
@@ -341,6 +345,7 @@
         "baptized": "Baptisé",
         "mpandray": "Mpandray",
         "mpiandry": "Mpiandry",
+        "sefala": "SEFALA",
         "mpamakyTeny": "Mpamaky teny"
       },
       "pagination": {
@@ -385,6 +390,7 @@
         "baptized": "Baptisé",
         "mpandray": "Mpandray",
         "mpiandry": "Mpiandry",
+        "sefala": "SEFALA",
         "mpamakyTeny": "Mpamaky teny"
       },
       "unregister": {

@@ -10,6 +10,8 @@ type AdultShape = {
   mpiandry_since?: string;
   is_mpandray: boolean;
   mpandray_since?: string;
+  is_sefala: boolean;
+  sefala_since?: string;
   age?: string;
 };
 
@@ -70,6 +72,14 @@ export function createRefinements(t: ValidationTranslator) {
         code: "custom",
         message: t("mpandrayDateRequired"),
         path: datePath("mpandray_since"),
+      });
+    }
+
+    if (data.is_sefala && !data.sefala_since?.trim()) {
+      ctx.addIssue({
+        code: "custom",
+        message: t("sefalaDateRequired"),
+        path: datePath("sefala_since"),
       });
     }
   }

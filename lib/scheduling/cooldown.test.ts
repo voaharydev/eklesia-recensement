@@ -35,6 +35,8 @@ function person(
     mpiandry_since: null,
     is_mpandray: false,
     mpandray_since: null,
+    is_sefala: false,
+    sefala_since: null,
     age: null,
     church_assignments: null,
     civility: null,

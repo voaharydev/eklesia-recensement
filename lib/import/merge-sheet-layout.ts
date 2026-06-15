@@ -90,6 +90,8 @@ function emptyPersonDraftBase(
   | "mpiandrySince"
   | "isMpandray"
   | "mpandraySince"
+  | "isSefala"
+  | "sefalaSince"
   | "branches"
   | "churchAssignments"
   | "preferredLanguage"
@@ -109,6 +111,8 @@ function emptyPersonDraftBase(
     mpiandrySince: null,
     isMpandray: false,
     mpandraySince: null,
+    isSefala: false,
+    sefalaSince: null,
     branches: [] as PersonBranchAssignment[],
     churchAssignments: null,
   };

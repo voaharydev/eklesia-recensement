@@ -277,6 +277,8 @@ export function rowToDraft(
     mpiandrySince: parseDate(getField(row, indexMap, "mpiandry_since")),
     isMpandray: parseBoolean(getField(row, indexMap, "is_mpandray")),
     mpandraySince: parseDate(getField(row, indexMap, "mpandray_since")),
+    isSefala: parseBoolean(getField(row, indexMap, "is_sefala")),
+    sefalaSince: parseDate(getField(row, indexMap, "sefala_since")),
     age,
     isChild,
     branches: parseBranchesField(getField(row, indexMap, "branches")),

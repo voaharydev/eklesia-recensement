@@ -41,6 +41,8 @@ export type MemberExportRow = {
   "Mpiandry depuis": string;
   Mpandray: string;
   "Mpandray depuis": string;
+  SEFALA: string;
+  "SEFALA depuis": string;
   "Mpamaky teny": string;
   Branches: string;
   Affectations: string;
@@ -103,6 +105,8 @@ export function membersToExportRows(
     "Mpiandry depuis": formatDateShort(person.mpiandry_since),
     Mpandray: boolLabel(person.is_mpandray),
     "Mpandray depuis": formatDateShort(person.mpandray_since),
+    SEFALA: boolLabel(person.is_sefala),
+    "SEFALA depuis": formatDateShort(person.sefala_since),
     "Mpamaky teny": boolLabel(person.is_mpamaky_teny),
     Branches: formatBranches(person.branches ?? []),
     Affectations: person.church_assignments ?? "",
