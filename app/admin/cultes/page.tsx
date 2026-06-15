@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getUpcomingServices } from "@/app/actions/scheduling";
 import { CultesDataGrid } from "@/components/admin/cultes-data-grid";
 import { GenerateScheduleButton } from "@/components/admin/generate-schedule-button";
+import { RecalculateDraftScheduleButton } from "@/components/admin/recalculate-draft-schedule-button";
 import { Alert } from "@/components/ui/alert";
 import { requireAdminPage } from "@/lib/admin/auth-guard";
 import { getTranslations } from "next-intl/server";
@@ -32,15 +33,26 @@ export default async function AdminCultesPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
           <p className="mt-1 text-sm text-muted">{t("description")}</p>
+          <p className="mt-2 text-xs text-muted">{t("eligibilityHint")}</p>
         </div>
-        <GenerateScheduleButton
-          year={currentYear}
-          labels={{
-            generate: t("generateYear", { year: currentYear }),
-            generating: t("generating"),
-            success: t("generateSuccess"),
-          }}
-        />
+        <div className="flex flex-col items-end gap-2">
+          <GenerateScheduleButton
+            year={currentYear}
+            labels={{
+              generate: t("generateYear", { year: currentYear }),
+              generating: t("generating"),
+              success: t("generateSuccess"),
+            }}
+          />
+          <RecalculateDraftScheduleButton
+            labels={{
+              recalculate: t("recalculateDraft"),
+              recalculating: t("recalculating"),
+              confirm: t("recalculateConfirm"),
+              success: t("recalculateSuccess"),
+            }}
+          />
+        </div>
       </div>
 
       {result.error ? (

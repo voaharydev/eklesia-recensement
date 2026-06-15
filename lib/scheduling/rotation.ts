@@ -1,16 +1,22 @@
 import type { ServiceRoleCode } from "@/types/database";
 
-const MPAMAKY_ROLES: ServiceRoleCode[] = [
-  "priere",
-  "lecture_1",
-  "lecture_2",
-  "lecture_3",
-];
+import { MPAMAKY_TENY_ROLE_CODES } from "@/lib/constants/service-roles";
 
 export type WeekAssignmentSlot = {
   roleCode: ServiceRoleCode;
   personIndex: number;
 };
+
+export function getWeekNumberForSunday(serviceDate: string): number {
+  const year = Number.parseInt(serviceDate.slice(0, 4), 10);
+  const weekNumber = getSundaysOfYear(year).indexOf(serviceDate);
+
+  if (weekNumber < 0) {
+    throw new Error(`Date invalide pour un culte du dimanche : ${serviceDate}`);
+  }
+
+  return weekNumber;
+}
 
 export function getSundaysOfYear(year: number): string[] {
   const sundays: string[] = [];
@@ -44,9 +50,9 @@ export function buildWeekAssignments(
     { roleCode: "powerpoint", personIndex: powerpointIndex },
   ];
 
-  for (let i = 0; i < MPAMAKY_ROLES.length; i += 1) {
+  for (let i = 0; i < MPAMAKY_TENY_ROLE_CODES.length; i += 1) {
     slots.push({
-      roleCode: MPAMAKY_ROLES[i],
+      roleCode: MPAMAKY_TENY_ROLE_CODES[i],
       personIndex: (startIndex + i) % mpamakyPoolLength,
     });
   }

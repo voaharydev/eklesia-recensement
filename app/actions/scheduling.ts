@@ -15,19 +15,29 @@ import { normalizeEmailForLookup } from "@/lib/registration/mappers";
 import {
   buildWeekAssignments,
   getSundaysOfYear,
-  resolvePersonIdForSlot,
+  getWeekNumberForSunday,
 } from "@/lib/scheduling/rotation";
+import {
+  getCooldownStartDate,
+  getRecentAssigneeEmails,
+  pickVolunteerForSlot,
+  type AssignmentHistoryEntry,
+} from "@/lib/scheduling/cooldown";
 import { getAuthenticatedPerson } from "@/lib/scheduling/member-auth";
 import { countByStatus } from "@/lib/scheduling/status-ui";
 import type {
   GenerateScheduleResult,
   MemberAssignmentRow,
+  RecalculateDraftResult,
   ReplaceVolunteerOption,
   ServiceDetail,
   ServiceWithStatusCounts,
 } from "@/lib/scheduling/types";
+import { isMpamakyRole } from "@/lib/constants/service-roles";
 import {
-  filterSchedulingVolunteers,
+  getSchedulingPoolForRole,
+  hasEmailForScheduling,
+  isPersonEligibleForRole,
   personDisplayName,
 } from "@/lib/scheduling/volunteers";
 import { createServerAuthClient } from "@/lib/supabase/server-auth";
@@ -75,18 +85,171 @@ function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-async function fetchActivePersons(): Promise<Person[]> {
+async function fetchActiveAdultsWithEmail(): Promise<Person[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("persons")
     .select("*, household:households!inner(unregistered_at)")
-    .is("household.unregistered_at", null);
+    .is("household.unregistered_at", null)
+    .eq("is_child", false)
+    .not("email", "is", null);
 
   if (error) {
     throw new Error(mapSupabaseError(error, () => "Erreur inattendue."));
   }
 
-  return data ?? [];
+  return (data ?? []).filter(hasEmailForScheduling);
+}
+
+async function fetchMpamakyTenyPersons(): Promise<Person[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("persons")
+    .select("*, household:households!inner(unregistered_at)")
+    .is("household.unregistered_at", null)
+    .eq("is_mpamaky_teny", true)
+    .eq("is_child", false)
+    .not("email", "is", null);
+
+  if (error) {
+    throw new Error(mapSupabaseError(error, () => "Erreur inattendue."));
+  }
+
+  return (data ?? []).filter(hasEmailForScheduling);
+}
+
+async function fetchVolunteersForRole(
+  roleCode: ServiceRoleCode,
+): Promise<Person[]> {
+  if (isMpamakyRole(roleCode)) {
+    return fetchMpamakyTenyPersons();
+  }
+  return fetchActiveAdultsWithEmail();
+}
+
+type DraftAssignmentRow = {
+  role_code: ServiceRoleCode;
+  person_id: string;
+  status: "draft";
+};
+
+async function fetchAssignmentHistory(
+  fromDate: string,
+  toDate: string,
+): Promise<AssignmentHistoryEntry[]> {
+  const supabase = createAdminClient();
+
+  const { data: services, error: servicesError } = await supabase
+    .from("services")
+    .select("id, service_date")
+    .gte("service_date", fromDate)
+    .lte("service_date", toDate);
+
+  if (servicesError) {
+    throw new Error(mapSupabaseError(servicesError, () => "Erreur inattendue."));
+  }
+
+  if (!services?.length) {
+    return [];
+  }
+
+  const serviceDateById = new Map(
+    services.map((service) => [service.id, service.service_date]),
+  );
+  const serviceIds = services.map((service) => service.id);
+
+  const { data: assignments, error: assignmentsError } = await supabase
+    .from("service_assignments")
+    .select("service_id, role_code, person:persons(email)")
+    .in("service_id", serviceIds);
+
+  if (assignmentsError) {
+    throw new Error(
+      mapSupabaseError(assignmentsError, () => "Erreur inattendue."),
+    );
+  }
+
+  const history: AssignmentHistoryEntry[] = [];
+
+  for (const assignment of assignments ?? []) {
+    const serviceDate = serviceDateById.get(assignment.service_id);
+    const person = assignment.person as { email: string | null } | null;
+    const email = person?.email?.trim();
+    if (!serviceDate || !email) continue;
+
+    history.push({
+      serviceDate,
+      email,
+      roleCode: assignment.role_code as ServiceRoleCode,
+    });
+  }
+
+  return history;
+}
+
+function buildAssignmentsForService(
+  serviceDate: string,
+  weekNumber: number,
+  powerpointPool: Person[],
+  mpamakyPool: Person[],
+  history: AssignmentHistoryEntry[],
+): DraftAssignmentRow[] {
+  const slots = buildWeekAssignments(
+    weekNumber,
+    powerpointPool.length,
+    mpamakyPool.length,
+  );
+  const recentEmails = getRecentAssigneeEmails(history, serviceDate);
+  const alreadyPickedThisService = new Set<string>();
+  const rows: DraftAssignmentRow[] = [];
+
+  for (const slot of slots) {
+    const pool = slot.roleCode === "powerpoint" ? powerpointPool : mpamakyPool;
+    const person = pickVolunteerForSlot(
+      pool,
+      slot.personIndex,
+      recentEmails,
+      alreadyPickedThisService,
+    );
+    alreadyPickedThisService.add(normalizeEmailForLookup(person.email!));
+    history.push({
+      serviceDate,
+      email: person.email!,
+      roleCode: slot.roleCode,
+    });
+    rows.push({
+      role_code: slot.roleCode,
+      person_id: person.id,
+      status: "draft",
+    });
+  }
+
+  return rows;
+}
+
+async function loadSchedulingPools(): Promise<
+  ActionResult<{ powerpointPool: Person[]; mpamakyPool: Person[] }>
+> {
+  const [powerpointCandidates, mpamakyCandidates] = await Promise.all([
+    fetchActiveAdultsWithEmail(),
+    fetchMpamakyTenyPersons(),
+  ]);
+  const powerpointPool = getSchedulingPoolForRole(
+    powerpointCandidates,
+    "powerpoint",
+  );
+  const mpamakyPool = getSchedulingPoolForRole(mpamakyCandidates, "priere");
+
+  if (powerpointPool.length === 0) {
+    return failure(
+      "Aucun volontaire PowerPoint (Vaomiera Technika) avec email trouvé.",
+    );
+  }
+  if (mpamakyPool.length === 0) {
+    return failure("Aucun volontaire Mpamaky teny avec email trouvé.");
+  }
+
+  return success({ powerpointPool, mpamakyPool });
 }
 
 export async function generateYearlySchedule(
@@ -103,18 +266,11 @@ export async function generateYearlySchedule(
   const { year } = parsed.data;
 
   try {
-    const persons = await fetchActivePersons();
-    const powerpointPool = filterSchedulingVolunteers(persons, "powerpoint");
-    const mpamakyPool = filterSchedulingVolunteers(persons, "priere");
-
-    if (powerpointPool.length === 0) {
-      return failure(
-        "Aucun volontaire PowerPoint (Vaomiera Technika) avec email trouvé.",
-      );
+    const poolsResult = await loadSchedulingPools();
+    if (poolsResult.error || !poolsResult.data) {
+      return failure(poolsResult.error ?? "Erreur inattendue.");
     }
-    if (mpamakyPool.length === 0) {
-      return failure("Aucun volontaire Mpamaky teny avec email trouvé.");
-    }
+    const { powerpointPool, mpamakyPool } = poolsResult.data;
 
     const sundays = getSundaysOfYear(year);
     const supabase = createAdminClient();
@@ -131,6 +287,11 @@ export async function generateYearlySchedule(
 
     const existingDates = new Set(
       (existingServices ?? []).map((service) => service.service_date),
+    );
+
+    const batchHistory = await fetchAssignmentHistory(
+      getCooldownStartDate(sundays[0]),
+      sundays[sundays.length - 1],
     );
 
     let createdServices = 0;
@@ -160,21 +321,16 @@ export async function generateYearlySchedule(
 
       createdServices += 1;
 
-      const slots = buildWeekAssignments(
+      const assignments = buildAssignmentsForService(
+        serviceDate,
         weekNumber,
-        powerpointPool.length,
-        mpamakyPool.length,
-      );
-
-      const assignments = slots.map((slot) => {
-        const pool = slot.roleCode === "powerpoint" ? powerpointPool : mpamakyPool;
-        return {
-          service_id: service.id,
-          person_id: resolvePersonIdForSlot(pool, slot.personIndex),
-          role_code: slot.roleCode,
-          status: "draft" as const,
-        };
-      });
+        powerpointPool,
+        mpamakyPool,
+        batchHistory,
+      ).map((row) => ({
+        ...row,
+        service_id: service.id,
+      }));
 
       const { error: assignmentError } = await supabase
         .from("service_assignments")
@@ -197,6 +353,123 @@ export async function generateYearlySchedule(
   } catch (error) {
     return failure(
       error instanceof Error ? error.message : "Erreur lors de la génération.",
+    );
+  }
+}
+
+export async function recalculateUpcomingDraftSchedules(): Promise<
+  ActionResult<RecalculateDraftResult>
+> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  try {
+    const poolsResult = await loadSchedulingPools();
+    if (poolsResult.error || !poolsResult.data) {
+      return failure(poolsResult.error ?? "Erreur inattendue.");
+    }
+    const { powerpointPool, mpamakyPool } = poolsResult.data;
+
+    const supabase = createAdminClient();
+    const today = todayIsoDate();
+    const batchHistory = await fetchAssignmentHistory(
+      getCooldownStartDate(today),
+      today,
+    );
+
+    const { data: services, error: servicesError } = await supabase
+      .from("services")
+      .select("id, service_date")
+      .gte("service_date", today)
+      .order("service_date", { ascending: true });
+
+    if (servicesError) {
+      return failure(mapSupabaseError(servicesError, () => "Erreur inattendue."));
+    }
+
+    if (!services?.length) {
+      return success({
+        updatedServices: 0,
+        skippedServices: 0,
+        updatedAssignments: 0,
+      });
+    }
+
+    const serviceIds = services.map((service) => service.id);
+    const { data: allAssignments, error: assignmentsError } = await supabase
+      .from("service_assignments")
+      .select("id, service_id, role_code, status")
+      .in("service_id", serviceIds);
+
+    if (assignmentsError) {
+      return failure(mapSupabaseError(assignmentsError, () => "Erreur inattendue."));
+    }
+
+    const assignmentsByService = new Map<
+      string,
+      NonNullable<typeof allAssignments>
+    >();
+    for (const assignment of allAssignments ?? []) {
+      const current = assignmentsByService.get(assignment.service_id) ?? [];
+      current.push(assignment);
+      assignmentsByService.set(assignment.service_id, current);
+    }
+
+    let updatedServices = 0;
+    let skippedServices = 0;
+    let updatedAssignments = 0;
+
+    for (const service of services) {
+      const assignments = assignmentsByService.get(service.id) ?? [];
+      if (
+        assignments.length === 0 ||
+        assignments.some((assignment) => assignment.status !== "draft")
+      ) {
+        skippedServices += 1;
+        continue;
+      }
+
+      const weekNumber = getWeekNumberForSunday(service.service_date);
+      const newRows = buildAssignmentsForService(
+        service.service_date,
+        weekNumber,
+        powerpointPool,
+        mpamakyPool,
+        batchHistory,
+      );
+      const assignmentByRole = new Map(
+        assignments.map((assignment) => [assignment.role_code, assignment]),
+      );
+
+      for (const row of newRows) {
+        const existing = assignmentByRole.get(row.role_code);
+        if (!existing) continue;
+
+        const { error: updateError } = await supabase
+          .from("service_assignments")
+          .update({ person_id: row.person_id })
+          .eq("id", existing.id);
+
+        if (updateError) {
+          return failure(mapSupabaseError(updateError, () => "Erreur inattendue."));
+        }
+
+        updatedAssignments += 1;
+      }
+
+      updatedServices += 1;
+    }
+
+    revalidatePath("/admin/cultes");
+
+    return success({
+      updatedServices,
+      skippedServices,
+      updatedAssignments,
+    });
+  } catch (error) {
+    return failure(
+      error instanceof Error ? error.message : "Erreur lors du recalcul.",
     );
   }
 }
@@ -347,6 +620,23 @@ export async function replaceAssignment(
     return failure("Seules les affectations refusées peuvent être remplacées.");
   }
 
+  const { data: newPerson, error: personError } = await supabase
+    .from("persons")
+    .select("*, household:households!inner(unregistered_at)")
+    .eq("id", parsed.data.newPersonId)
+    .is("household.unregistered_at", null)
+    .maybeSingle();
+
+  if (personError) {
+    return failure(mapSupabaseError(personError, () => "Erreur inattendue."));
+  }
+  if (
+    !newPerson ||
+    !isPersonEligibleForRole(newPerson, assignment.role_code)
+  ) {
+    return failure("Cette personne n'est pas éligible pour ce rôle.");
+  }
+
   const { data: siblings, error: siblingsError } = await supabase
     .from("service_assignments")
     .select("id, status")
@@ -407,11 +697,9 @@ export async function getReplaceVolunteerOptions(
     return failure("Paramètres invalides.");
   }
 
-  const persons = await fetchActivePersons();
-  const pool = filterSchedulingVolunteers(
-    persons,
-    parsed.data.roleCode as ServiceRoleCode,
-  );
+  const roleCode = parsed.data.roleCode as ServiceRoleCode;
+  const candidates = await fetchVolunteersForRole(roleCode);
+  const pool = getSchedulingPoolForRole(candidates, roleCode);
 
   const supabase = createAdminClient();
   const { data: assigned, error } = await supabase

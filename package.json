@@ -10,7 +10,8 @@
     "db:seed": "node scripts/seed.mjs",
     "db:seed:sql": "supabase db query -f supabase/seed.sql --linked",
     "db:import:inspect": "tsx scripts/import-excel.ts --inspect",
-    "db:import": "tsx scripts/import-excel.ts"
+    "db:import": "tsx scripts/import-excel.ts",
+    "test": "tsx --test lib/**/*.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

@@ -38,6 +38,12 @@ export type GenerateScheduleResult = {
   createdAssignments: number;
 };
 
+export type RecalculateDraftResult = {
+  updatedServices: number;
+  skippedServices: number;
+  updatedAssignments: number;
+};
+
 export const RSVP_STATUSES = ["accepted", "declined"] as const satisfies readonly ServiceAssignmentStatus[];
 
 export type RsvpStatus = (typeof RSVP_STATUSES)[number];

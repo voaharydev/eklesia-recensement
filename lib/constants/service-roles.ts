@@ -8,6 +8,14 @@ export const SERVICE_ROLE_CODES = [
   "lecture_3",
 ] as const satisfies readonly ServiceRoleCode[];
 
+/** Rôles assignés exclusivement aux mpamaky teny (`is_mpamaky_teny`). */
+export const MPAMAKY_TENY_ROLE_CODES = [
+  "priere",
+  "lecture_1",
+  "lecture_2",
+  "lecture_3",
+] as const satisfies readonly ServiceRoleCode[];
+
 export type ServiceRoleLabelKey =
   | "powerpoint"
   | "priere"
@@ -30,5 +38,5 @@ export function getServiceRoleLabelKey(
 }
 
 export function isMpamakyRole(code: ServiceRoleCode): boolean {
-  return code !== "powerpoint";
+  return (MPAMAKY_TENY_ROLE_CODES as readonly ServiceRoleCode[]).includes(code);
 }

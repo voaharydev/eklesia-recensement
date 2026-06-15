@@ -281,6 +281,50 @@
         "unexpected": "Nisy hadisoana tsy nampoizina."
       }
     },
+    "cultes": {
+      "title": "Fandaharam-potoana fivavahana",
+      "description": "Mamorona ny fandaharam-potoana isan-taona ary manara-maso ny valin'ny mpilatsaka an-tsitrapo.",
+      "eligibilityHint": "Vavaka sy famakiana : mpikambana nanisy marika « Mpamaky teny » misy mailaka. PowerPoint : Vaomiera Technika, andraikitra PowerPoint. Rehefa misy mpilatsaka an-tsitrapo vaovao, avereno kajikajy ny fivavahana brouillon ho avy na soloy ny andraikitra nolavina. Ny fihodirana dia misoroka ny hamerina olona efa nanompo tao anatin'ny 4 volana raha misy hafa azo atao.",
+      "backToDashboard": "Hiverina amin'ny tabilao",
+      "backToList": "Hiverina amin'ny lisitra",
+      "detailDescription": "Andraikitra sy satan'ny valiny ho an'ity fivavahana ity.",
+      "generateYear": "Hamorona ny taona {year}",
+      "generating": "Famoronana…",
+      "generateSuccess": "Voaforona ny fandaharam-potoana",
+      "recalculateDraft": "Haverina kajikajy ny fivavahana brouillon ho avy",
+      "recalculating": "Fanavaozana…",
+      "recalculateConfirm": "Haverina kajikajy ny andraikitra amin'ny fivavahana ho avy mbola brouillon? Tsy ho ovaina ny fivavahana efa nalefan'ny fangatahana.",
+      "recalculateSuccess": "Voaverina kajikajy ny fivavahana",
+      "empty": "Tsy misy fivavahana ho avy. Mamorona ny fandaharam-potoana isan-taona aloha.",
+      "viewDetail": "Hijery",
+      "sendInvitations": "Handefa fangatahana",
+      "sending": "Mandefa…",
+      "replace": "Hanolo",
+      "replacing": "Fanoloana…",
+      "selectVolunteer": "Misafidiana mpilatsaka an-tsitrapo",
+      "noVolunteers": "Tsy misy mpilatsaka an-tsitrapo azo",
+      "declineReason": "Antony fandavana",
+      "columns": {
+        "date": "Daty",
+        "title": "Lohateny",
+        "person": "Olona",
+        "role": "Andraikitra",
+        "status": "Sata"
+      },
+      "status": {
+        "draft": "Tahiry",
+        "pending": "Miandry",
+        "accepted": "Nekena",
+        "declined": "Nolavina"
+      },
+      "roles": {
+        "powerpoint": "PowerPoint",
+        "priere": "Vavaka",
+        "lecture1": "Famakiana 1",
+        "lecture2": "Famakiana 2",
+        "lecture3": "Famakiana 3"
+      }
+    },
     "members": {
       "filters": {
         "updated": "Fanavaozana tokantrano",
