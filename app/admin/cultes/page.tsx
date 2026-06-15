@@ -82,7 +82,7 @@ export default async function AdminCultesPage({
         </div>
       </div>
 
-      <ManageCultesDatesForm labels={manageDatesLabels} />
+      <ManageCultesDatesForm labels={manageDatesLabels} className="mt-2" />
 
       <div className="flex justify-end">
         <ShowCancelledFilter

@@ -9,11 +9,13 @@ import {
 } from "@/app/actions/scheduling";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ChevronIcon } from "@/components/ui/chevron-icon";
+import { cn } from "@/components/ui/cn";
 import { Input } from "@/components/ui/input";
 import { enumerateDatesInRange } from "@/lib/scheduling/rotation";
 
 type ManageCultesDatesFormProps = {
+  className?: string;
   labels: {
     title: string;
     singleTitle: string;
@@ -32,7 +34,10 @@ type ManageCultesDatesFormProps = {
   };
 };
 
-export function ManageCultesDatesForm({ labels }: ManageCultesDatesFormProps) {
+export function ManageCultesDatesForm({
+  className,
+  labels,
+}: ManageCultesDatesFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [singleDate, setSingleDate] = useState("");
@@ -112,11 +117,12 @@ export function ManageCultesDatesForm({ labels }: ManageCultesDatesFormProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <p className="text-base font-semibold text-foreground">{labels.title}</p>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <details className={cn("group", className)}>
+      <summary className="flex cursor-pointer list-none items-center gap-2 text-sm text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+        <ChevronIcon className="h-4 w-4 group-open:rotate-180" />
+        {labels.title}
+      </summary>
+      <div className="mt-3 space-y-6 rounded-lg border border-border p-4">
         <form className="space-y-3" onSubmit={handleAddSingle}>
           <p className="text-sm font-medium text-foreground">{labels.singleTitle}</p>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -203,7 +209,7 @@ export function ManageCultesDatesForm({ labels }: ManageCultesDatesFormProps) {
             {error}
           </Alert>
         ) : null}
-      </CardContent>
-    </Card>
+      </div>
+    </details>
   );
 }
