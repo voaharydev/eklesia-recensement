@@ -50,6 +50,8 @@ export default async function AdminCultesPage({
     showCancelled: t("filters.showCancelled"),
   };
 
+  const serviceCount = result.data?.length ?? 0;
+
   const gridLabels = {
     date: t("columns.date"),
     title: t("columns.title"),
@@ -61,7 +63,7 @@ export default async function AdminCultesPage({
     view: t("viewDetail"),
     empty: t("empty"),
     emptyFiltered: t("emptyFiltered"),
-    resultCount: t("filters.resultCount"),
+    resultCount: t("filters.resultCount", { count: serviceCount }),
   };
 
   const manageDatesLabels = {

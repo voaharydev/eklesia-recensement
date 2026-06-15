@@ -57,7 +57,7 @@ export function CultesDataGrid({
   return (
     <div className="space-y-2">
       <p className="text-sm text-muted">
-        {labels.resultCount.replace("{count}", String(services.length))}
+        {labels.resultCount}
       </p>
       <Card>
         <CardContent className="overflow-x-auto p-0">

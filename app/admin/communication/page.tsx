@@ -63,9 +63,11 @@ export default async function AdminCommunicationPage({
     householdNoResults: t("filters.householdNoResults"),
   };
 
+  const memberCount = result.data?.length ?? 0;
+
   const resultsLabels = {
     resultsTitle: t("results.title"),
-    resultCount: t("results.count"),
+    resultCount: t("results.count", { count: memberCount }),
     empty: t("results.empty"),
     lastName: t("columns.lastName"),
     firstName: t("columns.firstName"),

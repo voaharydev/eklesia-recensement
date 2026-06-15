@@ -91,7 +91,7 @@ export function CommunicationResults({
               {labels.resultsTitle}
             </p>
             <p className="mt-1 text-sm text-muted">
-              {labels.resultCount.replace("{count}", String(members.length))}
+              {labels.resultCount}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
