@@ -45,6 +45,12 @@ export default async function AdminCulteDetailPage({
     declined: t("status.declined"),
   };
 
+  const today = new Date().toISOString().slice(0, 10);
+  const allDraft = detail.assignments.every(
+    (assignment) => assignment.status === "draft",
+  );
+  const canRecalculate = allDraft && detail.service_date >= today;
+
   return (
     <div className="space-y-6">
       <div>
@@ -61,6 +67,7 @@ export default async function AdminCulteDetailPage({
 
       <CulteAssignmentsTable
         detail={detail}
+        canRecalculate={canRecalculate}
         labels={{
           person: t("columns.person"),
           role: t("columns.role"),
@@ -68,6 +75,10 @@ export default async function AdminCulteDetailPage({
           declineReason: t("declineReason"),
           sendInvitations: t("sendInvitations"),
           sending: t("sending"),
+          recalculateService: t("recalculateService"),
+          recalculatingService: t("recalculatingService"),
+          recalculateServiceConfirm: t("recalculateServiceConfirm"),
+          recalculateServiceSuccess: t("recalculateServiceSuccess"),
           replace: t("replace"),
           replacing: t("replacing"),
           selectVolunteer: t("selectVolunteer"),

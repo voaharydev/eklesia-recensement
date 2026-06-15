@@ -29,6 +29,7 @@ import type {
   GenerateScheduleResult,
   MemberAssignmentRow,
   RecalculateDraftResult,
+  RecalculateSingleServiceResult,
   ReplaceVolunteerOption,
   ServiceDetail,
   ServiceWithStatusCounts,
@@ -225,6 +226,62 @@ function buildAssignmentsForService(
   }
 
   return rows;
+}
+
+type DraftServiceAssignment = {
+  id: string;
+  role_code: string;
+  status: string;
+};
+
+async function applyDraftRecalculationForService(
+  service: { id: string; service_date: string },
+  assignments: DraftServiceAssignment[],
+  powerpointPool: Person[],
+  mpamakyPool: Person[],
+  history: AssignmentHistoryEntry[],
+): Promise<number> {
+  if (
+    assignments.length === 0 ||
+    assignments.some((assignment) => assignment.status !== "draft")
+  ) {
+    throw new Error(
+      "Seuls les cultes dont toutes les affectations sont en brouillon peuvent être recalculés.",
+    );
+  }
+
+  const supabase = createAdminClient();
+  const weekNumber = getWeekNumberForSunday(service.service_date);
+  const newRows = buildAssignmentsForService(
+    service.service_date,
+    weekNumber,
+    powerpointPool,
+    mpamakyPool,
+    history,
+  );
+  const assignmentByRole = new Map(
+    assignments.map((assignment) => [assignment.role_code, assignment]),
+  );
+
+  let updatedAssignments = 0;
+
+  for (const row of newRows) {
+    const existing = assignmentByRole.get(row.role_code);
+    if (!existing) continue;
+
+    const { error: updateError } = await supabase
+      .from("service_assignments")
+      .update({ person_id: row.person_id })
+      .eq("id", existing.id);
+
+    if (updateError) {
+      throw new Error(mapSupabaseError(updateError, () => "Erreur inattendue."));
+    }
+
+    updatedAssignments += 1;
+  }
+
+  return updatedAssignments;
 }
 
 async function loadSchedulingPools(): Promise<
@@ -429,35 +486,20 @@ export async function recalculateUpcomingDraftSchedules(): Promise<
         continue;
       }
 
-      const weekNumber = getWeekNumberForSunday(service.service_date);
-      const newRows = buildAssignmentsForService(
-        service.service_date,
-        weekNumber,
-        powerpointPool,
-        mpamakyPool,
-        batchHistory,
-      );
-      const assignmentByRole = new Map(
-        assignments.map((assignment) => [assignment.role_code, assignment]),
-      );
-
-      for (const row of newRows) {
-        const existing = assignmentByRole.get(row.role_code);
-        if (!existing) continue;
-
-        const { error: updateError } = await supabase
-          .from("service_assignments")
-          .update({ person_id: row.person_id })
-          .eq("id", existing.id);
-
-        if (updateError) {
-          return failure(mapSupabaseError(updateError, () => "Erreur inattendue."));
-        }
-
-        updatedAssignments += 1;
+      try {
+        updatedAssignments += await applyDraftRecalculationForService(
+          service,
+          assignments,
+          powerpointPool,
+          mpamakyPool,
+          batchHistory,
+        );
+        updatedServices += 1;
+      } catch (error) {
+        return failure(
+          error instanceof Error ? error.message : "Erreur lors du recalcul.",
+        );
       }
-
-      updatedServices += 1;
     }
 
     revalidatePath("/admin/cultes");
@@ -467,6 +509,77 @@ export async function recalculateUpcomingDraftSchedules(): Promise<
       skippedServices,
       updatedAssignments,
     });
+  } catch (error) {
+    return failure(
+      error instanceof Error ? error.message : "Erreur lors du recalcul.",
+    );
+  }
+}
+
+export async function recalculateDraftService(
+  input: unknown,
+): Promise<ActionResult<RecalculateSingleServiceResult>> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const parsed = serviceIdSchema.safeParse(input);
+  if (!parsed.success) {
+    return failure("Identifiant de culte invalide.");
+  }
+
+  try {
+    const supabase = createAdminClient();
+    const today = todayIsoDate();
+    const serviceId = parsed.data.serviceId;
+
+    const { data: service, error: serviceError } = await supabase
+      .from("services")
+      .select("id, service_date")
+      .eq("id", serviceId)
+      .maybeSingle();
+
+    if (serviceError) {
+      return failure(mapSupabaseError(serviceError, () => "Erreur inattendue."));
+    }
+    if (!service) {
+      return failure("Culte introuvable.");
+    }
+    if (service.service_date < today) {
+      return failure("Les cultes passés ne peuvent pas être recalculés.");
+    }
+
+    const { data: assignments, error: assignmentsError } = await supabase
+      .from("service_assignments")
+      .select("id, role_code, status")
+      .eq("service_id", service.id);
+
+    if (assignmentsError) {
+      return failure(mapSupabaseError(assignmentsError, () => "Erreur inattendue."));
+    }
+
+    const poolsResult = await loadSchedulingPools();
+    if (poolsResult.error || !poolsResult.data) {
+      return failure(poolsResult.error ?? "Erreur inattendue.");
+    }
+    const { powerpointPool, mpamakyPool } = poolsResult.data;
+
+    const history = await fetchAssignmentHistory(
+      getCooldownStartDate(service.service_date),
+      service.service_date,
+    );
+
+    const updatedAssignments = await applyDraftRecalculationForService(
+      service,
+      assignments ?? [],
+      powerpointPool,
+      mpamakyPool,
+      history,
+    );
+
+    revalidatePath("/admin/cultes");
+    revalidatePath(`/admin/cultes/${service.id}`);
+
+    return success({ updatedAssignments });
   } catch (error) {
     return failure(
       error instanceof Error ? error.message : "Erreur lors du recalcul.",

@@ -5,9 +5,11 @@ import { useEffect, useState, useTransition } from "react";
 
 import {
   getReplaceVolunteerOptions,
+  recalculateDraftService,
   replaceAssignment,
   sendInvitations,
 } from "@/app/actions/scheduling";
+import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +22,7 @@ import type { ServiceAssignmentStatus } from "@/types/database";
 
 type CulteAssignmentsTableProps = {
   detail: ServiceDetail;
+  canRecalculate: boolean;
   labels: {
     person: string;
     role: string;
@@ -27,6 +30,10 @@ type CulteAssignmentsTableProps = {
     declineReason: string;
     sendInvitations: string;
     sending: string;
+    recalculateService: string;
+    recalculatingService: string;
+    recalculateServiceConfirm: string;
+    recalculateServiceSuccess: string;
     replace: string;
     replacing: string;
     selectVolunteer: string;
@@ -38,10 +45,13 @@ type CulteAssignmentsTableProps = {
 
 export function CulteAssignmentsTable({
   detail,
+  canRecalculate,
   labels,
 }: CulteAssignmentsTableProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [recalculateMessage, setRecalculateMessage] = useState<string | null>(null);
+  const [recalculateError, setRecalculateError] = useState<string | null>(null);
   const [activeReplaceId, setActiveReplaceId] = useState<string | null>(null);
   const [optionsByAssignment, setOptionsByAssignment] = useState<
     Record<string, { id: string; label: string }[]>
@@ -55,6 +65,26 @@ export function CulteAssignmentsTable({
   function handleSendInvitations() {
     startTransition(async () => {
       await sendInvitations({ serviceId: detail.id });
+      router.refresh();
+    });
+  }
+
+  function handleRecalculateService() {
+    if (!window.confirm(labels.recalculateServiceConfirm)) {
+      return;
+    }
+
+    setRecalculateMessage(null);
+    setRecalculateError(null);
+
+    startTransition(async () => {
+      const result = await recalculateDraftService({ serviceId: detail.id });
+      if (result.error) {
+        setRecalculateError(result.error);
+        return;
+      }
+
+      setRecalculateMessage(labels.recalculateServiceSuccess);
       router.refresh();
     });
   }
@@ -95,15 +125,38 @@ export function CulteAssignmentsTable({
   return (
     <div className="space-y-4">
       {allDraft ? (
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            onClick={handleSendInvitations}
-            disabled={isPending}
-            size="sm"
-          >
-            {isPending ? labels.sending : labels.sendInvitations}
-          </Button>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
+            {canRecalculate ? (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleRecalculateService}
+                disabled={isPending}
+                size="sm"
+              >
+                {isPending ? labels.recalculatingService : labels.recalculateService}
+              </Button>
+            ) : null}
+            <Button
+              type="button"
+              onClick={handleSendInvitations}
+              disabled={isPending}
+              size="sm"
+            >
+              {isPending ? labels.sending : labels.sendInvitations}
+            </Button>
+          </div>
+          {recalculateMessage ? (
+            <Alert variant="success" className="max-w-md text-sm">
+              {recalculateMessage}
+            </Alert>
+          ) : null}
+          {recalculateError ? (
+            <Alert variant="error" className="max-w-md text-sm">
+              {recalculateError}
+            </Alert>
+          ) : null}
         </div>
       ) : null}
 
