@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 echo "=== Déploiement Eklesia ==="
-cd ~/eklesia-recensement
+cd ~/Development/nextjs_v/eklesia-recensement
 echo "→ Récupération du code..."
 git pull origin main
 echo "→ Reconstruction de l'image..."
