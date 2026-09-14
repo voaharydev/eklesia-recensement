@@ -85,7 +85,7 @@ function ensureHouseholdRoles(persons: ImportPersonDraft[]): string[] {
   if (!hasHead && adults.length > 0) {
     adults[0].role = "chef_de_famille";
     warnings.push(
-      `Foyer « ${persons[0]?.householdName} » : chef de famille déduit sur le premier adulte.`,
+      `Foyer « ${persons[0]?.householdName} » : Adulte 1 déduit sur le premier adulte.`,
     );
   }
   return warnings;

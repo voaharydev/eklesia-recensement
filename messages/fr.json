@@ -84,10 +84,10 @@
       "prepare": "Préparer le formulaire"
     },
     "sections": {
-      "headTitle": "Chef de famille",
+      "headTitle": "Adulte 1",
       "headDescription": "Personne responsable du foyer (16 ans et +).",
       "spouseTitle": "Conjoint(e)",
-      "spouseDescription": "Époux ou épouse du chef de famille (facultatif).",
+      "spouseDescription": "Époux ou épouse de l'Adulte 1 (facultatif).",
       "addSpouse": "Ajouter un conjoint",
       "removeSpouse": "Retirer le conjoint",
       "otherAdultsTitle": "Autres adultes du foyer",
@@ -100,7 +100,7 @@
       "noChildren": "Aucun enfant ajouté.",
       "addChild": "+ Ajouter un enfant",
       "removeChild": "Retirer cet enfant",
-      "promoteToHead": "Définir comme chef de famille"
+      "promoteToHead": "Définir comme Adulte 1"
     },
     "nav": {
       "quickNav": "Navigation rapide entre les personnes",
@@ -153,10 +153,10 @@
       "adultTitle": "Membre adulte {n}",
       "childTitle": "Enfant {n}",
       "householdRole": "Type dans le foyer",
-      "householdRoleChef": "Chef de famille",
+      "householdRoleChef": "Adulte 1",
       "householdRoleSpouse": "Conjoint(e)",
       "householdRoleOther": "Autre adulte",
-      "cannotDemoteHead": "Désignez d'abord un autre adulte comme chef de famille.",
+      "cannotDemoteHead": "Désignez d'abord un autre adulte comme Adulte 1.",
       "createdAt": "Membre créé le",
       "updatedAt": "Membre modifié le"
     },
@@ -236,7 +236,7 @@
     "invalidInputPersonId": "Identifiant de personne invalide.",
     "invalidInputRequired": "Ce champ est requis.",
     "invalidInputGeneric": "Valeur invalide. Vérifiez ce champ.",
-    "singleHeadRequired": "Le foyer doit compter exactement un chef de famille.",
+    "singleHeadRequired": "Le foyer doit compter exactement un Adulte 1.",
     "singleSpouseMax": "Un seul conjoint est autorisé par foyer.",
     "announcements": {
       "branchRequired": "La branche est requise.",
@@ -449,7 +449,7 @@
       "branches": "Branches",
       "spiritualTitle": "Parcours",
       "groups": {
-        "head": "Chef de famille",
+        "head": "Adulte 1",
         "spouse": "Conjoint",
         "otherAdults": "Autres adultes",
         "children": "Enfants"
@@ -486,7 +486,7 @@
       }
     },
     "roles": {
-      "chef_de_famille": "Chef de famille",
+      "chef_de_famille": "Adulte 1",
       "conjoint": "Conjoint",
       "autre": "Autre",
       "enfant": "Enfant"
