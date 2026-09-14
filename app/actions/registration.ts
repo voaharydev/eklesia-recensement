@@ -71,7 +71,7 @@ export async function lookupByEmail(
     const { data: candidates, error: lookupError } = await supabase
       .from("persons")
       .select("*")
-      .contains("emails", [normalizedEmail])
+      .filter("emails", "cs", JSON.stringify([normalizedEmail]))
       .limit(20);
 
     if (lookupError) {
